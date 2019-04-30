@@ -1,4 +1,9 @@
-## Vanno
+## VarNote
+   VarNote is a tool that rapidly annotates genome-scale variants from large and complex functional annotation resources. It supports both region-based and allele-specific annotations for different file formats and introduces many advanced functions to improve the flexibility.
+ 
+   - We welcome any discussion, suggestion and potential contribution of new functional prediction scores through github or contact Dr. Mulin Jun Li (mulinli{at}connect.hku.hk). 
 
-Vanno is a ... tool. It includes four modules: index, count, overlap and annotate.
-hdd
+
+## Copyright
+Copyright (c) Mulinlab@Tianjin Medical University 2016-2019. All rights reserved.
+
