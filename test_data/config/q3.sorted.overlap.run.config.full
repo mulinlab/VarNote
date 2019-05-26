@@ -1,0 +1,33 @@
+# this is a command line
+# The result of this config file is equal to example 7
+
+query_file=q3.sorted.vcf.gz
+query_format=vcf
+
+chrom=1
+begin=2
+end=2
+ref=4
+alt=5
+zero_based=false
+comment_indicator=##
+header_indicator=#
+has_header=true
+verbose=true
+unzip=false
+
+thread=1
+remove_comment=false
+use_jdk_inflater=false
+
+[db]
+db_path=database2.sorted.tab.gz
+db_index_type=vanno
+db_label=db2
+db_type=0
+
+[db]
+db_path=database1.sorted.bed.gz
+db_index_type=tbi
+db_label=db1
+db_type=0

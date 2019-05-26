@@ -1,0 +1,14 @@
+# this is a command line
+# The result of this config file is equal to q3.overlap.run.config.full
+
+query_file=q3.sorted.vcf.gz
+
+
+[db]
+db_path=database2.sorted.tab.gz
+db_index_type=vanno
+
+
+[db]
+db_path=database1.sorted.bed.gz
+db_index_type=tbi
