@@ -1,5 +1,5 @@
 ## VarNote
-   VarNote is a tool that rapidly annotates genome-scale variants from large and complex functional annotation resources. It supports both region-based and allele-specific annotations for different file formats and introduces many advanced functions to improve the flexibility. For more information and usage of VarNote, please visit http://mulinlab.org/varnote.
+   VarNote is a tool that rapidly annotates genome-scale variants from large and complex functional annotation resources. It supports both region-based and allele-specific annotations for different file formats and introduces many advanced functions to improve the flexibility. For more information and usage of VarNote, please visit http://mulinlab.tmu.edu.cn/varnote.
  
    - [Install and Usage](http://mulinlab.tmu.edu.cn/varnote/vanno/vanno/vanno_command "Install and Usage")
    - [Quick Start](http://mulinlab.tmu.edu.cn/varnote/vanno/vanno/vanno_help "Quick Start")
