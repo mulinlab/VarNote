@@ -1,0 +1,45 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'com.mulinlab'
+version '1.1-SNAPSHOT'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile('com.intel.gkl:gkl:0.8.6') {
+        exclude module: 'htsjdk'
+    }
+
+    compile 'com.github.samtools:htsjdk:2.20.3'
+    compile 'net.sf.jopt-simple:jopt-simple:5.0.3'
+    compile 'org.apache.commons:commons-lang3:3.4'
+    compile 'org.apache.logging.log4j:log4j-api:2.3'
+    compile 'org.apache.logging.log4j:log4j-core:2.3'
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+    compile group: 'org.broadinstitute', name: 'barclay', version: '2.1.0'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+application {
+    mainClassName = 'org.mulinlab.varnote.cmdline.VarNoteCommandLine'
+}
+
+jar {
+    manifest {
+        attributes("Implementation-Title": "VarNote",
+                "Implementation-Version": version,
+                'Main-Class': 'org.mulinlab.varnote.cmdline.VarNoteCommandLine')
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
