@@ -57,7 +57,7 @@ public final class Annotation extends QueryFileProgram {
         AnnoOutParam outParam = new AnnoOutParam();
         outParam = (AnnoOutParam)outputArguments.getOutParam(outParam);
 
-        AnnoRunConfig annoRunConfig = new AnnoRunConfig(new QueryFileParam(queryFilePath, format), dbArguments.getDBList());
+        AnnoRunConfig annoRunConfig = new AnnoRunConfig(new QueryFileParam(inputArguments.getQueryFilePath(), format), dbArguments.getDBList());
 
         annoRunConfig.setForceOverlap(forceOverlap);
         if(annoConfig != null) annoRunConfig.setAnnoConfig(annoConfig.getAbsolutePath());

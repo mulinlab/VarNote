@@ -1,27 +1,42 @@
 package org.mulinlab.varnote.cmdline;
 
 import org.junit.Test;
+import org.mulinlab.varnote.cmdline.query.Annotation;
 import org.mulinlab.varnote.cmdline.query.Intersect;
 import utils.TestUtils;
 
 
 public final class IntersectTest {
 
+
     @Test
-    public void testIndex() {
+    public void testVCF() {
+        String[] args = new String[]{
+                "-D", "src/test/resources/database3.sorted.tab.gz",
+                "-Q", "src/test/resources/test5.vcf",
+                "-T", "1", "--log", "true" , "-O", "src/test/resources/out/q3.out", "-Z", "false"};
+        TestUtils.initClass(Intersect.class, args);
+    }
 
-//        String[] args = new String[]{ "-D:db,tag=d1,index=TBI", "/Users/hdd/Downloads/test_data/database1.sorted.bed.gz",
-//                "-D:db,tag=d2", "/Users/hdd/Downloads/test_data/database2.sorted.tab.gz",
-//                "-D", "/Users/hdd/Downloads/test_data/database3.sorted.tab.gz",
-//                "-Q", "/Users/hdd/Downloads/test_data/q1.sorted.bed.gz",
-//        "-OM", "1"};
-//
-//        TestUtils.initClass(Intersect.class, args);
 
-        String[] args1 = new String[]{
-                "-D", "/Users/hdd/Downloads/test_data/database3.sorted.tab.gz",
-                "-Q", "/Users/hdd/Downloads/test_data/q3.sorted.vcf.gz",
-                "-T", "1", "--log", "true" , "-O", "/Users/hdd/Downloads/test_data/out/q3.out", "-Z", "false"};
-        TestUtils.initClass(Intersect.class, args1);
+    @Test
+    public void testBED() {
+        String[] args = new String[]{ "-D:db,tag=d1,index=TBI", "src/test/resources/database1.sorted.bed.gz",
+                "-D:db,tag=d2", "src/test/resources/database2.sorted.tab.gz",
+                "-D", "src/test/resources/database3.sorted.tab.gz",
+                "-Q", "src/test/resources/q1.sorted.bed.gz"};
+
+        TestUtils.initClass(Intersect.class, args);
+    }
+
+    @Test
+    public void testTAB() {
+        String[] args = new String[]{ "-D:db,tag=d1,index=TBI", "src/test/resources/database1.sorted.bed.gz",
+            "-D:db", "src/test/resources/database2.sorted.tab.gz",
+            "-D", "src/test/resources/database3.sorted.tab.gz",
+            "-Q:tab,c=2,b=3,e=4,ref=5,alt=6", "src/test/resources/q4.sorted.tab.gz",
+            "-OM", "1"};
+
+        TestUtils.initClass(Intersect.class, args, true);
     }
 }

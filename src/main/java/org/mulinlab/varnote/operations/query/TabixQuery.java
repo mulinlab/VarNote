@@ -6,7 +6,7 @@ import org.mulinlab.varnote.utils.enumset.IntersectType;
 import htsjdk.tribble.readers.TabixReader;
 import htsjdk.tribble.readers.TabixReader.Iterator;
 import org.mulinlab.varnote.utils.database.Database;
-import org.mulinlab.varnote.utils.node.Node;
+import org.mulinlab.varnote.utils.node.LocFeature;
 import org.mulinlab.varnote.utils.node.NodeFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -58,7 +58,7 @@ public final class TabixQuery extends AbstractQuery{
 	}
 	
 	@Override
-	public void doQuery(final Node node) throws IOException {
+	public void doQuery(final LocFeature node) throws IOException {
 		this.randomAccessQuery(node);
 	}
 	
@@ -73,7 +73,7 @@ public final class TabixQuery extends AbstractQuery{
 //		}
 //	}
 	
-	public void randomAccessQuery(Node node) {
+	public void randomAccessQuery(LocFeature node) {
 		try {
 			Iterator it ;
 			results = new HashMap<String, List<String>>();
@@ -87,7 +87,7 @@ public final class TabixQuery extends AbstractQuery{
 				}
 				
 				list = new ArrayList<String>();
-				Node db;
+				LocFeature db;
 				String s = null;
 				while((s = it.next()) != null) {
 					if(dbFiles.get(i).getConfig().getIntersect() == IntersectType.EXACT) {

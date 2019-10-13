@@ -73,7 +73,7 @@ public final class MyEndianOutputStream  extends FilterOutputStream {
     }
     
     public void close(long address) throws IOException {
-    		out.flush();
+        out.flush();
         out.close(address);
     }
 }

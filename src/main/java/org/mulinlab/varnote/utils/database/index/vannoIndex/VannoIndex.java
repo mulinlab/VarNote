@@ -1,11 +1,10 @@
 package org.mulinlab.varnote.utils.database.index.vannoIndex;
 
+import htsjdk.samtools.util.BlockCompressedInputStream;
 import org.mulinlab.varnote.utils.database.index.Index;
 import org.mulinlab.varnote.utils.database.index.IndexFactory;
 import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.exceptions.InvalidArgumentException;
-import org.mulinlab.varnote.utils.gz.MyBlockCompressedInputStream;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -14,7 +13,7 @@ public class VannoIndex extends Index{
 	protected List<String> headerColList;
 	protected int version;
 	
-	public VannoIndex(final MyBlockCompressedInputStream is, final int version) {
+	public VannoIndex(final BlockCompressedInputStream is, final int version) {
 		super(is);
 		this.version = version;
 		try {

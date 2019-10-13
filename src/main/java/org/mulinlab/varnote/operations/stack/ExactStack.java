@@ -4,37 +4,36 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mulinlab.varnote.utils.enumset.Mode;
 import org.mulinlab.varnote.operations.process.ProcessResult;
-import org.mulinlab.varnote.utils.node.Node;
+import org.mulinlab.varnote.utils.node.LocFeature;
 
 public final class ExactStack extends AbstractReaderStack {
-	protected List<Node> st;
-	protected Node tempNode;
+	protected List<LocFeature> st;
+	protected LocFeature tempNode;
 	
 	public ExactStack(final ProcessResult resultProcessor) {
 		super(resultProcessor);
 		if(st == null) {
-			st = new ArrayList<Node>();
+			st = new ArrayList<LocFeature>();
 		}
 		tempNode = null;
 	}
 
 	public void clearST() {
 		st = null;
-		st = new ArrayList<Node>();
+		st = new ArrayList<LocFeature>();
 		tempNode = null;
 	}
 
 	
-	public void findOverlaps(List<Node> list) {
-		for (Node intvNode : list) {
+	public void findOverlaps(List<LocFeature> list) {
+		for (LocFeature intvNode : list) {
 			findOverlap(intvNode);
 		}
 	}
 	
-	public void loadDB(Node query) {
-		Node curNode = null;
+	public void loadDB(LocFeature query) {
+		LocFeature curNode = null;
 		try {
 			while((curNode = it.nextNode()) != null) {
 				if(query.beg == curNode.beg) {
@@ -53,7 +52,7 @@ public final class ExactStack extends AbstractReaderStack {
 		}
 	}
 	
-	public void findOverlap(Node query) {
+	public void findOverlap(LocFeature query) {
 		if(it == null) return;
 		
 		if(tempNode == null) {
@@ -62,7 +61,7 @@ public final class ExactStack extends AbstractReaderStack {
 		}
 		if(query.beg > tempNode.beg) {
 			st = null;
-			st = new ArrayList<Node>();
+			st = new ArrayList<LocFeature>();
 			loadDB(query);
 			
 		} else if(query.beg == tempNode.beg) {
@@ -78,7 +77,7 @@ public final class ExactStack extends AbstractReaderStack {
 	}
 
 	@Override
-	public boolean findOverlapInST(Node query) {
+	public boolean findOverlapInST(LocFeature query) {
 		// TODO Auto-generated method stub
 		return false;
 	}

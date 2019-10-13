@@ -70,10 +70,8 @@ public abstract class RunConfig {
 		QueryFileParam queryParam = (QueryFileParam)this.queryParam;
 
 		if(queryParam == null) throw new InvalidArgumentException("Query file is required.");
-		queryParam.getQueryFormat().checkOverlap(queryParam.getQueryPath(), queryParam.getFileType());
-
-		queryParam.loadSpiderWithThread(runParam.getThread());
-		runParam.checkThreadNum(queryParam.getSpiderSize());
+		queryParam.splitFile(runParam.getThread());
+		runParam.checkThreadNum(queryParam.getThreadSize());
 	}
 
 	protected void initPrintter(OutParam outParam, final int thread) {

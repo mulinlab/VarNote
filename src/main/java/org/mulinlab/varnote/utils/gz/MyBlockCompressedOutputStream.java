@@ -146,7 +146,7 @@ public class MyBlockCompressedOutputStream
         this.file = file;
         codec = new BinaryCodec(file, true);
         deflater = deflaterFactory.makeDeflater(compressionLevel, true);
-        log.debug("Using deflater: " + deflater.getClass().getSimpleName());
+//        log.debug("Using deflater: " + deflater.getClass().getSimpleName());
     }
 
     /**
@@ -182,7 +182,7 @@ public class MyBlockCompressedOutputStream
             codec.setOutputFileName(file.getAbsolutePath());
         }
         deflater = deflaterFactory.makeDeflater(compressionLevel, true);
-        log.debug("Using deflater: " + deflater.getClass().getSimpleName());
+//        log.debug("Using deflater: " + deflater.getClass().getSimpleName());
     }
 
     /**

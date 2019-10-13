@@ -13,7 +13,7 @@ public final class DBArgumentCollection {
 
     @Argument( fullName = Arguments.DB_INPUT_LONG, shortName = Arguments.DB_INPUT_SHORT, optional = false,
             doc = "Local path or http/ftp address of indexed database(or annotation) file(s). Note: Either VarNote index(.vanno.vi) or Tabix index(.tbi) should be in the same location.\n" +
-                  "\nAvailable attributes for this argument are index, mode and tag.\n" +
+                  "\nPossible attributes: {index, mode, tag}.\n" +
                     "index - The index type that should be used to retrieve data. Default value is \"VarNote\". Possible values: {VarNote, TBI}, optional \n" +
                     "mode - Mode of Intersection. default value is \"0\". Possible values: {0, 1, 2}, optional.\n" +
                     "\t   0: Intersect mode, perform common interaction operation\n\t      according to query and database formats;\n"  +
@@ -21,7 +21,7 @@ public final class DBArgumentCollection {
                     "\t   2: Full close mode, force the program to report database\n\t      records that overlap both endpoints of query interval regardless\n\t      of original query and database formats.\n"  +
                     "tag - A label to rename the database in the output file, optional. By default, the program will use original file name as tag for the database.\n\n"
     )
-    public List<AnnotationFile> dbFiles;
+    public List<TagArgument> dbFiles;
 
     public List<DBParam> getDBList() {
         List<DBParam> dbParams = new ArrayList<>();

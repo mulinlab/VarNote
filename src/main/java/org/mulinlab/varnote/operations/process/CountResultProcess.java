@@ -2,8 +2,7 @@ package org.mulinlab.varnote.operations.process;
 
 import java.util.List;
 
-import org.mulinlab.varnote.utils.enumset.Mode;
-import org.mulinlab.varnote.utils.node.Node;
+import org.mulinlab.varnote.utils.node.LocFeature;
 
 public final class CountResultProcess implements ProcessResult{
 
@@ -16,7 +15,7 @@ public final class CountResultProcess implements ProcessResult{
 	
 
 	@Override
-	public void doProcess(Node d) {
+	public void doProcess(LocFeature d) {
 		count++;
 	}
 

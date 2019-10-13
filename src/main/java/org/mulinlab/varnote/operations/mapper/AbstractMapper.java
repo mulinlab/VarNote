@@ -1,10 +1,11 @@
 package org.mulinlab.varnote.operations.mapper;
 
 import org.mulinlab.varnote.config.run.RunConfig;
+import org.mulinlab.varnote.filters.iterator.LineFilterIterator;
 import org.mulinlab.varnote.operations.query.AbstractQuery;
+import org.mulinlab.varnote.operations.readers.query.AbstractFileReader;
 import org.mulinlab.varnote.utils.mapreduce.Mapper;
-import org.mulinlab.varnote.utils.node.Node;
-import org.mulinlab.varnote.utils.queryreader.ThreadLineReader;
+import org.mulinlab.varnote.utils.node.LocFeature;
 
 import java.io.IOException;
 
@@ -20,21 +21,24 @@ public abstract class AbstractMapper<T> implements Mapper<T>{
 		this.index = index;
 	}
 
-	public abstract ThreadLineReader getQueryForThread();
-	public abstract void processResult(final Node node) throws IOException;
+	public abstract AbstractFileReader getQueryForThread();
+	public abstract void processResult(final LocFeature node) throws IOException;
 
 	@Override
 	public void doMap() {
 		try {
-			ThreadLineReader spider = getQueryForThread();
+			AbstractFileReader reader = getQueryForThread();
+			LineFilterIterator it = reader.getFilterIterator();
 			
-			Node node = new Node();
-			while((node = spider.nextNode(node)) != null) {
-				queryEngine.doQuery(node);
-				processResult(node);
+			LocFeature node;
+			while(it.hasNext()) {
+				node = it.next();
+				if(node != null) {
+					queryEngine.doQuery(node);
+					processResult(node);
+				}
 			}
 			queryEngine.teardown();
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

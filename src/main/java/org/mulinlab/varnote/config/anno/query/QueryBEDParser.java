@@ -1,8 +1,6 @@
 package org.mulinlab.varnote.config.anno.query;
 
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import htsjdk.samtools.util.StringUtil;
@@ -11,8 +9,8 @@ import htsjdk.variant.vcf.VCFHeader;
 import org.mulinlab.varnote.config.anno.VCFParser;
 import org.mulinlab.varnote.config.anno.ab.AbstractQueryParser;
 import org.mulinlab.varnote.config.param.query.QueryFileParam;
+import org.mulinlab.varnote.filters.iterator.NoFilterIterator;
 import org.mulinlab.varnote.utils.node.RefNode;
-import org.mulinlab.varnote.utils.queryreader.LineIteratorImpl;
 import org.mulinlab.varnote.constants.GlobalParameter;
 
 
@@ -92,21 +90,14 @@ public final class QueryBEDParser extends AbstractQueryParser{
 
 	@Override
 	public VCFHeader getVCFHeader() {
-		try {
-			if(vcfHeaderPathForBED == null) {
-				System.out.println(GlobalParameter.KRED + "Note: Your output format is vcf, you should define --vcf-header-for-bed or -V for vcf header or we won't output header." + GlobalParameter.KNRM);
-				return null;
-			} else {
-				LineIteratorImpl reader = new LineIteratorImpl(vcfHeaderPathForBED, query.getFileType());
-				VCFHeader header = (VCFHeader) (new VCFCodec()).readActualHeader(reader);
-				reader.close();
-				return header;
-			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		if(vcfHeaderPathForBED == null) {
+			System.out.println(GlobalParameter.KRED + "Note: Your output format is vcf, you should define --vcf-header-for-bed or -V for vcf header or we won't output header." + GlobalParameter.KNRM);
+			return null;
+		} else {
+			NoFilterIterator reader = new NoFilterIterator(vcfHeaderPathForBED, query.getFileType());
+			VCFHeader header = (VCFHeader) (new VCFCodec()).readActualHeader(reader);
+			reader.close();
+			return header;
 		}
-		return null;
 	}
 }

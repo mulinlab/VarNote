@@ -1,88 +1,72 @@
 package org.mulinlab.varnote.speed;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
+import org.mulinlab.varnote.operations.readers.itf.BGZReader;
+import org.mulinlab.varnote.operations.readers.itf.GZIPReader;
+import org.mulinlab.varnote.operations.readers.itf.LongLineReader;
 import org.mulinlab.varnote.utils.*;
-import org.mulinlab.varnote.utils.queryreader.LineIteratorImpl;
-
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.List;
 
 public class LineItSpeedTest {
+    final Logger logger = LoggingUtils.logger;
 
     @Test
-    public void testIndex() throws IOException {
-        final Logger logger = LoggingUtils.logger;
-
+    public void testTXT() throws Exception {
         long t1 = System.currentTimeMillis();
+        String path = "src/test/resources/database4.sorted.vcf";
 
-        String file = "/Users/hdd/Downloads/test_data/database1.sorted.bed.gz";
-        LineIteratorImpl reader = new LineIteratorImpl(file, VannoUtils.FileType.TXT);
-
+        LongLineReader reader = new LongLineReader(path);
         String s;
         int i = 0;
-        while((s = reader.advance()) != null) {
-
+        while((s = reader.readLine()) != null) {
             if(!s.startsWith("#")) {
                 i++;
             }
         }
-        System.out.println("i=" + i);
-        reader.close();
-
+        reader.closeReader();
 
         long t2 = System.currentTimeMillis();
-        logger.info(String.format("\n\nDone! Time: %d\n", (t2 - t1)));
-
-
-
-
-
-
-        t1 = System.currentTimeMillis();
-        file = "/Users/hdd/Downloads/test_data/database1.sorted.bed.gz";
-        reader = new LineIteratorImpl(file, VannoUtils.FileType.GZ);
-
-        i = 0;
-        while((s = reader.advance()) != null) {
-
-            if(!s.startsWith("#")) {
-                i++;
-            }
-        }
-        System.out.println("i=" + i);
-        reader.close();
-
-        t2 = System.currentTimeMillis();
-        logger.info(String.format("\n\nDone! Time: %d\n", (t2 - t1)));
-
-
-
-
-        t1 = System.currentTimeMillis();
-        file = "/Users/hdd/Downloads/test_data/database1.sorted.bed.gz";
-        reader = new LineIteratorImpl(file, VannoUtils.FileType.BGZ);
-
-        i = 0;
-        while((s = reader.advance()) != null) {
-
-            if(!s.startsWith("#")) {
-                i++;
-            }
-        }
-        System.out.println("i=" + i);
-        reader.close();
-
-        t2 = System.currentTimeMillis();
-        logger.info(String.format("\n\nDone! Time: %d\n", (t2 - t1)));
-
-
-        t1 = System.currentTimeMillis();
-        List<String> lines = IOUtils.readLines(new FileInputStream(file));
-        t2 = System.currentTimeMillis();
-        logger.info(String.format("\n\nDone! Time: %d\n", (t2 - t1)));
+        logger.info(String.format("\n\nDone! Time: %d total: %d\n", (t2 - t1), i));
     }
+
+
+    @Test
+    public void testBGZ() throws Exception {
+        long t1 = System.currentTimeMillis();
+        String path = "/Users/hdd/Downloads/test_data/database4.sorted.vcf.gz";
+
+        BGZReader reader = new BGZReader(path);
+        String s;
+        int i = 0;
+        while((s = reader.readLine()) != null) {
+            if(!s.startsWith("#")) {
+                i++;
+            }
+        }
+        reader.closeReader();
+
+        long t2 = System.currentTimeMillis();
+        logger.info(String.format("\n\nDone! Time: %d total: %d\n", (t2 - t1), i));
+    }
+
+
+    @Test
+    public void testGZ() throws Exception {
+        long t1 = System.currentTimeMillis();
+        String path = "/Users/hdd/Downloads/test_data/q3.sorted.vcf.gz";
+
+        GZIPReader reader = new GZIPReader(path);
+        String s;
+        int i = 0;
+        while((s = reader.readLine()) != null) {
+            if(!s.startsWith("#")) {
+                i++;
+            }
+        }
+        reader.closeReader();
+
+        long t2 = System.currentTimeMillis();
+        logger.info(String.format("\n\nDone! Time: %d total: %d\n", (t2 - t1), i));
+    }
+
 }

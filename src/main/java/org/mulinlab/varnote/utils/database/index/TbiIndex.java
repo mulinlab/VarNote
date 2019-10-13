@@ -46,10 +46,11 @@ public final class TbiIndex extends Index{
 		super.read();
 
 		if((mPreset & 0xffff) == 2) {
-			this.format = Format.newVCF();
-	    	} else {
-	    		this.format = new Format(mPreset, mSc, mBc, mEc, mSkip, "##", -1, -1, false);
-	    	}
+			this.format = Format.VCF;
+			this.format.numHeaderLinesToSkip = mSkip;
+		} else {
+			this.format = new Format(mPreset, mSc, mBc, mEc, mSkip, Character.toString((char) mMeta), -1, -1, false);
+		}
 	}
 	
 	public void readIndex() throws IOException {

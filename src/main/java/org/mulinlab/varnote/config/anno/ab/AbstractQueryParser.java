@@ -43,10 +43,10 @@ public abstract class AbstractQueryParser extends AbstractParser{
 			requiredColForBED.add(format.getFieldCol(key));
 		}
 		
-		for (Integer col : format.getColToField().keySet()) {
-			if(!requiredColForVCF.contains(col) && (col > -1) && (col != format.getFieldCol(Format.H_FIELD.END.toString()))) otherColForVCF.add(col);
-			if(!requiredColForBED.contains(col) && (col > -1)) otherColForBED.add(col);
-		}
+//		for (Integer col : format.getColToField().keySet()) {
+//			if(!requiredColForVCF.contains(col) && (col > -1) && (col != format.getFieldCol(Format.H_FIELD.END.toString()))) otherColForVCF.add(col);
+//			if(!requiredColForBED.contains(col) && (col > -1)) otherColForBED.add(col);
+//		}
 	}
 	
 	public List<String> basicCol(final RefNode query, final boolean queryVCF, final boolean outVCF) {
@@ -54,7 +54,7 @@ public abstract class AbstractQueryParser extends AbstractParser{
 		fieldList.add(query.chr);
 		if(queryVCF) {
 			if(outVCF) { //vcf to vcf
-				fieldList.add(query.orgBeg + "");  
+				fieldList.add((query.beg + 1) + "");
 			} else { //vcf to bed
 				fieldList.add(query.beg + "");  
 				fieldList.add(query.end + "");  

@@ -1,24 +1,24 @@
 package org.mulinlab.varnote.operations.index;
 
-import org.mulinlab.varnote.config.index.IndexWriteConfig;
 import org.mulinlab.varnote.config.param.IndexParam;
 import org.mulinlab.varnote.constants.GlobalParameter;
+import org.mulinlab.varnote.filters.iterator.LineFilterIterator;
+import org.mulinlab.varnote.filters.query.line.SkipLineFilter;
+import org.mulinlab.varnote.operations.readers.itf.BGZReader;
+import org.mulinlab.varnote.operations.readers.query.AbstractFileReader;
+import org.mulinlab.varnote.utils.LoggingUtils;
 import org.mulinlab.varnote.utils.VannoUtils;
 import org.mulinlab.varnote.utils.block.SROB;
+import org.mulinlab.varnote.utils.enumset.FileType;
 import org.mulinlab.varnote.utils.enumset.IndexType;
-import org.mulinlab.varnote.utils.gz.MyBlockCompressedInputStream;
 import org.mulinlab.varnote.utils.gz.MyBlockCompressedOutputStream;
 import org.mulinlab.varnote.utils.gz.MyEndianOutputStream;
 import htsjdk.samtools.util.BlockCompressedFilePointerUtil;
-import org.mulinlab.varnote.utils.headerparser.BEDHeaderParser;
 import org.mulinlab.varnote.utils.format.Format;
-import org.mulinlab.varnote.utils.enumset.Mode;
-import org.mulinlab.varnote.utils.node.Node;
+import org.mulinlab.varnote.utils.node.LocFeature;
 import org.mulinlab.varnote.utils.node.NodeFactory;
 import org.mulinlab.varnote.exceptions.InvalidArgumentException;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -30,86 +30,89 @@ import java.util.Map;
 import java.util.Set;
 
 public final class IndexWriter {
-	private final Logger logger = LogManager.getLogger(this.getClass());
+	private final Logger logger = LoggingUtils.logger;
 
-	private final IndexWriteConfig config;
+	private final IndexParam param;
 	private final Format formatSpec;
 	private final List<String> sequenceNames = new ArrayList<String>();
 	private final Set<String> sequenceNamesSeen = new HashSet<String>();
-	private ByteArrayOutputStream bufStream;
-	private int max;
-	
+
 	private Map<Integer, Long> addressOfChr;
 	private MyEndianOutputStream vannoOS;
 	private MyEndianOutputStream vannoIndexOS;
 	private boolean isBlockStart;
-	private List<String> headerColList;
 	
 	private SROB bin;
 	private SROBListBean listBean;
 	
-	public IndexWriter(final IndexWriteConfig config) {
-		this.config = config;
-		this.formatSpec = config.getIndexParam().getFormat();
+	public IndexWriter(final IndexParam param) {
+		this.param = param;
+		this.formatSpec = param.getFormat();
 		this.isBlockStart = true;
 		this.addressOfChr = new HashMap<Integer, Long>();
 		this.bin = new SROB(-1, 0, 0, 0);
-		this.headerColList = null;
-		this.max = 0;
+
 		this.listBean = new SROBListBean();
 	}
 
-	public void setHeadColList(final String line) {
-		if(formatSpec.getHeaderPath() != null) {
-			headerColList = formatSpec.getOriginalField();
-		} else {
-			if(line.startsWith(Format.VCF_HEADER_INDICATOR)) {
-				headerColList = BEDHeaderParser.parserHeader(line.substring(Format.VCF_HEADER_INDICATOR.length()));
-    			} else {
-    				headerColList = BEDHeaderParser.parserHeader(line);
-    			}
+	public void makeIndex() {
+		try {
+
+			VannoUtils.checkValidBGZ(param.getInput());
+
+			final String vannoFile = param.getOutputDir() + File.separator + param.getInputFileName() + IndexType.VARNOTE.getExt(); // + inputName
+			final String vannoIndexFile = param.getOutputDir() + File.separator + param.getInputFileName() + IndexType.VARNOTE.getExtIndex();
+
+			final File vannoFileTemp = new File(vannoFile + GlobalParameter.TEMP);
+			final File vannoIndexFileTemp = new File(vannoIndexFile + GlobalParameter.TEMP);
+
+			vannoOS = new MyEndianOutputStream(new MyBlockCompressedOutputStream(vannoFileTemp));
+			vannoIndexOS = new MyEndianOutputStream(new MyBlockCompressedOutputStream(vannoIndexFileTemp));
+
+			final AbstractFileReader reader = VannoUtils.getReader(new BGZReader(param.getInput()), formatSpec);
+			writeIndexForBGZ(reader);
+
+			vannoOS.write(GlobalParameter.VANNO_FILE_END);
+			vannoOS.close();
+
+			vannoIndexOS.write(GlobalParameter.VANNO_FILE_END);
+			long address = vannoIndexOS.getOut().getFilePointer();
+
+			VannoUtils.writeFormats(vannoIndexOS, formatSpec, reader.getFormat().getHeaderPart(), sequenceNames, addressOfChr);
+			vannoIndexOS.close(address);
+
+			moveFile(vannoFileTemp, new File(vannoFile));
+			moveFile(vannoIndexFileTemp, new File(vannoIndexFile));
+
+			logger.info(String.format("\nVanno file is done, please find it in %s." , vannoFile));
+			logger.info(String.format("Vanno index file is done, please find it in %s. \n" , vannoIndexFile));
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
-	
-	public void writeIndexForBGZ(final MyBlockCompressedInputStream reader) throws IOException {
-		String line,  seqName = "";
+
+	public void writeIndexForBGZ(final AbstractFileReader reader) throws IOException {
+		reader.addLineFilters(new SkipLineFilter(formatSpec.numHeaderLinesToSkip));
+		reader.readHeader();
+		reader.checkFormat();
+
+		logger.info(String.format("Input format: %s", param.getFormat().logFormat()));
+		final LineFilterIterator iterator = reader.getFilterIterator();
+
+		String seqName = "";
 		BlockBean blockBean = new BlockBean(0), preBlockBean = new BlockBean(0);
 		int tid = 0, preBeg = -1;
-		Node feature = new Node();
-		boolean readHeader = false;
-		
-		for(int i=0; i< formatSpec.getNumHeaderLinesToSkip(); i++) {
-			line = reader.readLine();
-			if(line == null) break;
-			
-			line = line.trim();
-			if(line.startsWith(formatSpec.getCommentIndicator()) || line.equals("")) {
-			} else if((formatSpec.isHasHeader() ||  line.startsWith(Format.VCF_HEADER_INDICATOR)) && !readHeader) {
-				setHeadColList(line);
-				readHeader = true;
-			} 
-			blockBean.setFilePointer(reader.getFilePointer());
-		}
+		LocFeature feature = new LocFeature();
 
-		while((line = reader.readLine()) != null) {
-			line = line.trim();
-		
-			if(line.startsWith(formatSpec.getCommentIndicator()) || line.equals("")) {
-				blockBean.setFilePointer(reader.getFilePointer());
-			} else if((formatSpec.isHasHeader() ||  line.startsWith(Format.VCF_HEADER_INDICATOR)) && !readHeader) {
-				setHeadColList(line);
-				readHeader = true; 
-				
-				blockBean.setFilePointer(reader.getFilePointer());
+		int c = 0;
+		while(iterator.hasNext()) {
+			c++;
+			feature = iterator.next();
+//			System.out.println(feature + ", " + iterator.getPosition());
+			if(feature == null) {
+				blockBean.setFilePointer(iterator.getPosition());
 			} else {
-				if(line.length() > this.max) {
-					this.max = line.length() + 100;
-					this.bufStream = new ByteArrayOutputStream(this.max);
-				}
-				
-				feature = decodeFeature(line, feature, bufStream);
 				if(!feature.chr.equals(seqName)) {
-					
 					if(!seqName.equals("")) {
 						addBin(bin);
 						vannoOS.write(GlobalParameter.CHR_START); //new chr start
@@ -128,7 +131,7 @@ public final class IndexWriter {
 					logger.info(String.format("Writing vanno file for chr %s", seqName));
 				}
 				
-				if(feature.orgBeg < preBeg) throw new InvalidArgumentException(String.format("Features added out of order: next start " + feature.orgBeg + " < previous start " + preBeg + ", please sorted features by chr column, start column."));
+				if(feature.beg < preBeg) throw new InvalidArgumentException(String.format("Features added out of order: next start %d < previous start %d, please sorted features by chr column, start column. Unsorted line: %s", feature.beg, preBeg, feature.origStr));
 				if(feature.beg > feature.end) throw new InvalidArgumentException(String.format("Feature start position %d > feature end position %d", feature.beg, feature.end));
 				
 				if(isBlockStart) {
@@ -139,8 +142,8 @@ public final class IndexWriter {
 				}
 				
 				preBlockBean.setFilePointer(blockBean.getFilePointer());
-				preBeg = feature.orgBeg;
-				blockBean.setFilePointer(reader.getFilePointer());
+				preBeg = feature.beg;
+				blockBean.setFilePointer(iterator.getPosition());
 
 				if(blockBean.getBlockAddress() == preBlockBean.getBlockAddress()) {
 					isBlockStart = false;
@@ -153,7 +156,8 @@ public final class IndexWriter {
 			addBin(bin);
 			vannoIndexOS.writeInt(GlobalParameter.CHR_START);
 		}
-		reader.close();
+		iterator.close();
+		System.out.println("total: " + c);
 	}
 	
 	public void addBin(final SROB bin) throws IOException {
@@ -187,28 +191,20 @@ public final class IndexWriter {
 				flagBeg = 0;  flagEnd = 0; flag = 0;
 				feature = features.get(i);
 				
-				beg = feature.getBeg();     end = feature.getEnd();    offset = feature.getOffset() - avgOffset;
-				if(beg <= 4 && beg >= 0) {
+				beg = feature.getBeg();    end = feature.getEnd();    offset = feature.getOffset() - avgOffset;
+				if(beg <= 4) {
 					flag += beg;   
-				} else if(beg <= GlobalParameter.MAX_BYTE_UNSIGNED && beg >= 0) {
-					flagBeg = 1; 
-				} else if(beg <= GlobalParameter.MAX_SHORT_UNSIGNED && beg >= 0) {
-					flagBeg = 2; 
 				} else {
-					flagBeg = 3; 
+					flagBeg = getFlag(beg);
 				}
 				if(flagBeg > 0) flag = flag + flagBeg + 4;
-	
-				if(end == 1) {      
-											
-				} else if(end <= GlobalParameter.MAX_BYTE_UNSIGNED && beg >= 0 ) {
-					flagEnd = 1;             
-				} else if(end <= GlobalParameter.MAX_SHORT_UNSIGNED && beg >= 0 ) {
-					flagEnd = 2;            
+
+				if(end == 1) {
+
 				} else {
-					flagEnd = 3;         
+					flagEnd = getFlag(end);
 				}
-				flag += flagEnd*8; 
+				flag += flagEnd * 8;
 				
 				if(offset < 0) {       
 					flag += 32;      
@@ -246,7 +242,17 @@ public final class IndexWriter {
 			vannoIndexOS.writeInt(bin.getMax() - bin.getMin());
 		}
 	}
-	
+
+	public int getFlag(final int num) {
+		if(num <= GlobalParameter.MAX_BYTE_UNSIGNED ) {
+			return  1;
+		} else if(num <= GlobalParameter.MAX_SHORT_UNSIGNED) {
+			return 2;
+		} else {
+			return 3;
+		}
+	}
+
 	public void writeShort(final MyEndianOutputStream os, final int val) throws IOException {
 		if(val <= GlobalParameter.MAX_SHORT) {
 			os.writeShort(val);
@@ -265,43 +271,7 @@ public final class IndexWriter {
 			os.writeInt(val);
 		}
 	}
-	
-	public void makeIndex() {
-		try {
-			IndexParam indexParam = config.getIndexParam();
-			VannoUtils.checkValidBGZ(indexParam.getInput());
 
-			final String vannoFile = indexParam.getOutputDir() + File.separator + indexParam.getInputFileName() + IndexType.VARNOTE.getExt(); // + inputName
-			final String vannoIndexFile = indexParam.getOutputDir() + File.separator + indexParam.getInputFileName() + IndexType.VARNOTE.getExtIndex();
-
-			final File vannoFileTemp = new File(vannoFile + GlobalParameter.TEMP);
-			final File vannoIndexFileTemp = new File(vannoIndexFile + GlobalParameter.TEMP);
-
-			vannoOS = new MyEndianOutputStream(new MyBlockCompressedOutputStream(vannoFileTemp));
-			vannoIndexOS = new MyEndianOutputStream(new MyBlockCompressedOutputStream(vannoIndexFileTemp));
-
-			writeIndexForBGZ(VannoUtils.makeBGZ(indexParam.getInput()));
-			vannoOS.write(GlobalParameter.VANNO_FILE_END);
-			vannoOS.close();
-
-			vannoIndexOS.write(GlobalParameter.VANNO_FILE_END);
-			long address = vannoIndexOS.getOut().getFilePointer();
-			if((headerColList == null) || (headerColList.size() == 0)) {
-				headerColList = formatSpec.getOriginalField();
-			}
-
-			VannoUtils.writeFormats(vannoIndexOS, formatSpec, headerColList, sequenceNames, addressOfChr);
-			vannoIndexOS.close(address);
-
-			moveFile(vannoFileTemp, new File(vannoFile));
-			moveFile(vannoIndexFileTemp, new File(vannoIndexFile));
-
-			logger.info(String.format("\nVanno file is done, please find it in %s." , vannoFile));
-			logger.info(String.format("Vanno index file is done, please find it in %s. \n" , vannoIndexFile));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 
 	private void moveFile(final File src, final File des) {
 		boolean success = src.renameTo(des);
@@ -319,7 +289,7 @@ public final class IndexWriter {
 		sequenceNamesSeen.add(sequenceName);
 	}
     
-    public Node decodeFeature(final String s, Node node, ByteArrayOutputStream bufStream) {
+    public LocFeature decodeFeature(final String s, LocFeature node, ByteArrayOutputStream bufStream) {
 		return NodeFactory.createBasic(s, formatSpec, node, bufStream);
 	}
     

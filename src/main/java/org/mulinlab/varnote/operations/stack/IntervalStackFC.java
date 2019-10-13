@@ -2,14 +2,14 @@ package org.mulinlab.varnote.operations.stack;
 
 import java.io.IOException;
 import org.mulinlab.varnote.operations.process.ProcessResult;
-import org.mulinlab.varnote.utils.node.Node;
+import org.mulinlab.varnote.utils.node.LocFeature;
 
 public final class IntervalStackFC extends IntervalStack {	
 	public IntervalStackFC(final ProcessResult resultProcessor) {
 		super(resultProcessor);
 	}
 	
-	public boolean findOverlapInST(Node query) {
+	public boolean findOverlapInST(LocFeature query) {
 		for(int k=0; k<st.size(); k++) { 
 			if(st.get(k).end < query.beg) {
 				st.remove(k);
@@ -34,11 +34,11 @@ public final class IntervalStackFC extends IntervalStack {
 		return true;
 	}
 	
-	public void findOverlap(Node query) {
+	public void findOverlap(LocFeature query) {
 		if(it == null) return;
 		if(!findOverlapInST(query)) return;
 		try {
-			Node curNode = null;
+			LocFeature curNode = null;
 			while((curNode = it.nextNode()) != null) {
 				if(curNode.end < query.beg) {
 					continue;

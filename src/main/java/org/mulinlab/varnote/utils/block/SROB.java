@@ -4,8 +4,7 @@ package org.mulinlab.varnote.utils.block;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mulinlab.varnote.utils.enumset.Mode;
-import org.mulinlab.varnote.utils.node.Node;
+import org.mulinlab.varnote.utils.node.LocFeature;
 
 public class SROB {
 	private long vannoFilePointer;
@@ -58,7 +57,7 @@ public class SROB {
 		return totalOffset/blockFeature.size();
 	}
 	
-	public void updateMax(final Node feature, final int offset) {
+	public void updateMax(final LocFeature feature, final int offset) {
 		if(feature.end > this.max) this.max = feature.end;
 		blockFeature.add(new Feature(feature.beg - this.preBeg, feature.end - feature.beg, offset));
 		this.preBeg = feature.beg;

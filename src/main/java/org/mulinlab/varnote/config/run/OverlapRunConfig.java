@@ -16,12 +16,11 @@ import org.mulinlab.varnote.utils.enumset.IndexType;
 import org.mulinlab.varnote.utils.enumset.Mode;
 import org.mulinlab.varnote.utils.enumset.OutMode;
 import org.mulinlab.varnote.utils.headerparser.BEDHeaderParser;
-import org.mulinlab.varnote.utils.node.Node;
+import org.mulinlab.varnote.utils.node.LocFeature;
 
 public class OverlapRunConfig extends RunConfig {
 	protected final static String OVERLAP_EQUAL = GlobalParameter.OVERLAP_EQUAL;
 	protected final static String OVERLAP_NOTE = GlobalParameter.OVERLAP_NOTE;
-
 	private final static String QUERY_START = GlobalParameter.QUERY_START;
 
 	public OverlapRunConfig() {
@@ -90,7 +89,7 @@ public class OverlapRunConfig extends RunConfig {
 		comments.add(getComment(QueryReader.QUERY, queryParam.getQueryPath()));
 		comments.add(getComment(QueryReader.QUERY_FORMAT, queryParam.getQueryFormat().toString()));
 		if(queryParam.getQueryFormat().getHeaderPath() != null) comments.add(getComment(QueryReader.HEADER_PATH, queryParam.getQueryFormat().getHeaderPath()));
-		comments.add(getComment(QueryReader.HEADER, StringUtil.join(BEDHeaderParser.COMMA, queryParam.getQueryFormat().getOriginalField())));
+		comments.add(getComment(QueryReader.HEADER, StringUtil.join(BEDHeaderParser.TAB, queryParam.getQueryFormat().getHeaderPart())));
 
 		for (DBParam db : dbParams) {
 			comments.add(getComment(QueryReader.DB_PATH, db.getDbPath()));
@@ -115,7 +114,7 @@ public class OverlapRunConfig extends RunConfig {
 		}
 	}
 	
-	public void printRecord(final Node node, final Map<String, List<String>> results, final int index) throws IOException {
+	public void printRecord(final LocFeature node, final Map<String, List<String>> results, final int index) throws IOException {
 		IntersetOutParam outParam = (IntersetOutParam)this.outParam;
 		ThreadPrintter threadPrintter = printter.getPrintter(index);
 		if(outParam.isLoj()) {

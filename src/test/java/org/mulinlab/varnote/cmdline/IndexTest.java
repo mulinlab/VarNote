@@ -13,10 +13,19 @@ import java.io.PrintStream;
 public final class IndexTest {
 
     @Test
-    public void testIndex() {
+    public void testIndexVCF() {
+        String[] args = new String[]{
+                "-I", "src/test/resources/database4.sorted.vcf.gz" };
 
-        String[] args = new String[]{"-I=/Users/hdd/Downloads/test_data/database1.sorted.bed.gz", "-HP=/Users/hdd/Downloads/test_data/database1.sorted.bed.gz.header"};
+        TestUtils.initClass(Index.class, args, false);
+    }
 
-        TestUtils.initClass(Index.class, args);
+    @Test
+    public void testIndexTAB() {
+        String[] args = new String[]{
+                "-I", "src/test/resources/database3.sorted.tab.gz" ,
+                "-HP", "src/test/resources/database3.sorted.tab.gz.header"};
+
+        TestUtils.initClass(Index.class, args, false);
     }
 }

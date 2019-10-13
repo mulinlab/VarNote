@@ -3,7 +3,7 @@ package org.mulinlab.varnote.utils.node;
 import java.util.HashMap;
 import java.util.Map;
 
-public  class RefNode extends Node{
+public  class RefNode extends LocFeature {
 	public String ref;
 	public String[] alts;
 	

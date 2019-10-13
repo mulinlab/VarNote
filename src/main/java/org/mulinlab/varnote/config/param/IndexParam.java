@@ -1,9 +1,8 @@
 package org.mulinlab.varnote.config.param;
 
-import org.mulinlab.varnote.utils.VannoUtils;
+
 import org.mulinlab.varnote.utils.format.Format;
 import htsjdk.samtools.util.IOUtil;
-
 import java.io.File;
 
 public final class IndexParam extends Param {
@@ -39,13 +38,9 @@ public final class IndexParam extends Param {
             setDefaultOutDir();
         }
 
-        checkFormat();
-        format.checkOverlap(this.input, VannoUtils.FileType.BGZ);
-    }
-
-    public void checkFormat() {
         if(format == null) this.format = Format.defaultFormat(this.input, false);
     }
+
 
     public String getInput() {
         return input;

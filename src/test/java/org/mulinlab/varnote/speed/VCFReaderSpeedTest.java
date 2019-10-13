@@ -20,7 +20,7 @@ public final class VCFReaderSpeedTest {
         final Logger logger = LoggingUtils.logger;
         long t1 = System.currentTimeMillis();
 
-        final String file = "/Users/hdd/Downloads/test_data/database4.sorted.vcf.gz";
+        final String file = "src/test/resources/test5.vcf";
         final VCFFileReader fileReader = new VCFFileReader(new File(file), false);
         final VCFHeader fileHeader = fileReader.getFileHeader();
 

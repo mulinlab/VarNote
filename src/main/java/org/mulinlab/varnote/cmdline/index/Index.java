@@ -10,6 +10,7 @@ import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.utils.RunFactory;
 import org.broadinstitute.barclay.argparser.Argument;
 import org.broadinstitute.barclay.argparser.CommandLineProgramProperties;
+import org.mulinlab.varnote.utils.format.Format;
 
 @CommandLineProgramProperties(
         summary = Index.USAGE_SUMMARY + Index.USAGE_DETAILS,
@@ -36,11 +37,15 @@ public final class Index extends IndexProgram {
     )
     public String outputFolder = null;
 
+    @Argument(shortName = Arguments.FORMAT_SKIP_SHORT, fullName = Arguments.FORMAT_SKIP_LONG, optional = true,
+            doc = "Skip first INT lines(including comment lines) in the data file.")
+    public int skip = GlobalParameter.DEFAULT_SKIP;
 
     @Override
     protected int doWork() {
         IndexParam indexParam = setParam();
-        indexParam.setFormat(formatArguments.getFormat(indexParam.getInput(), false));
+
+        if(skip > 0) indexParam.getFormat().numHeaderLinesToSkip = skip;
 
         IndexWriteConfig config = new IndexWriteConfig(indexParam);
         RunFactory.writeIndex(config);
@@ -49,18 +54,5 @@ public final class Index extends IndexProgram {
     }
 
     public static void main(final String[] argv) throws IllegalAccessException, InstantiationException {
-//        System.exit(new BuildVarNoteIndex().instanceMain(argv));
-
-//        final Set<Class<?>> classes = new HashSet<>();
-//        classes.add(Index.class);
-//
-//        VarNoteCommandLine.printUsage(System.out, classes, GlobalParameter.PRO_CMD);
-        String[] args = new String[]{"-I /Users/hdd/Downloads/test_data/database1.sorted.bed.gz"};
-
-        final Class<?> clazz = Index.class;
-        final CMDProgram program = (CMDProgram)clazz.newInstance();
-        program.instanceMain(args);
-
-        System.out.println(program.getUsage());
     }
 }

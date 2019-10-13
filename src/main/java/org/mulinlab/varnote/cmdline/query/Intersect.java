@@ -49,7 +49,7 @@ public final class Intersect extends QueryFileProgram {
         outParam.setRemoveCommemt(isRemoveComment);
         outParam.setOutputMode(outModeValue);
 
-        OverlapRunConfig runConfig = new OverlapRunConfig(new QueryFileParam(queryFilePath, format), dbArguments.getDBList());
+        OverlapRunConfig runConfig = new OverlapRunConfig(new QueryFileParam(inputArguments.getQueryFilePath(), format), dbArguments.getDBList());
         runConfig.setOutParam(outParam);
         runConfig.setThread(runArguments.getThreads());
 

@@ -1,16 +1,14 @@
 package org.mulinlab.varnote.utils.headerparser;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.mulinlab.varnote.constants.GlobalParameter;
+import org.mulinlab.varnote.filters.iterator.NoFilterIterator;
+import org.mulinlab.varnote.utils.enumset.FileType;
 import org.mulinlab.varnote.utils.format.Format;
 import org.mulinlab.varnote.config.anno.ab.AbstractParser;
-import org.mulinlab.varnote.utils.queryreader.LineIteratorImpl;
 import org.mulinlab.varnote.exceptions.InvalidArgumentException;
-import org.mulinlab.varnote.utils.VannoUtils.FileType;
 
 
 public final class BEDHeaderParser {
@@ -20,27 +18,23 @@ public final class BEDHeaderParser {
 	
 	public static List<String> readActualHeader(final String path, final Format format, final boolean fromHeaderPath, final FileType fileType) {
 		String line,  header = null, dataLine = null;
-        try {
-			LineIteratorImpl lineIterator = new LineIteratorImpl(path, fileType);
-			
-			while (lineIterator.hasNext()) {
-				line = lineIterator.next().trim();
 
-				if(line.startsWith(format.getCommentIndicator()) || line.equals("")) {
-				} else if(fromHeaderPath || format.isHasHeader() || line.startsWith(Format.VCF_HEADER_INDICATOR)){
-					header =  line;
-					break;
-				} else {
-					dataLine =  line;
-					break;
-				}
+		NoFilterIterator lineIterator = new NoFilterIterator(path, fileType);
+
+		while (lineIterator.hasNext()) {
+			line = lineIterator.next().trim();
+
+			if(line.startsWith(format.getCommentIndicator()) || line.equals("")) {
+			} else if(fromHeaderPath || format.isHasHeader() || line.startsWith(GlobalParameter.VCF_HEADER_INDICATOR)){
+				header =  line;
+				break;
+			} else {
+				dataLine =  line;
+				break;
 			}
-			lineIterator.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
+		lineIterator.close();
+
         
         if((header == null) && (dataLine == null))  throw new InvalidArgumentException("No header or data found in file: " + path);
 		
@@ -48,12 +42,12 @@ public final class BEDHeaderParser {
      
         if(header != null) {
         		format.setHeader(header);
-        		if(header.startsWith(Format.VCF_HEADER_INDICATOR)) {
-        			header = header.substring(Format.VCF_HEADER_INDICATOR.length());
+        		if(header.startsWith(GlobalParameter.VCF_HEADER_INDICATOR)) {
+        			header = header.substring(GlobalParameter.VCF_HEADER_INDICATOR.length());
         		}
         		headerList = parserHeaderComma(header);
         } else {
-        		format.setHasHeaderInFile(false);
+//        		format.setHeader(false);
         		headerList = parserHeader(dataLine);
     			for (int i = 0; i < headerList.size(); i++) {
     				if(format.getColOriginalField(i+1) != null) {
@@ -80,17 +74,17 @@ public final class BEDHeaderParser {
 		}
 		return headerList;
 	}
-	
+
 	public static List<String> parserHeaderComma(final String header) {
 		final List<String> headerList = new ArrayList<String>();
 		String[] strings = header.split(COMMA);
 		if(strings.length < 2) {
 			strings = header.split(TAB);
-			
+
 			if (strings.length < 2)
 				throw new InvalidArgumentException("there are not enough columns present in the header line: " + header);
 		}
-		
+
 		for (int i = 0; i < strings.length; i++) {
 			headerList.add(strings[i].trim());
 		}

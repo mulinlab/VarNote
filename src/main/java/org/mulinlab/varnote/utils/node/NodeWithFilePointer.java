@@ -1,7 +1,7 @@
 package org.mulinlab.varnote.utils.node;
 
 
-public final class NodeWithFilePointer extends Node {
+public final class NodeWithFilePointer extends LocFeature {
 	public long blockAddress;
 	public int blockOffset;
 	
@@ -17,7 +17,7 @@ public final class NodeWithFilePointer extends Node {
 		this.blockOffset = blockOffset;
 	} 
 	
-	public Node clone()  {
+	public LocFeature clone()  {
 		NodeWithFilePointer cloned = new NodeWithFilePointer(blockAddress, blockOffset);
 		
 		cloned.beg = this.beg;

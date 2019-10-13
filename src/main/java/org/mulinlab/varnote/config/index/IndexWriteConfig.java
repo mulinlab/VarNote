@@ -78,8 +78,8 @@ public final class IndexWriteConfig {
 		for (String seq : idx.getmSeq()) {
 			sequenceNames.add(seq);
 		}
-		VannoUtils.writeFormats(indexLos, idx.getFormat(), 
-				BEDHeaderParser.parserHeaderComma(header.replaceAll("\"", "").replaceAll("“", "").replaceAll("”", "")), 
+		VannoUtils.writeFormats(indexLos, idx.getFormat(),
+				VannoUtils.parserHeaderComma(VannoUtils.replaceQuote(header)),
 				sequenceNames, idx.getMinOffForChr());
 		try {
 			indexLos.close();

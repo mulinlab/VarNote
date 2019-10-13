@@ -20,7 +20,6 @@ public final class OverlapHeaderReader<T> extends QueryReader<T> {
 		format = setformatHeader(format);
 		QueryFileParam queryFileParam = new QueryFileParam(valueHash.get(QUERY), format);
 
-
 		AnnoRunConfig annoRunConfig = new AnnoRunConfig(queryFileParam, dbParams);
 		if(valueHash.get(OUTPUT_PATH) != null) {
 			AnnoOutParam outParam = new AnnoOutParam();

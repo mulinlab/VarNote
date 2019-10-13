@@ -3,8 +3,8 @@ package org.mulinlab.varnote.operations.mapper;
 import org.mulinlab.varnote.config.param.query.QueryFileParam;
 import org.mulinlab.varnote.config.run.CountRunConfig;
 import org.mulinlab.varnote.operations.query.VannoQuery;
-import org.mulinlab.varnote.utils.node.Node;
-import org.mulinlab.varnote.utils.queryreader.ThreadLineReader;
+import org.mulinlab.varnote.operations.readers.query.AbstractFileReader;
+import org.mulinlab.varnote.utils.node.LocFeature;
 
 import java.io.IOException;
 
@@ -18,12 +18,12 @@ public final class CounterMapper<T> extends AbstractMapper {
 		queryEngine = new VannoQuery(config.getDatabses(), true);
 	}
 
-	public ThreadLineReader getQueryForThread() {
-		return ((QueryFileParam)config.getQueryParam()).getSpider(index);
+	public AbstractFileReader getQueryForThread() {
+		return ((QueryFileParam)config.getQueryParam()).getThreadReader(index);
 	}
 
 	@Override
-	public void processResult(final Node node) throws IOException {
+	public void processResult(final LocFeature node) throws IOException {
 		this.count = queryEngine.getResultCount();
 	}
 

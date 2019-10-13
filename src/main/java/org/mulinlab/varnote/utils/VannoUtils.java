@@ -1,6 +1,15 @@
 package org.mulinlab.varnote.utils;
 
+import htsjdk.samtools.seekablestream.SeekableStream;
+import htsjdk.samtools.util.BlockCompressedInputStream;
 import org.mulinlab.varnote.constants.GlobalParameter;
+import org.mulinlab.varnote.filters.query.LocFeatureFilter;
+import org.mulinlab.varnote.filters.query.VCFContextFilter;
+import org.mulinlab.varnote.operations.readers.itf.QueryReaderItf;
+import org.mulinlab.varnote.operations.readers.query.AbstractFileReader;
+import org.mulinlab.varnote.operations.readers.query.BEDFileReader;
+import org.mulinlab.varnote.operations.readers.query.TABFileReader;
+import org.mulinlab.varnote.operations.readers.query.VCFFileReader;
 import org.mulinlab.varnote.utils.enumset.*;
 import htsjdk.samtools.seekablestream.SeekableStreamFactory;
 import htsjdk.samtools.util.BlockCompressedStreamConstants;
@@ -8,59 +17,31 @@ import htsjdk.samtools.util.IOUtil;
 import htsjdk.samtools.util.StringUtil;
 import htsjdk.variant.vcf.VCFHeaderLineCount;
 import htsjdk.variant.vcf.VCFHeaderLineType;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+
+import java.io.*;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.*;
+
 import joptsimple.OptionSet;
 import org.mulinlab.varnote.utils.database.index.IndexFactory;
 import org.mulinlab.varnote.utils.format.Format;
 import org.mulinlab.varnote.exceptions.InvalidArgumentException;
-import org.mulinlab.varnote.utils.gz.MyBlockCompressedInputStream;
 import org.mulinlab.varnote.utils.gz.MyEndianOutputStream;
 
 public final class VannoUtils {
 	public final static String INTERSECT_ERROR = "Intersection type, valid values are " + IntersectType.INTERSECT.getVal() + "(" + IntersectType.INTERSECT.getName() + ")" +
 			" or " + IntersectType.EXACT.getVal() + "(" + IntersectType.EXACT.getName() + ") or " + IntersectType.FULLCLOASE.getVal() + "(" + IntersectType.FULLCLOASE.getName() + ")" +
 			". default is:" +  IntersectType.INTERSECT.getName() + ".";
-	
-	public enum PROGRAM {
-		OVERLAP("overlap", "record intersection for a list of intervals or variants"),
-		INDEX("index", "indexes a VCF, BED or TAB-delimited annotation files and creates two VarNote index files (.vanno and .vanno.vi)"),
-		ANNO("anno", "annotation extraction for a list of intervals or variants"),
-		QUERY("query", "random access of intersected annotations for a specified genomic region like \"chr:beginPos-endPos\"");
-		
-		private final String name;
-		private final String desc;
-		
-		PROGRAM(final String name, final String desc) {
-	        this.name = name;
-	        this.desc = desc;
-	    }
-		
-		public String getName() {
-			return name;
-		}
-		public String getDesc() {
-			return desc;
-		}
-	}
-	
-	public enum FileType {
-		BGZ, GZ, TXT
-	}
+
 	 
 	public enum FileExt {
 		GZ(Arrays.asList(".gz", ".gzip", ".bgz", ".bgzf")),
 		VCF(Arrays.asList(".vcf", ".vcf.gz", ".vcf.bgz")),
-		BED(Arrays.asList(".bed", ".bed.gz", ".bed.bgz"));
+		BED(Arrays.asList(".bed", ".bed.gz", ".bed.bgz")),
+		GZVCF(Arrays.asList(".vcf.gz", ".vcf.bgz")),
+		GZBED(Arrays.asList(".bed.gz", ".bed.bgz"));
 		private final List<String> suffix; 
 		
 		private FileExt(final List<String> suffix) {
@@ -188,11 +169,18 @@ public final class VannoUtils {
 				"mode=" + Mode.MIX.getNum() + " means mix search, mode=" + Mode.SWEEP.getNum() + " means sweep search.");
 	}
 	
-	public static Format determineFileType(String fileName) {
+	public static Format determineFileType(String fileName, final boolean isQuery) {
 		fileName = trimAndLC(fileName);
-		if(hasExtension(FileExt.VCF, fileName)) return Format.newVCF();
-		else if(hasExtension(FileExt.BED, fileName)) return Format.newBED(); 
-		else return null;
+
+		if(isQuery) {
+			if(hasExtension(FileExt.VCF, fileName)) return Format.VCF;
+			else if(hasExtension(FileExt.BED, fileName)) return Format.BED;
+			else return null;
+		} else {
+			if(hasExtension(FileExt.GZVCF, fileName)) return Format.VCF;
+			else if(hasExtension(FileExt.GZBED, fileName)) return Format.BED;
+			else return null;
+		}
 	}
 	
 	public static AnnoOutFormat checkFileFormat(String format) {
@@ -254,15 +242,6 @@ public final class VannoUtils {
         if(missing.size() > 0) throw new InvalidArgumentException("Missing required arguments: " + String.join(", ", missing.toArray(new String[0])));
 	}
 	
-	public static PROGRAM checkARG(String arg) {
-		for (PROGRAM p : PROGRAM.values()) {
-			if(arg.equalsIgnoreCase(p.getName())) {
-				return p;
-			}
-		}	
-		throw new InvalidArgumentException("Invalid arguments, please use " + GlobalParameter.PRO_CMD + " " + GlobalParameter.HELP_OPTION_ABBR + " for help.");
-	}
-	
 	public static void assertOutputIsValid(final String output) {
 	      if (output == null) {
 	    	  		throw new InvalidArgumentException("Cannot check validity of null output.");
@@ -272,61 +251,60 @@ public final class VannoUtils {
 	      }
 	}
 
-	public static void writeFormats(final MyEndianOutputStream indexLos, final Format formatSpec, final List<String> headerColList, final List<String> sequenceNames, final Map<Integer, Long> addressOfChr) {
-	    	try { 
-	    		 indexLos.writeInt(GlobalParameter.version);
-	    		 indexLos.writeInt(IndexFactory.MAGIC_NUMBER);
-	    		 indexLos.writeInt(formatSpec.getFlags());
-	    		 indexLos.writeInt(formatSpec.getFieldCol(Format.H_FIELD.CHROM.toString()));
-	    		 indexLos.writeInt(formatSpec.getFieldCol(Format.H_FIELD.BEGIN.toString()));
-	    		 indexLos.writeInt(formatSpec.getFieldCol(Format.H_FIELD.END.toString()));
-	    		 
-	    		 indexLos.writeInt(formatSpec.getCommentIndicator().length());
-	    		 indexLos.write(StringUtil.stringToBytes(formatSpec.getCommentIndicator()));
-	
-	        	 if(headerColList != null && headerColList.size() > 0) {
-	        		 indexLos.writeInt(headerColList.size());
-	        		 
-	        		 int headerBlockSize = headerColList.size(); // null terminators
-	    	         for (final String colName : headerColList) {
-	    	        	 	 headerBlockSize += colName.length(); 
-	    	         }
-	    	
-	    	         indexLos.writeInt(headerBlockSize);
-	    	         
-	        		 for (String colName : headerColList) {
-	        			 indexLos.write(StringUtil.stringToBytes(colName));
-	        			 indexLos.write(0);
-				 }
-	        	 } else {
-	        		 indexLos.writeInt(0);
-	        	 }
-	    		 
-	    		 indexLos.writeInt(formatSpec.getNumHeaderLinesToSkip());
-	    		 indexLos.writeInt(formatSpec.getFieldCol(Format.H_FIELD.REF.toString()));
-	    		 indexLos.writeInt(formatSpec.getFieldCol(Format.H_FIELD.ALT.toString()));
-	    		 indexLos.writeInt(formatSpec.getFieldCol(Format.H_FIELD.INFO.toString()));
-	    		 indexLos.writeBoolean(formatSpec.isHasHeader() && formatSpec.isHasHeaderInFile());
+	public static void writeFormats(final MyEndianOutputStream indexLos, final Format formatSpec, final String[] headerParts, final List<String> sequenceNames, final Map<Integer, Long> addressOfChr) {
+		try {
+			indexLos.writeInt(GlobalParameter.version);
+			indexLos.writeInt(IndexFactory.MAGIC_NUMBER);
+			indexLos.writeInt(formatSpec.getFlags());
+			indexLos.writeInt(formatSpec.sequenceColumn);
+			indexLos.writeInt(formatSpec.startPositionColumn);
+			indexLos.writeInt(formatSpec.endPositionColumn);
 
-	    		 indexLos.writeInt(sequenceNames.size());
-		         
-	         int nameBlockSize = sequenceNames.size(); // null terminators
-	         for (final String sequenceName : sequenceNames) {
-	         	nameBlockSize += sequenceName.length();
-	         }
-	
-	         indexLos.writeInt(nameBlockSize);
-	         for (final String sequenceName : sequenceNames) {
-		        	 indexLos.write(StringUtil.stringToBytes(sequenceName));
-		        	 indexLos.write(0);
-	         }
-	         
-	         indexLos.writeInt(addressOfChr.keySet().size());
-	         for (Integer chrID : addressOfChr.keySet()) {
-		        	 indexLos.writeInt(chrID);	
-		        	 indexLos.writeLong(addressOfChr.get(chrID));	
-	 		}
-	    	} catch (IOException e) {
+			indexLos.writeInt(formatSpec.getCommentIndicator().length());
+			indexLos.write(StringUtil.stringToBytes(formatSpec.getCommentIndicator()));
+
+			if (headerParts != null && headerParts.length > 0) {
+				indexLos.writeInt(headerParts.length);
+
+				int headerBlockSize = headerParts.length; // null terminators
+				for (final String colName : headerParts) {
+					headerBlockSize += colName.length();
+				}
+				indexLos.writeInt(headerBlockSize);
+
+				for (String colName : headerParts) {
+					indexLos.write(StringUtil.stringToBytes(colName));
+					indexLos.write(0);
+				}
+			} else {
+				indexLos.writeInt(0);
+			}
+
+			indexLos.writeInt(formatSpec.numHeaderLinesToSkip);
+			indexLos.writeInt(formatSpec.refPositionColumn);
+			indexLos.writeInt(formatSpec.altPositionColumn);
+			indexLos.writeInt(8);
+			indexLos.writeBoolean(formatSpec.isHasHeader());
+
+			indexLos.writeInt(sequenceNames.size());
+
+			int nameBlockSize = sequenceNames.size(); // null terminators
+			for (final String sequenceName : sequenceNames) {
+				nameBlockSize += sequenceName.length();
+			}
+
+			indexLos.writeInt(nameBlockSize);
+			for (final String sequenceName : sequenceNames) {
+				indexLos.write(StringUtil.stringToBytes(sequenceName));
+				indexLos.write(0);
+			}
+
+			indexLos.writeInt(addressOfChr.keySet().size());
+			for (Integer chrID : addressOfChr.keySet()) {
+				indexLos.writeInt(chrID);
+				indexLos.writeLong(addressOfChr.get(chrID));
+			}
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -341,9 +319,7 @@ public final class VannoUtils {
 		try {
 			if(hasExtension(FileExt.GZ, path)) {
 				final int bufferSize = Math.max(GlobalParameter.BUFFER_SIZE, BlockCompressedStreamConstants.MAX_COMPRESSED_BLOCK_SIZE);
-				BufferedInputStream stream;
-				
-					stream = new BufferedInputStream(new FileInputStream(path), bufferSize);
+				BufferedInputStream stream = new BufferedInputStream(new FileInputStream(path), bufferSize);
 				
 				
 				stream.mark(BlockCompressedStreamConstants.BLOCK_HEADER_LENGTH);
@@ -351,9 +327,9 @@ public final class VannoUtils {
 			    final int count = readBytes(stream, buffer, 0, BlockCompressedStreamConstants.BLOCK_HEADER_LENGTH);
 			    stream.reset();
 			    if(count == BlockCompressedStreamConstants.BLOCK_HEADER_LENGTH && isValidBlockHeader(buffer)) {
-			    		return FileType.BGZ;
+			    	return FileType.BGZ;
 			    } else {
-			    		return FileType.GZ;
+			    	return FileType.GZ;
 			    }
 			} else return FileType.TXT;
 		} catch (Exception e) {
@@ -361,10 +337,10 @@ public final class VannoUtils {
 			throw new InvalidArgumentException("Read file " + path + " with error.");
 		}
 	}
-	
-	public static MyBlockCompressedInputStream makeBGZ(final String path) {
+
+	public static BlockCompressedInputStream makeBGZ(final String path) {
 		try {
-			return new MyBlockCompressedInputStream(SeekableStreamFactory.getInstance()
+			return new BlockCompressedInputStream(SeekableStreamFactory.getInstance()
 					.getBufferedStream(SeekableStreamFactory.getInstance().getStreamFor(path)));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -380,7 +356,27 @@ public final class VannoUtils {
                 buffer[12] == BlockCompressedStreamConstants.BGZF_ID1 &&
                 buffer[13] == BlockCompressedStreamConstants.BGZF_ID2);
     }
-	
+
+	public static long getAddress(final SeekableStream mFile) {
+		try {
+			mFile.seek(mFile.length() - BlockCompressedStreamConstants.EMPTY_GZIP_BLOCK.length - 8);
+			byte[] buf = new byte[8];
+			mFile.read(buf);
+			return ByteBuffer.wrap(buf).order(ByteOrder.LITTLE_ENDIAN).getLong();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	public static String getAbsolutePath(final String path) {
+		if(SeekableStreamFactory.isFilePath(path)) {
+			return new File(path).getAbsolutePath();
+		} else {
+			return path;
+		}
+	}
+
 	public static int readBytes(final InputStream stream, final byte[] buffer, final int offset, final int length) throws IOException {
         int bytesRead = 0;
         while (bytesRead < length) {
@@ -409,5 +405,57 @@ public final class VannoUtils {
 			header = header + " ";
 		}
 		return String.format("\n\n----------------------------------------------------%s----------------------------------------------------", header);
+	}
+
+	public static boolean isEmptyLine(final String line) {
+		return line.trim().equals("");
+	}
+
+	public static String[] parserHeader(final String header, final String splitChar) {
+		String[] parts = header.split(splitChar);
+
+		if (parts.length < 2)
+			throw new InvalidArgumentException("there are not enough columns present in the header line: " + header);
+
+		return parts;
+	}
+
+	public static String[] parserHeaderComma(final String header) {
+		String[] strings = header.split(GlobalParameter.TAB);
+		if(strings.length < 2) {
+			strings = header.split(GlobalParameter.COMMA);
+
+			if (strings.length < 2)
+				throw new InvalidArgumentException("there are not enough columns present in the header line: " + header);
+		}
+		return strings;
+	}
+
+
+	public static String[] setDefaultCol(final String[] parts) {
+		for (int i = 0; i < parts.length; i++) {
+			parts[i] = GlobalParameter.COL + (i + 1);
+		}
+		return parts;
+	}
+
+	public static AbstractFileReader getReader(final String path, final FileType fileType, final Format format) throws FileNotFoundException {
+		if(format.getType() == FormatType.VCF)  {
+			return new VCFFileReader(path, fileType, format);
+		} else if(format.getType() == FormatType.BED)  {
+			return new BEDFileReader(path, fileType, format);
+		} else {
+			return new TABFileReader(path, fileType, format);
+		}
+	}
+
+	public static AbstractFileReader getReader(QueryReaderItf itf, Format format) throws FileNotFoundException {
+		if(format.getType() == FormatType.VCF)  {
+			return new VCFFileReader(itf, format);
+		} else if(format.getType() == FormatType.BED)  {
+			return new BEDFileReader(itf, format);
+		} else {
+			return new TABFileReader(itf, format);
+		}
 	}
 }

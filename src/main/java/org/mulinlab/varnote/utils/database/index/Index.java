@@ -3,9 +3,9 @@ package org.mulinlab.varnote.utils.database.index;
 import htsjdk.samtools.seekablestream.ISeekableStreamFactory;
 import htsjdk.samtools.seekablestream.SeekableStream;
 import htsjdk.samtools.seekablestream.SeekableStreamFactory;
+import htsjdk.samtools.util.BlockCompressedInputStream;
 import org.mulinlab.varnote.utils.format.Format;
 import org.mulinlab.varnote.constants.GlobalParameter;
-import org.mulinlab.varnote.utils.gz.MyBlockCompressedInputStream;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -25,7 +25,7 @@ public abstract class Index {
 	protected Map<String, Integer> mChr2tid;
 	protected Map<Integer, String> mTid2chr;
 	protected int mSkip = 0;
-	protected MyBlockCompressedInputStream is;
+	protected BlockCompressedInputStream is;
 	protected Map<Integer, Long> minOffForChr;
 	protected Format format;
 	protected byte[] buf = new byte[8];
@@ -41,14 +41,14 @@ public abstract class Index {
         try {
 			fp = ssf.getBufferedStream(ssf.getStreamFor(indexPath), 128000);
 			if (fp == null)  is = null ;
-			else is = new MyBlockCompressedInputStream(fp);
+			else is = new BlockCompressedInputStream(fp);
 			this.minOffForChr = new HashMap<Integer, Long>();
         } catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public Index(final MyBlockCompressedInputStream is) {
+	public Index(final BlockCompressedInputStream is) {
 		this.is = is;
 		this.minOffForChr = new HashMap<Integer, Long>();
 	}
@@ -153,7 +153,7 @@ public abstract class Index {
 	public int getmSeqLen() {
 		return mSeq.length;
 	}
-	public MyBlockCompressedInputStream getIs() {
+	public BlockCompressedInputStream getIs() {
 		return is;
 	}
 

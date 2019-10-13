@@ -1,25 +1,12 @@
 package org.mulinlab.varnote.cmdline.txtreader.abs;
 
-import com.intel.gkl.compression.IntelInflaterFactory;
-import htsjdk.samtools.util.BlockGunzipper;
-import htsjdk.samtools.util.Log;
-import htsjdk.samtools.util.zip.InflaterFactory;
-import org.mulinlab.varnote.config.param.DBParam;
-import org.mulinlab.varnote.config.param.output.OutParam;
 import org.mulinlab.varnote.constants.GlobalParameter;
-import org.mulinlab.varnote.utils.LoggingUtils;
-import org.mulinlab.varnote.utils.enumset.IntersectType;
+import org.mulinlab.varnote.filters.iterator.NoFilterIterator;
 import htsjdk.samtools.util.IOUtil;
-import org.mulinlab.varnote.utils.enumset.OutMode;
-import org.mulinlab.varnote.utils.format.Format;
-import org.mulinlab.varnote.utils.queryreader.LineIteratorImpl;
 import org.mulinlab.varnote.exceptions.InvalidArgumentException;
 import org.mulinlab.varnote.utils.VannoUtils;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
+
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractQueryReader<T> implements RunReaderInterface<T> {
@@ -35,24 +22,21 @@ public abstract class AbstractQueryReader<T> implements RunReaderInterface<T> {
 	public T read(final String filePath) {
 		IOUtil.assertInputIsValid(filePath);
 		T obj = null;
-		try {
-			doInit();
-			final LineIteratorImpl reader = new LineIteratorImpl(filePath, VannoUtils.checkFileType(filePath));
-			String line;
-			while((line = reader.advance()) != null) {
-				line = line.trim();
-				if(isBreak(line)) break;
-				if(!filterLine(line)) {
-					processLine(line);
-				}
+
+		doInit();
+		final NoFilterIterator iterator = new NoFilterIterator(filePath, VannoUtils.checkFileType(filePath));
+		String line;
+		while(iterator.hasNext()) {
+			line = iterator.peek().trim();
+			if(isBreak(line)) break;
+			if(!filterLine(line)) {
+				processLine(line);
 			}
-			reader.close();
-			obj = doEnd();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+			iterator.next();
 		}
+		iterator.close();
+		obj = doEnd();
+
 		return obj;
 	}
 

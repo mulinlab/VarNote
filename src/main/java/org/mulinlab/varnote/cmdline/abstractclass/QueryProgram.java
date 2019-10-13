@@ -3,18 +3,11 @@ package org.mulinlab.varnote.cmdline.abstractclass;
 
 import com.intel.gkl.compression.IntelInflaterFactory;
 import htsjdk.samtools.util.BlockGunzipper;
-import htsjdk.samtools.util.Log;
 import htsjdk.samtools.util.zip.InflaterFactory;
-import org.apache.logging.log4j.Level;
 import org.broadinstitute.barclay.argparser.Argument;
 import org.broadinstitute.barclay.argparser.ArgumentCollection;
 import org.mulinlab.varnote.cmdline.collection.DBArgumentCollection;
-import org.mulinlab.varnote.cmdline.collection.FormatArgumentCollection;
-import org.mulinlab.varnote.cmdline.collection.RunArgumentCollection;
 import org.mulinlab.varnote.cmdline.constant.Arguments;
-import org.mulinlab.varnote.utils.LoggingUtils;
-
-import java.io.File;
 
 public abstract class QueryProgram extends CMDProgram {
 

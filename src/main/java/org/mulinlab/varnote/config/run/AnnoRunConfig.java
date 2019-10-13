@@ -24,7 +24,7 @@ import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.utils.database.Database;
 import org.mulinlab.varnote.utils.enumset.AnnoOutFormat;
 import org.mulinlab.varnote.utils.format.Format;
-import org.mulinlab.varnote.utils.node.Node;
+import org.mulinlab.varnote.utils.node.LocFeature;
 import org.mulinlab.varnote.utils.node.NodeFactory;
 import org.mulinlab.varnote.utils.node.RefNode;
 import org.mulinlab.varnote.utils.VannoUtils;
@@ -186,7 +186,7 @@ public final class AnnoRunConfig extends OverlapRunConfig{
 		super.mergeResult();
 	}
 
-	public void printRecord(final Node node, final Map<String, List<String>> results, final int index) throws IOException {
+	public void printRecord(final LocFeature node, final Map<String, List<String>> results, final int index) throws IOException {
 		String r = doQuery(NodeFactory.createRefAlt(node.origStr, ((QueryFileParam)queryParam).getQueryFormat()), results, index);
 		printter.print(r, index);
 	}

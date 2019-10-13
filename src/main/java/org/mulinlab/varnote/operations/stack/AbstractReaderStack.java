@@ -2,10 +2,9 @@ package org.mulinlab.varnote.operations.stack;
 
 import java.util.List;
 
-import org.mulinlab.varnote.utils.enumset.Mode;
 import org.mulinlab.varnote.operations.process.ProcessResult;
-import org.mulinlab.varnote.operations.readers.AbstractReader.Iterator;
-import org.mulinlab.varnote.utils.node.Node;
+import org.mulinlab.varnote.operations.readers.db.AbstractDBReader.Iterator;
+import org.mulinlab.varnote.utils.node.LocFeature;
 
 public abstract class AbstractReaderStack{
 	
@@ -43,7 +42,7 @@ public abstract class AbstractReaderStack{
 		return resultProcessor;
 	}
 
-	public abstract void findOverlaps(List<Node> nodes);
-	public abstract void findOverlap(Node node);
-	public abstract boolean findOverlapInST(Node query) ;
+	public abstract void findOverlaps(List<LocFeature> nodes);
+	public abstract void findOverlap(LocFeature node);
+	public abstract boolean findOverlapInST(LocFeature query) ;
 }

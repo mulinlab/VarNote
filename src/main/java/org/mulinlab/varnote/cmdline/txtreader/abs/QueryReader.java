@@ -13,7 +13,6 @@ import org.mulinlab.varnote.utils.VannoUtils;
 import org.mulinlab.varnote.utils.format.Format;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public abstract class QueryReader<T> extends AbstractQueryReader<T> {
@@ -27,7 +26,8 @@ public abstract class QueryReader<T> extends AbstractQueryReader<T> {
     public static final String QUERY_REF = "ref";
     public static final String QUERY_ALT = "alt";
     public static final String ZERO_BASED = "zero_based";
-    public static final String HEADER = "has_header";
+    public static final String HAS_HEADER = "has_header";
+    public static final String HEADER = "header";
     public static final String HEADER_PATH = "header_path";
     public static final String COMMNT_INDICATOR = "comment_indicator";
 
@@ -127,7 +127,7 @@ public abstract class QueryReader<T> extends AbstractQueryReader<T> {
 
     protected Format setformatHeader(Format format) {
         if(valueHash.get(HEADER_PATH) != null) format.setHeaderPath(valueHash.get(HEADER_PATH));
-        if(valueHash.get(HEADER) != null) format.setHasHeader(VannoUtils.strToBool(valueHash.get(HEADER)));
+        if(valueHash.get(HEADER) != null) format.setHeaderPart(VannoUtils.parserHeader(valueHash.get(HEADER), GlobalParameter.TAB), false);
         return format;
     }
 
@@ -136,11 +136,11 @@ public abstract class QueryReader<T> extends AbstractQueryReader<T> {
 
         format = setformatHeader(format);
         if(valueHash.get(ZERO_BASED) != null && VannoUtils.strToBool(valueHash.get(ZERO_BASED))) format.setZeroBased();
-        if(valueHash.get(QUERY_CHROM) != null) format.setSequenceColumn(Integer.parseInt(QUERY_CHROM));
-        if(valueHash.get(QUERY_BEGIN) != null) format.setStartPositionColumn(Integer.parseInt(QUERY_BEGIN));
-        if(valueHash.get(QUERY_END) != null) format.setEndPositionColumn(Integer.parseInt(QUERY_END));
-        if(valueHash.get(QUERY_REF) != null) format.setRefColumn(Integer.parseInt(QUERY_REF));
-        if(valueHash.get(QUERY_ALT) != null) format.setAltColumn(Integer.parseInt(QUERY_ALT));
+        if(valueHash.get(QUERY_CHROM) != null) format.sequenceColumn = Integer.parseInt(QUERY_CHROM);
+        if(valueHash.get(QUERY_BEGIN) != null) format.startPositionColumn = Integer.parseInt(QUERY_BEGIN);
+        if(valueHash.get(QUERY_END) != null) format.endPositionColumn = Integer.parseInt(QUERY_END);
+        if(valueHash.get(QUERY_REF) != null) format.refPositionColumn = Integer.parseInt(QUERY_REF);
+        if(valueHash.get(QUERY_ALT) != null) format.altPositionColumn = Integer.parseInt(QUERY_ALT);
 
         return format;
     }

@@ -1,8 +1,8 @@
 package org.mulinlab.varnote.utils.block;
 
 import htsjdk.samtools.util.BlockCompressedFilePointerUtil;
+import htsjdk.samtools.util.BlockCompressedInputStream;
 import org.mulinlab.varnote.constants.GlobalParameter;
-import org.mulinlab.varnote.utils.gz.MyBlockCompressedInputStream;
 
 import java.io.IOException;
 
@@ -20,7 +20,7 @@ public final class BlockFeature {
 		isReadBlock = false;
 	}
 	
-	public void readBlock(final MyBlockCompressedInputStream is, final int min, final int flag, byte[] buf) throws IOException {
+	public void readBlock(final BlockCompressedInputStream is, final int min, final int flag, byte[] buf) throws IOException {
 		preBeg = min;
 		
 		switch (flag) {
@@ -46,7 +46,7 @@ public final class BlockFeature {
 		isReadBlock = true;
 	}
 	
-	public int readShort(final MyBlockCompressedInputStream is) throws IOException {
+	public int readShort(final BlockCompressedInputStream is) throws IOException {
 		int a = GlobalParameter.readShort(is);
 		if(a < 0) a = GlobalParameter.readInt(is);
 		return a;
@@ -57,7 +57,7 @@ public final class BlockFeature {
 		return feature;
 	}
 
-	public VannoFeature makeVannoFeature(final MyBlockCompressedInputStream is, final byte flag) throws IOException{
+	public VannoFeature makeVannoFeature(final BlockCompressedInputStream is, final byte flag) throws IOException{
 		final int begflag = flag & 7, endflag = flag >> 3 & 3, offsetSign = flag >> 5 & 1, offsetflag = flag >> 6 & 1;
 		preBeg = preBeg + getBeg(is, begflag);
 		offsetEnd = getEnd(is, endflag);
@@ -80,7 +80,7 @@ public final class BlockFeature {
 		return feature;
 	}
 	
-	public int getBeg(final MyBlockCompressedInputStream is, final int val) throws IOException {
+	public int getBeg(final BlockCompressedInputStream is, final int val) throws IOException {
 		if(val < 5) {
 			return val;
 		} else if(val == 5) {
@@ -92,7 +92,7 @@ public final class BlockFeature {
 		} 
 	}
 	
-	public int getEnd(final MyBlockCompressedInputStream is, final int val) throws IOException {
+	public int getEnd(final BlockCompressedInputStream is, final int val) throws IOException {
 		if(val == 0) {
 			return 1;
 		} else if(val == 1) {

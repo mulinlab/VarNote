@@ -1,19 +1,13 @@
 package org.mulinlab.varnote.config.io.temp;
 
 import htsjdk.tribble.util.LittleEndianOutputStream;
-import org.mulinlab.varnote.config.param.DBParam;
-import org.mulinlab.varnote.config.param.output.IntersetOutParam;
 import org.mulinlab.varnote.config.param.output.OutParam;
-import org.mulinlab.varnote.constants.GlobalParameter;
-import org.mulinlab.varnote.utils.enumset.OutMode;
-import org.mulinlab.varnote.utils.node.Node;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
 
 public abstract class Printter {
 

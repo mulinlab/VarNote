@@ -5,14 +5,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import htsjdk.samtools.util.BlockCompressedInputStream;
 import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.utils.database.index.IndexFactory;
 import org.mulinlab.varnote.utils.format.Format;
-import org.mulinlab.varnote.utils.gz.MyBlockCompressedInputStream;
 
 public class VannoIndexV1 extends VannoIndex{
 	
-	public VannoIndexV1(final MyBlockCompressedInputStream is, final int version) {
+	public VannoIndexV1(final BlockCompressedInputStream is, final int version) {
 		super(is, version);
 	}
 	

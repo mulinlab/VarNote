@@ -52,14 +52,13 @@ public final class BZIP2InputStream {
     }
 
     public void adjustPos() throws IOException {
-    		
-    		
-    		pos[0] = 0;
-    		if(input.length() < 200) {
-    			threadNum = 1;
+
+        pos[0] = 0;
+        if(input.length() < 200) {
+            threadNum = 1;
             pos[1] = input.length();
             return;
-    		}
+        }
     		 
         for (int i = 1; i < threadNum; i++) {
             pos[i] = (input.length() / threadNum * i);
@@ -138,6 +137,8 @@ public final class BZIP2InputStream {
         raf.close();
     }
 
+
+
     public void creatSpider() throws IOException {
         spider = new BZIP2InputStream.Spider[this.threadNum];
         for (int i = 0; i < this.threadNum; i++) {
@@ -176,6 +177,10 @@ public final class BZIP2InputStream {
 		public long getLongEnd() {
 			return longEnd;
 		}
+
+        public String getFilePath() {
+            return input.getAbsolutePath();
+        }
 
 		public Spider(int spiderID, int intFormat, long longStart, long longEnd, char chrDelimiter) throws IOException {
             longRemainSize = (longEnd - longStart);

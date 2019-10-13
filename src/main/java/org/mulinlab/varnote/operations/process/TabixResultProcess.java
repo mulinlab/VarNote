@@ -3,8 +3,7 @@ package org.mulinlab.varnote.operations.process;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mulinlab.varnote.utils.enumset.Mode;
-import org.mulinlab.varnote.utils.node.Node;
+import org.mulinlab.varnote.utils.node.LocFeature;
 
 public final class TabixResultProcess implements ProcessResult{
 
@@ -15,7 +14,7 @@ public final class TabixResultProcess implements ProcessResult{
 	}
 
 	@Override
-	public void doProcess(Node d) {
+	public void doProcess(LocFeature d) {
 		result.add(d.origStr);
 	}
 

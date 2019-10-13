@@ -1,10 +1,10 @@
 package org.mulinlab.varnote.operations.process;
 
 
-import org.mulinlab.varnote.utils.enumset.Mode;
-import org.mulinlab.varnote.utils.node.Node;
+import htsjdk.samtools.util.BlockCompressedInputStream;
+import org.mulinlab.varnote.utils.gz.BlockCompressedFilePointerUtil;
+import org.mulinlab.varnote.utils.node.LocFeature;
 import org.mulinlab.varnote.utils.node.NodeWithFilePointer;
-import org.mulinlab.varnote.utils.gz.MyBlockCompressedInputStream;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import java.util.List;
 
 public final class VannoResultProcess implements ProcessResult{
 
-	private MyBlockCompressedInputStream mFp;
+	private BlockCompressedInputStream mFp;
 //	private BGZReader cReader;
 	private List<String> result;
 	public VannoResultProcess() {
@@ -20,7 +20,7 @@ public final class VannoResultProcess implements ProcessResult{
 		result = new ArrayList<String>(3);
 	}
 	
-	public void setMFP(final MyBlockCompressedInputStream mFp) {
+	public void setMFP(final BlockCompressedInputStream mFp) {
 		this.mFp = mFp;
 	}
 	
@@ -29,7 +29,7 @@ public final class VannoResultProcess implements ProcessResult{
 //	}
 
 	@Override
-	public void doProcess(Node d) {
+	public void doProcess(LocFeature d) {
 //		NodeWithFilePointer dt = (NodeWithFilePointer)d;
 //		result.add(dbLabel + "\t" +  cReader.readLine((dt.blockAddress << 16 | dt.blockOffset))); //cReader.getIndex() + "\t" +
 		
@@ -38,7 +38,7 @@ public final class VannoResultProcess implements ProcessResult{
 				result.add(d.bgzStr); 
 			} else {
 				NodeWithFilePointer dt = (NodeWithFilePointer)d;
-				mFp.seek(dt.blockAddress, dt.blockOffset);   //25238  54636  //12541 44392
+				mFp.seek(BlockCompressedFilePointerUtil.makeFilePointer(dt.blockAddress, dt.blockOffset));   //25238  54636  //12541 44392
 //				System.out.println(dt.blockAddress + "," + dt.blockOffset );
 				dt.bgzStr = mFp.readLine();
 				result.add(dt.bgzStr);

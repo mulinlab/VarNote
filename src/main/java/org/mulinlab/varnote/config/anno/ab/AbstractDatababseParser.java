@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.mulinlab.varnote.constants.GlobalParameter;
+import org.mulinlab.varnote.utils.enumset.FileType;
 import org.mulinlab.varnote.utils.enumset.IndexType;
 import htsjdk.samtools.util.StringUtil;
 import htsjdk.variant.vcf.VCFHeader;
@@ -18,7 +19,6 @@ import org.mulinlab.varnote.utils.database.index.vannoIndex.VannoIndex;
 import org.mulinlab.varnote.utils.node.NodeFactory;
 import org.mulinlab.varnote.utils.node.RefNode;
 import org.mulinlab.varnote.exceptions.InvalidArgumentException;
-import org.mulinlab.varnote.utils.VannoUtils.FileType;
 
 public abstract class AbstractDatababseParser extends AbstractParser{
 	protected List<Integer> columnsToExtract;
@@ -51,7 +51,7 @@ public abstract class AbstractDatababseParser extends AbstractParser{
 			this.format.setField(((VannoIndex)this.db.getIndex()).getHeaderColList());
 		} 
 		
-		format.checkOverlap(db.getDbPath(), FileType.BGZ);
+		format.checkLoc();
 		format.checkRefAndAlt();
 		
 		if(!format.isRefAndAltExsit()) {

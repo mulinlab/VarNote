@@ -7,17 +7,17 @@ import java.util.Map;
 import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.utils.database.Database;
 import org.mulinlab.varnote.operations.process.CountResultProcess;
-import org.mulinlab.varnote.operations.readers.AbstractReader;
-import org.mulinlab.varnote.utils.node.Node;
+import org.mulinlab.varnote.operations.readers.db.AbstractDBReader;
+import org.mulinlab.varnote.utils.node.LocFeature;
 
 public abstract class AbstractQuery implements Query{
 
 
 	protected final List<Database> dbs;
-	protected List<AbstractReader> readers;
+	protected List<AbstractDBReader> readers;
 	protected boolean isCount = GlobalParameter.DEFAULT_IS_COUNT;
 	
-	protected AbstractQuery(final List<Database> dbs, final boolean isCount) { //, final int threadIndex, final ThreadLineReader queryLineReader
+	protected AbstractQuery(final List<Database> dbs, final boolean isCount) { //, final int threadIndex, final ThreadReader queryLineReader
 		super();
 		this.dbs = dbs;
 		this.isCount = isCount;
@@ -31,7 +31,7 @@ public abstract class AbstractQuery implements Query{
 	protected void init() throws IOException {
 	}
 	
-	public void doQuery(final Node node) throws IOException {
+	public void doQuery(final LocFeature node) throws IOException {
 		if(readers != null)
 			for(int i=0; i<readers.size(); i++) {
 				readers.get(i).query(node);
@@ -47,7 +47,7 @@ public abstract class AbstractQuery implements Query{
 	
 	public void teardown() {
 		if(this.readers != null && this.readers.size() > 0) {
-			for (AbstractReader tr : readers) {
+			for (AbstractDBReader tr : readers) {
 				tr.close();
 			}
 		}

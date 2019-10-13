@@ -1,20 +1,10 @@
 package org.mulinlab.varnote.speed;
 
-import htsjdk.samtools.util.CloseableIterator;
-import htsjdk.samtools.util.CloserUtil;
-import htsjdk.variant.variantcontext.VariantContext;
-import htsjdk.variant.vcf.VCFFileReader;
-import htsjdk.variant.vcf.VCFHeader;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 import org.mulinlab.varnote.utils.LoggingUtils;
-import org.mulinlab.varnote.utils.format.Format;
-import org.mulinlab.varnote.utils.queryreader.ThreadLineReader;
-import org.mulinlab.varnote.utils.queryreader.reader.BufferReader;
-import org.mulinlab.varnote.utils.queryreader.reader.GZipReader;
+import org.mulinlab.varnote.operations.readers.itf.thread.GZIPThreadReader;
 import org.mulinlab.varnote.utils.stream.GZInputStream;
-
-import java.io.File;
 
 public final class GZReaderSpeedTest {
 
@@ -23,21 +13,36 @@ public final class GZReaderSpeedTest {
         final Logger logger = LoggingUtils.logger;
         long t1 = System.currentTimeMillis();
 
-        final String file = "/Users/hdd/Downloads/test_data/database4.sorted.vcf.gz";
-        GZInputStream in = new GZInputStream(file, 1);
-        ThreadLineReader reader = new ThreadLineReader(new GZipReader(in.getReader(0)), Format.newVCF(), 1);
+        final String file = "src/test/resources/q1.sorted.bed.gz";
 
-        String s;
+
+        int thread = 4;
+        GZInputStream in = new GZInputStream(file, thread);
+
+
+//        BufferedWriter write = IOUtil.openFileForBufferedUtf8Writing(new File("/Users/hdd/Downloads/test_data/database4.vcf"));
         int i = 0;
-        while((s = reader.readLine()) != null) {
-            i++;
-            if(i % 10000 == 0) System.out.println(i);
-        }
-        System.out.println("i=" + i);
-        reader.close();
+        String s;
 
+
+        for (int j = 0; j < thread ; j++) {
+            GZIPThreadReader reader = new GZIPThreadReader(in.getReader(j));
+            while((s = reader.readLine()) != null) {
+                if(!s.startsWith("#")) {
+//                    write.write(s);
+//                    write.newLine();
+                    i++;
+                }
+            }
+            reader.closeReader();
+        }
+
+
+        System.out.println("i=" + i);
+
+//        write.close();
 
         long t2 = System.currentTimeMillis();
-        logger.info(String.format("\n\nDone! Time: %ds\n", (t2 - t1)/1000));
+        logger.info(String.format("\n\nDone! Time: %d\n", t2 - t1));
     }
 }

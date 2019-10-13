@@ -27,7 +27,7 @@ public final class Count extends QueryFileProgram {
     protected int doWork() {
         Format format = getFormat();
 
-        CountRunConfig runConfig = new CountRunConfig(new QueryFileParam(queryFilePath, format), dbArguments.getDBList());
+        CountRunConfig runConfig = new CountRunConfig(new QueryFileParam(inputArguments.getQueryFilePath(), format), dbArguments.getDBList());
         runConfig.setThread(runArguments.getThreads());
         RunFactory.runCount(runConfig);
 

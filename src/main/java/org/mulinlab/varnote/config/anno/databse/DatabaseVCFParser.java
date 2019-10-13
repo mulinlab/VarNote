@@ -14,11 +14,11 @@ import org.mulinlab.varnote.config.anno.ab.AbstractDatababseParser;
 import org.mulinlab.varnote.config.anno.ab.ExtractValue;
 import org.mulinlab.varnote.utils.enumset.AnnoOutFormat;
 import org.mulinlab.varnote.utils.database.Database;
+import org.mulinlab.varnote.utils.enumset.FileType;
 import org.mulinlab.varnote.utils.format.Format;
 import org.mulinlab.varnote.utils.node.RefNode;
-
 import org.mulinlab.varnote.exceptions.InvalidArgumentException;
-import org.mulinlab.varnote.utils.VannoUtils.FileType;
+
 
 
 public class DatabaseVCFParser extends AbstractDatababseParser{

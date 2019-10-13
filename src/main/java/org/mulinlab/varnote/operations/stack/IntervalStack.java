@@ -4,35 +4,34 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.mulinlab.varnote.utils.enumset.Mode;
 import org.mulinlab.varnote.operations.process.ProcessResult;
-import org.mulinlab.varnote.utils.node.Node;
+import org.mulinlab.varnote.utils.node.LocFeature;
 
 public class IntervalStack extends AbstractReaderStack {
-	protected List<Node> st;
-	protected Node tempNode;
+	protected List<LocFeature> st;
+	protected LocFeature tempNode;
 	
 	public IntervalStack(final ProcessResult resultProcessor) {
 		super(resultProcessor);
 		if(st == null) {
-			st = new LinkedList<Node>();
+			st = new LinkedList<LocFeature>();
 		}
 		tempNode = null;
 	}
 
 	public void clearST() {
 		st = null;
-		st = new LinkedList<Node>();
+		st = new LinkedList<LocFeature>();
 		tempNode = null;
 	}
 	
-	public void findOverlaps(List<Node> list) {
-		for (Node intvNode : list) {
+	public void findOverlaps(List<LocFeature> list) {
+		for (LocFeature intvNode : list) {
 			findOverlap(intvNode);
 		}
 	}
 	
-	public boolean findOverlapInST(Node query) {
+	public boolean findOverlapInST(LocFeature query) {
 
 		for(int k=0; k<st.size(); k++) { 
 			if(st.get(k).end <= query.beg) {
@@ -60,14 +59,14 @@ public class IntervalStack extends AbstractReaderStack {
 		return true;
 	}
 	
-	public void findOverlap(Node query) {
+	public void findOverlap(LocFeature query) {
 
 		if(it == null) return;
 		if(!findOverlapInST(query)) return;
 		try {
-			Node curNode = null;
+			LocFeature curNode = null;
 			while((curNode = it.nextNode()) != null) {
-
+//				System.out.println(curNode);
 				if(curNode.end <= query.beg) {
 					continue;
 				} else {

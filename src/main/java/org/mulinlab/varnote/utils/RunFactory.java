@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.logging.log4j.Logger;
 import org.mulinlab.varnote.config.param.output.AnnoOutParam;
 import org.mulinlab.varnote.config.param.query.QueryFileParam;
@@ -16,9 +15,9 @@ import org.mulinlab.varnote.config.run.CountRunConfig;
 import org.mulinlab.varnote.config.run.OverlapRunConfig;
 import org.mulinlab.varnote.config.run.QueryRegionConfig;
 import org.mulinlab.varnote.operations.mapper.CounterMapper;
+import org.mulinlab.varnote.filters.iterator.NoFilterIterator;
 import org.mulinlab.varnote.utils.node.NodeFactory;
 import org.mulinlab.varnote.utils.node.RefNode;
-import org.mulinlab.varnote.utils.queryreader.LineIteratorImpl;
 import org.mulinlab.varnote.config.io.PrintGZ;
 import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.config.index.IndexWriteConfig;
@@ -47,7 +46,7 @@ public final class RunFactory {
 		config.setThread(thread);
 
 		try {
-			final LineIteratorImpl reader = new LineIteratorImpl(config.getOverlapFile(), VannoUtils.checkFileType(config.getOverlapFile()));
+			final NoFilterIterator reader = new NoFilterIterator(config.getOverlapFile(), VannoUtils.checkFileType(config.getOverlapFile()));
 			final PrintGZ out = new PrintGZ(outParam.getOutputPath(), outParam.isGzip());
 			
 //			if(outParam.isGzip()) {
@@ -61,7 +60,8 @@ public final class RunFactory {
 			Map<String, List<String>> dbResultsMap = null;
 			List<String> result;
 			int beg;
-			while(((line = reader.advance()) != null)) {
+			while(reader.hasNext()) {
+				line = reader.peek();
 				if(!line.startsWith(OVERLAP_NOTE)) {
 					beg = line.indexOf(TAB);
 					if(line.startsWith(QUERY_START)) {
@@ -79,6 +79,7 @@ public final class RunFactory {
 						dbResultsMap.put(dbOutName, result);
 					}
 				}
+				reader.next();
 			}
 	
 			if(queryNode != null) {
@@ -95,11 +96,14 @@ public final class RunFactory {
 	
 
 	public static void writeIndex(final IndexWriteConfig config) {
+		final Logger logger = LoggingUtils.logger;
+
 		config.init();
-        System.out.println("write vanno file for: " + config.getIndexParam().getInput() + " begin...\n");
-        IndexWriter write = new IndexWriter(config);
+
+		logger.info(String.format("write vanno file for: %s begin...\n", config.getIndexParam().getInput()));
+        IndexWriter write = new IndexWriter(config.getIndexParam());
         write.makeIndex();
-        System.out.println("write vanno file for: " + config.getIndexParam().getInput() + " end");
+		logger.info(String.format("write vanno file for: %s end", config.getIndexParam().getInput()));
 	}
 	
 	public static void runQuery(final QueryRegionConfig queryRegionConfig) {

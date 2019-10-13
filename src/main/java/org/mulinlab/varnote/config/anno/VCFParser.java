@@ -1,8 +1,5 @@
 package org.mulinlab.varnote.config.anno;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,10 +8,10 @@ import htsjdk.samtools.util.IOUtil;
 import htsjdk.variant.vcf.VCFCodec;
 import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFInfoHeaderLine;
-//import org.mulinlab.varnote.config.anno.vcf.VCFCodec;
-import org.mulinlab.varnote.utils.queryreader.LineIteratorImpl;
+import org.mulinlab.varnote.filters.iterator.NoFilterIterator;
+import org.mulinlab.varnote.utils.enumset.FileType;
 import org.mulinlab.varnote.constants.GlobalParameter;
-import org.mulinlab.varnote.utils.VannoUtils.FileType;
+
 
 public final class VCFParser {
 	
@@ -34,28 +31,20 @@ public final class VCFParser {
 	
 	public void readHeaderFiles(final String path, final FileType fileType) {
 //		log.printKVKCYN("Reading VCF header from file", log.isLog() ? new File(path).getName() :path);
-		try {
-			
-			LineIteratorImpl reader = new LineIteratorImpl(path, fileType);
-			vcfHeader = (VCFHeader)(new VCFCodec()).readActualHeader(reader);
-			try {
-				reader.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			infoKeys = new ArrayList<String>();
-			infoMap = new HashMap<String, VCFInfoHeaderLine>();
-			
-			for (VCFInfoHeaderLine info : vcfHeader.getInfoHeaderLines()) {
-				infoKeys.add(info.getID());
-				infoMap.put(info.getID(), info);
-			}
-		} catch (FileNotFoundException e) {
-			System.out.println("File Path" + path);
-			e.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
+
+
+		NoFilterIterator it = new NoFilterIterator(path, fileType);
+		vcfHeader = (VCFHeader)(new VCFCodec()).readActualHeader(it);
+
+		it.close();
+
+
+		infoKeys = new ArrayList<String>();
+		infoMap = new HashMap<String, VCFInfoHeaderLine>();
+
+		for (VCFInfoHeaderLine info : vcfHeader.getInfoHeaderLines()) {
+			infoKeys.add(info.getID());
+			infoMap.put(info.getID(), info);
 		}
 	}
 	
