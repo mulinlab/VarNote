@@ -16,7 +16,6 @@ import org.mulinlab.varnote.utils.VannoUtils;
 
 public class Format extends TabixFormat {
 
-	public enum H_FIELD { CHROM, BEGIN, END, REF, ALT, QUAL, FILTER, INFO }
 	public static final String HEADER_POS = "POS";
 
 	public final static int MAX_HEADER_COMPARE_LENGTH = 128;
@@ -27,8 +26,8 @@ public class Format extends TabixFormat {
 	public final static int DEFAULT_COL = -1;
 
 
-	public static Format VCF = new Format(VCF_FLAGS, 1, 2, 0, 0, DEFAULT_COMMENT_INDICATOR, 4, 5, true);
-	public static Format BED = new Format(UCSC_FLAGS, 1, 2, 3, 0, DEFAULT_COMMENT_INDICATOR, -1, -1, false);
+	public static Format VCF = new Format(VCF_FLAGS, 1, 2, 0, 0, DEFAULT_COMMENT_INDICATOR, 4, 5, true, FormatType.VCF);
+	public static Format BED = new Format(UCSC_FLAGS, 1, 2, 3, 0, DEFAULT_COMMENT_INDICATOR, -1, -1, false, FormatType.BED);
 //	public static Format TAB = new Format(GENERIC_FLAGS, -1, -1, -1, 0, DEFAULT_COMMENT_INDICATOR, -1, -1, false);
 
 
@@ -41,14 +40,14 @@ public class Format extends TabixFormat {
 	private boolean isRefAndAltExsit = false;
 
 	private String[] headerPart;
-	private FormatType type;
+	public FormatType type;
 
 	private String headerStr;
 	private String headerStart;
 	private String dataStr;
 
 	public static Format newTAB() {
-		return new Format(GENERIC_FLAGS, -1, -1, -1, 0, DEFAULT_COMMENT_INDICATOR, -1, -1, false);
+		return new Format(GENERIC_FLAGS, -1, -1, -1, 0, DEFAULT_COMMENT_INDICATOR, -1, -1, false, FormatType.TAB);
 	}
 
 	public Format(final int flags, int sequenceColumn, int startPositionColumn, int endPositionColumn, final int numHeaderLinesToSkip,
@@ -62,7 +61,7 @@ public class Format extends TabixFormat {
 
 		if(flags == VCF_FLAGS) {
 			type = FormatType.VCF;
-		} else if(flags == UCSC_FLAGS) {
+		} else if(flags == UCSC_FLAGS && sequenceColumn == 1 && startPositionColumn == 2 && endPositionColumn == 3) {
 			type = FormatType.BED;
 		} else {
 			type = FormatType.TAB;
@@ -101,9 +100,9 @@ public class Format extends TabixFormat {
 	}
 
 	public String logFormat() {
-		if(this.flags == VCF_FLAGS) {
+		if(this.type == FormatType.VCF) {
 			return "VCF";
-		} else if(this.flags == UCSC_FLAGS) {
+		} else if(this.type == FormatType.BED) {
 			return "BED";
 		} else {
 			return String.format("TAB, CHROM:%s BEGIN:%s END:%s REF:%s ALT:%s", sequenceColumn, startPositionColumn, endPositionColumn,
@@ -118,14 +117,6 @@ public class Format extends TabixFormat {
 
 		return new Format(Integer.parseInt(cols[0]), Integer.parseInt(cols[1]), Integer.parseInt(cols[2]), Integer.parseInt(cols[3]), Integer.parseInt(cols[4]),
 				cols[5], Integer.parseInt(cols[6]), Integer.parseInt(cols[7]), VannoUtils.strToBool(cols[8]));
-	}
-
-	public List<String> getOriginalField() {
-		return null;
-	}
-
-	public List<String> getConvertField() {
-		return null;
 	}
 
 	public String getCommentIndicator() {
@@ -145,25 +136,13 @@ public class Format extends TabixFormat {
 	}
 
 	public void setHeaderPath(String headerPath) {
+		IOUtil.assertInputIsValid(headerPath);
 		this.extHeaderPath = VannoUtils.getAbsolutePath(headerPath);
-		IOUtil.assertInputIsValid(this.extHeaderPath);
-	}
-	
-	public void checkRefAndAlt() {
-		if ((refPositionColumn > 0) && (altPositionColumn > 0)) {
-			isRefAndAltExsit = true;
-		} else {
-			isRefAndAltExsit = false;
-		}
+		this.setHasHeader(false);
 	}
 
 	public boolean isRefAndAltExsit() {
-		return isRefAndAltExsit;
-	}
-
-	public void setField(List<String> colNmaes) {
-//		this.originalField = colNmaes;
-//		updateFormatByColNames();
+		return (refPositionColumn > 0) && (altPositionColumn > 0);
 	}
 
 	public boolean hasLoc() {
@@ -201,18 +180,6 @@ public class Format extends TabixFormat {
 	public int getFlags() {
 		return flags;
 	}
-	
-	public int getFieldCol(final String field) {
-		return -1;
-	}
-	
-	public String getColField(final int col) {
-		return "";
-	}
-
-	public String getColOriginalField(final int col) {
-		return "";
-	}
 
 	public FormatType getType() {
 		return type;
@@ -220,6 +187,18 @@ public class Format extends TabixFormat {
 
 	public String[] getHeaderPart() {
 		return headerPart;
+	}
+
+	public String getHeaderPartStr() {
+		return StringUtil.join(GlobalParameter.TAB, headerPart);
+	}
+
+	public int getHeaderPartSize() {
+		return headerPart.length;
+	}
+
+	public String getColumnName(final int col) {
+		return headerPart[col - 1];
 	}
 
 	public void setHeader(String header) {
@@ -277,6 +256,28 @@ public class Format extends TabixFormat {
 				if(count < 3) throw new InvalidArgumentException(String.format("Invalid header line: %s, " +
 						"header line should include CHROM, POS (or BEGIN, END) columns.", StringUtil.join(GlobalParameter.TAB, headerPart)));
 			}
+		}
+	}
+
+	public int getCol(String str) {
+		str = str.toUpperCase();
+		if(str.equals("CHROM") || str.equals("CHR")) {
+			return sequenceColumn;
+		} else if(str.equals("POS") || str.equals("BEGIN")) {
+			return startPositionColumn;
+		} else if(str.equals("END")) {
+			return endPositionColumn;
+		} else if(str.equals("REF")) {
+			return refPositionColumn;
+		} else if(str.equals("ALT")) {
+			return altPositionColumn;
+		} else {
+			for (int i = 0; i < headerPart.length; i++) {
+				if(headerPart[i].toUpperCase().equals(str)) {
+					return i+1;
+				}
+			}
+			return -1;
 		}
 	}
 }

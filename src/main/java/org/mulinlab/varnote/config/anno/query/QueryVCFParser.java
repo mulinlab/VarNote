@@ -1,93 +1,96 @@
 package org.mulinlab.varnote.config.anno.query;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import htsjdk.samtools.util.StringUtil;
+import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFHeader;
-import org.mulinlab.varnote.config.anno.VCFParser;
-import org.mulinlab.varnote.config.anno.ab.AbstractQueryParser;
-import org.mulinlab.varnote.config.param.query.QueryFileParam;
+import org.mulinlab.varnote.config.anno.databse.VCFParser;
+import org.mulinlab.varnote.operations.readers.query.AbstractFileReader;
+import org.mulinlab.varnote.operations.readers.query.VCFFileReader;
 import org.mulinlab.varnote.utils.format.Format;
-import org.mulinlab.varnote.utils.node.RefNode;
+import org.mulinlab.varnote.utils.node.LocFeature;
+import java.util.StringJoiner;
 
 public final class QueryVCFParser extends AbstractQueryParser{
 
 	private final VCFParser vcfParser;
-	
-	public QueryVCFParser(QueryFileParam query) {
-		super(query);
-		vcfParser = new VCFParser((query.getQueryFormat().getHeaderPath() != null) ? query.getQueryFormat().getHeaderPath() : query.getQueryPath(), query.getFileType());
+
+	public QueryVCFParser(final Format format, final VCFParser vcfParser) {
+		super(format);
+		this.vcfParser = vcfParser;
 	}
 
 	@Override
 	public String toVCFHeader() {
-		String format = "";
-		if(vcfParser.getGenotypeSamples() != null && vcfParser.getGenotypeSamples().size() > 0) {
-			format =  TAB + "FORMAT" + TAB + StringUtil.join(TAB, vcfParser.getGenotypeSamples());
-		}
-		return VCFParser.VCF_HEADER_INDICATOR + VCFParser.VCF_FIELD +  format ;
-	}
-	
-	@Override
-	public String toVCFRecord(final RefNode query, final List<String> extractDB) { 
-		
-		List<String> fieldList = basicCol(query, true, true);
-		for (int i = 2; i < requiredColForVCF.size() - 1; i++) fieldList.add(query.getField(requiredColForVCF.get(i)));
-		
-		String info = query.getField( format.getFieldCol( Format.H_FIELD.INFO.toString()));
-		if(extractDB.size() > 0) {
-			info = info + INFO_FIELD_SEPARATOR + StringUtil.join(INFO_FIELD_SEPARATOR, extractDB);
-		}
-		fieldList.add(info);
-		
-		for (Integer col : otherColForVCF) fieldList.add(query.getField(col));
-		
-		return StringUtil.join(TAB, fieldList);
-	}
-	
-	@Override
-	public String toBEDHeader(final String extractDBHeader) {
-		List<String> headerList = new ArrayList<String>();
-		
-		for (Integer col : requiredColForBED) headerList.add(format.getColField(col));
-		
-		String infoHeader = null;
-		for (Integer col : otherColForBED) {
-			if(col == format.getFieldCol(Format.H_FIELD.INFO.toString())) {
-				infoHeader =  StringUtil.join(TAB, vcfParser.getInfoKeys());
-				infoHeader = ((extractDBHeader) == null || extractDBHeader.trim().equals("")) ? infoHeader : infoHeader + TAB + extractDBHeader;
-				headerList.add(infoHeader);
-			} else {
-				headerList.add(format.getColOriginalField(col));
-			}
-		}
-
-		return StringUtil.join(TAB, headerList);
-	}
-	
-	@Override
-	public String toBEDRecord(RefNode query, final List<String> extractDB) {
-		List<String> fieldList = basicCol(query, true, false);
-		
-		for (Integer col : otherColForBED) {
-			if(col == format.getFieldCol(Format.H_FIELD.INFO.toString())) {
-				fieldList.add(StringUtil.join(TAB, vcfParser.infoToList( query.getField(col) )));
-			} else {
-				fieldList.add(query.getField(col));
-			}
-		}
-		if(extractDB.size() > 0) {
-			for (String s : extractDB) {
-				fieldList.add(s);
-			}
-		}
-
-		return StringUtil.join(TAB, fieldList);
+		return VCF_HEADER_INDICATOR + format.getHeaderPartStr();
 	}
 
 	@Override
-	public VCFHeader getVCFHeader() {	
+	public String toBEDHeader(final StringJoiner dbHeader) {
+		StringJoiner join = new StringJoiner(TAB);
+
+		join = getBEDHeaderStart(join);
+
+		for (int i = 3; i < 7; i++) {
+			join.add(VCF_FIELD[i]);
+		}
+
+		for (String key: vcfParser.getInfoKeys()) {  //add info fields
+			join.add(key);
+		}
+
+		if(format.getHeaderPartSize() > 8)  //add genotypes
+			for (int i = 9; i <= format.getHeaderPartSize(); i++) {
+				join.add(format.getColumnName(i));
+			}
+
+		join.merge(dbHeader);
+		return join.toString();
+	}
+
+
+	@Override
+	public String toVCFRecord(final LocFeature query, final StringJoiner dbjoiner) {
+
+		String[] parts = query.parts;
+
+		if(dbjoiner != null && dbjoiner.length() > 0) {
+			parts[INFO_COL - 1] += INFO_FIELD_SEPARATOR + dbjoiner.toString();
+		}
+
+		return StringUtil.join(TAB, parts);
+	}
+
+	@Override
+	public String toBEDRecord(final LocFeature query, final StringJoiner dbjoiner) {
+		StringJoiner join = new StringJoiner(TAB);
+
+		String[] parts = query.parts;
+		join = getBEDDataStart(join, query);
+
+		for (int i = 3; i < 7; i++) {
+			join.add(parts[i]);
+		}
+
+		VariantContext ctx = query.variantContext;
+		if(ctx == null) ctx = vcfParser.getCodec().decode(query.origStr);
+
+		Object val;
+		for (String key: vcfParser.getInfoKeys()) {  //add info fields
+			join.add(ctx.getAttributeAsString(key, NULLVALUE));
+		}
+
+		if(format.getHeaderPartSize() > 8)  //add genotypes
+			for (int i = 8; i < format.getHeaderPartSize(); i++) {
+				join.add(parts[i]);
+			}
+
+		if(dbjoiner != null && dbjoiner.length() > 0) join.merge(dbjoiner);
+		return join.toString();
+	}
+
+	@Override
+	public VCFHeader getVCFHeader() {
 		return vcfParser.getVcfHeader();
 	}
 }

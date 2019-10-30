@@ -27,7 +27,7 @@ public class LocFilterIteratorTest {
         List<LineFilter> lineFilters = new ArrayList<>();
         lineFilters.add(new VCFHeaderLineFilter());
 
-        LocFilterIterator iterator = new LocFilterIterator(new NoFilterIterator(new GZIPReader(path)), lineFilters, new VCFLocCodec());
+        LocFilterIterator iterator = new LocFilterIterator(new NoFilterIterator(new GZIPReader(path)), lineFilters, new VCFLocCodec(false));
 
         int i = 0;
         while(iterator.hasNext()) {
@@ -54,7 +54,7 @@ public class LocFilterIteratorTest {
         List<LineFilter> lineFilters = new ArrayList<>();
         lineFilters.add(new VCFHeaderLineFilter());
 
-        LocFilterIterator iterator = new LocFilterIterator(new NoFilterIterator(new LongLineReader(path)), lineFilters, new VCFLocCodec());
+        LocFilterIterator iterator = new LocFilterIterator(new NoFilterIterator(new LongLineReader(path)), lineFilters, new VCFLocCodec(false));
 
         int i = 0;
         while(iterator.hasNext()) {
@@ -69,6 +69,5 @@ public class LocFilterIteratorTest {
         long t2 = System.currentTimeMillis();
         logger.info(String.format("\n\nDone! Time: %d total: %d\n", (t2 - t1), i));
     }
-
 
 }

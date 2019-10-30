@@ -8,6 +8,7 @@ import org.mulinlab.varnote.utils.node.LocFeature;
 
 public interface Query {
 	public void doQuery(LocFeature node) throws IOException;
-	public Map<String, List<String>> getResults();
+	public Map<String, String[]> getResults();
+	public Map<String, LocFeature[]> getResultFeatures();
 	public long getResultCount();
 }

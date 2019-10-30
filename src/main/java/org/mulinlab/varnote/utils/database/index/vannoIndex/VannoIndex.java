@@ -10,9 +10,9 @@ import java.util.List;
 
 public class VannoIndex extends Index{
 	protected String commentIndicator;
-	protected List<String> headerColList;
+	protected String[] headerParts;
 	protected int version;
-	
+
 	public VannoIndex(final BlockCompressedInputStream is, final int version) {
 		super(is);
 		this.version = version;
@@ -38,13 +38,9 @@ public class VannoIndex extends Index{
 		
 	}
 
-	public List<String> getHeaderColList() {
-		return headerColList;
-	}
-
 	@Override
-	public List<String> getColumnNames() {
-		return headerColList;
+	public String[] getColumnNames() {
+		return headerParts;
 	}
 
 	public int getVersion() {

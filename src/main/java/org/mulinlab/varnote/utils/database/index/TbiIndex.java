@@ -6,10 +6,8 @@ import htsjdk.tribble.util.TabixUtils.TPair64;
 import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.utils.format.Format;
 import org.mulinlab.varnote.exceptions.InvalidArgumentException;
-
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 
 public final class TbiIndex extends Index{
 	
@@ -109,7 +107,7 @@ public final class TbiIndex extends Index{
 	}
 
 	@Override
-	public List<String> getColumnNames() {
+	public String[] getColumnNames() {
 		return null;
 	}
 }

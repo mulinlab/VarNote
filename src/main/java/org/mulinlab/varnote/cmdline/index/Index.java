@@ -18,7 +18,7 @@ import org.mulinlab.varnote.utils.format.Format;
         programGroup = IndexProgramGroup.class)
 
 public final class Index extends IndexProgram {
-    static final String USAGE_SUMMARY = "Generates VarNote index files(\".vanno\" and \".vanno.vi\") for the compressed database(or annotation) file. \n ";
+    static final String USAGE_SUMMARY = "Generates VarNote index files(\".vanno\" and \".vanno.vi\") for the compressed database(or annotation) file.";
     static final String USAGE_DETAILS = "This tool creates two index files (\".vanno\" and \".vanno.vi\") for the compressed database(or annotation) file " +
             "(The original file is VCF, BED or TAB-delimited format, then compressed by \"tabix bgzip\" function) " +
             ", like the index on a database. \nNote that the input file must be sorted in coordinate order.\n\n" +

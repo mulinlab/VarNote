@@ -157,5 +157,5 @@ public abstract class Index {
 		return is;
 	}
 
-	public abstract List<String> getColumnNames();
+	public abstract String[] getColumnNames();
 }

@@ -15,6 +15,7 @@ public abstract class HeaderLineFilter implements LineFilter {
         if(isReadHeader) {
             return false;
         } else if(isMetaLine(line) || line.trim().equals("")) {
+//            System.out.println("skip line " + line);
 //            System.out.println("meta line" + line);
             return true;
         } else if(isHeaderLine(line)) {

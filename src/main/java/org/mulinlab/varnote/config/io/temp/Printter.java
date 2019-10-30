@@ -28,6 +28,7 @@ public abstract class Printter {
     }
 
     public void printComments(List<String> comments) throws IOException {
+        if(comments != null)
         for (String comment: comments) {
             finalOutputStream.writeBytes(comment + "\n");
         }

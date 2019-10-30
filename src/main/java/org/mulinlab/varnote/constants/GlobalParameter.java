@@ -46,6 +46,7 @@ public final class GlobalParameter {
 	public static final String INFO_FIELD_SEPARATOR = ";";
 	public static final String VCF_INFO_EQUAL = "=";
 	public static final String COMMA = ",";
+	public static final int INFO_COL = 8;
 
 
 	//index
@@ -61,13 +62,11 @@ public final class GlobalParameter {
 	public final static IntersectType DEFAULT_INTERSECT = IntersectType.INTERSECT;
 	public final static int DEFAULT_THREAD = 1;
 	public static String OVERLAP_RESULT_SUFFIX = ".overlap";
-	public static String OVERLAP_RESULT_SUFFIX_GZ = ".overlap.gz";
 
 
 	//anno
 	public final static boolean DEFAULT_FORCE_OVERLAP = false;
 	public static String ANNO_RESULT_SUFFIX = ".anno";
-	public static String ANNO_RESULT_SUFFIX_GZ = ".anno.gz";
 	public static final String ANNO_CONFIG_SUFFIX = ".annoc";
 
 

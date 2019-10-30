@@ -7,7 +7,6 @@ import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.filters.iterator.NoFilterIterator;
 import org.mulinlab.varnote.utils.enumset.FileType;
 import org.mulinlab.varnote.utils.format.Format;
-import org.mulinlab.varnote.config.anno.ab.AbstractParser;
 import org.mulinlab.varnote.exceptions.InvalidArgumentException;
 
 
@@ -40,26 +39,27 @@ public final class BEDHeaderParser {
 		
         final List<String> headerList;
      
-        if(header != null) {
-        		format.setHeader(header);
-        		if(header.startsWith(GlobalParameter.VCF_HEADER_INDICATOR)) {
-        			header = header.substring(GlobalParameter.VCF_HEADER_INDICATOR.length());
-        		}
-        		headerList = parserHeaderComma(header);
-        } else {
-//        		format.setHeader(false);
-        		headerList = parserHeader(dataLine);
-    			for (int i = 0; i < headerList.size(); i++) {
-    				if(format.getColOriginalField(i+1) != null) {
-    					headerList.set(i, format.getColOriginalField(i+1));
-    				} else {
-    					headerList.set(i, AbstractParser.COL + (i+1));
-    				}
-    			}
-        }
+//        if(header != null) {
+//        		format.setHeader(header);
+//        		if(header.startsWith(GlobalParameter.VCF_HEADER_INDICATOR)) {
+//        			header = header.substring(GlobalParameter.VCF_HEADER_INDICATOR.length());
+//        		}
+//        		headerList = parserHeaderComma(header);
+//        } else {
+////        		format.setHeader(false);
+//        		headerList = parserHeader(dataLine);
+//    			for (int i = 0; i < headerList.size(); i++) {
+//    				if(format.getColOriginalField(i+1) != null) {
+//    					headerList.set(i, format.getColOriginalField(i+1));
+//    				} else {
+//    					headerList.set(i, AbstractParser.COL + (i+1));
+//    				}
+//    			}
+//        }
 
-		if (headerList.size() < 2) throw new InvalidArgumentException("there are not enough columns present in header of file: " + path);
-		return headerList;
+//		if (headerList.size() < 2) throw new InvalidArgumentException("there are not enough columns present in header of file: " + path);
+//		return headerList;
+		return null;
 	}
 
 	public static List<String> parserHeader(final String header) {

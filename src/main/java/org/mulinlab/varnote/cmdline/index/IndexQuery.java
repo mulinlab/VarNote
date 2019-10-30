@@ -2,6 +2,7 @@ package org.mulinlab.varnote.cmdline.index;
 
 
 import org.mulinlab.varnote.cmdline.abstractclass.CMDProgram;
+import org.mulinlab.varnote.cmdline.abstractclass.RunProgram;
 import org.mulinlab.varnote.cmdline.collection.IndexArgumentCollection;
 import org.mulinlab.varnote.cmdline.programgroups.IndexProgramGroup;
 import org.mulinlab.varnote.config.index.IndexWriteConfig;
@@ -19,17 +20,17 @@ import java.io.File;
         oneLineSummary = IndexQuery.USAGE_SUMMARY,
         programGroup = IndexProgramGroup.class)
 
-public final class IndexQuery extends CMDProgram {
-    static final String USAGE_SUMMARY = "Query header, meta or sequence names stored in the VarNote index files (\".vanno.vi\"). \n ";
+public final class IndexQuery extends RunProgram {
+    static final String USAGE_SUMMARY = "Query header, meta or sequence names stored in the VarNote index files (\".vanno.vi\").";
     static final String USAGE_DETAILS =
             "\nUsage example:" +
             "\n" +
-            "java -jar " + GlobalParameter.PRO_NAME + ".jar IndexMeta -" +  Arguments.INDEX_INPUT_SHORT + " /path/test.gz -"
+            "java -jar " + GlobalParameter.PRO_NAME + ".jar IndexMeta -" +  Arguments.INPUT_SHORT + " /path/test.gz -"
                     + Arguments.INDEX_PRINT_HEADER_SHORT + " true -" + Arguments.INDEX_PRINT_META_SHORT + " true " + Arguments.INDEX_LITS_CHROM_SHORT + " true" +
             "\n\n" ;
 
     @Argument(
-            fullName = Arguments.INDEX_INPUT_LONG, shortName = Arguments.INDEX_INPUT_SHORT,
+            fullName = Arguments.INPUT_LONG, shortName = Arguments.INPUT_SHORT,
             doc = "The indexed database(or annotation) file, indexed by VarNote."
     )
     public File vannoFile = null;

@@ -3,15 +3,18 @@ package org.mulinlab.varnote.filter;
 import htsjdk.variant.vcf.VCFCodec;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
+import org.mulinlab.varnote.config.param.FilterParam;
 import org.mulinlab.varnote.filters.iterator.VCFFilterIterator;
-import org.mulinlab.varnote.filters.query.LocFeatureFilter;
-import org.mulinlab.varnote.filters.query.VCFContextFilter;
+import org.mulinlab.varnote.filters.query.InfoFilter;
+import org.mulinlab.varnote.filters.query.VariantFilter;
 import org.mulinlab.varnote.filters.query.line.LineFilter;
 import org.mulinlab.varnote.filters.query.line.VCFHeaderLineFilter;
+import org.mulinlab.varnote.operations.decode.VCFLocCodec;
 import org.mulinlab.varnote.operations.readers.itf.LongLineReader;
 import org.mulinlab.varnote.filters.iterator.NoFilterIterator;
-import org.mulinlab.varnote.utils.node.VCFFeature;
 import org.mulinlab.varnote.utils.LoggingUtils;
+import org.mulinlab.varnote.utils.format.Format;
+import org.mulinlab.varnote.utils.node.LocFeature;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,17 +31,18 @@ public class VCFFilterIteratorTest {
         List<LineFilter> lineFilters = new ArrayList<>();
         lineFilters.add(new VCFHeaderLineFilter());
 
-        List<LocFeatureFilter> locFilters = new ArrayList<>();
-        locFilters.add(new VCFContextFilter());
+        FilterParam filterParam = new FilterParam();
+        filterParam.addVariantFilters(new InfoFilter("AF", "AF < 0.001"));
 
         VCFCodec codec = new VCFCodec();
         codec.readActualHeader(new NoFilterIterator(new LongLineReader(path)));
 
-        VCFFilterIterator iterator = new VCFFilterIterator(new NoFilterIterator(new LongLineReader(path)), lineFilters, locFilters, codec);
+        VCFFilterIterator iterator = new VCFFilterIterator(new NoFilterIterator(new LongLineReader(path)), lineFilters, filterParam,
+                new VCFLocCodec(Format.VCF, true, codec));
 
         int i = 0;
         while(iterator.hasNext()) {
-            VCFFeature feature = (VCFFeature)iterator.next();
+            LocFeature feature = iterator.next();
             if(feature != null) {
                 i++;
             }

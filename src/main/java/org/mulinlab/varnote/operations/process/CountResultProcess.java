@@ -38,5 +38,6 @@ public final class CountResultProcess implements ProcessResult{
 
 	@Override
 	public void initResult() {
+		count = 0;
 	}
 }

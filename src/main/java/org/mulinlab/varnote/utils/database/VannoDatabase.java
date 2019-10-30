@@ -7,7 +7,6 @@ import org.mulinlab.varnote.utils.VannoUtils;
 import org.mulinlab.varnote.utils.enumset.IndexType;
 
 public final class VannoDatabase extends Database{
-	private VannoIndex idx;
 	private String vannoFile;
 	
 	public VannoDatabase(final DBParam config) {
@@ -23,7 +22,11 @@ public final class VannoDatabase extends Database{
 		if(VannoUtils.isExist(this.dbIndexPath) && VannoUtils.isExist(this.vannoFile))  return true;
 		else return false;	
 	}
-	
+
+	public VannoDatabase clone() {
+		return (VannoDatabase)setParam(new VannoDatabase(this.config));
+	}
+
 	@Override
 	protected void checkIndexFile() {
 		if(!VannoUtils.isExist(this.vannoFile)) {
@@ -37,10 +40,6 @@ public final class VannoDatabase extends Database{
 	@Override
 	protected String indexExtension() {
 		return IndexType.VARNOTE.getExtIndex();
-	}
-
-	public VannoIndex getIdx() {
-		return idx;
 	}
 
 	public String getVannoFile() {

@@ -23,7 +23,7 @@ public class TABLocCodecTest {
 
         format.setZeroBased();
 
-        TABLocCodec decode = new TABLocCodec(format);
+        TABLocCodec decode = new TABLocCodec(format, false);
         LocFeature feature = decode.decode("1	10177	.	A	A	22041.2");
         Assert.assertEquals(feature.chr, "1");
         Assert.assertEquals(feature.beg, 10177);
@@ -41,7 +41,7 @@ public class TABLocCodecTest {
 
         format.endPositionColumn = 3;
         format.setZeroBased();
-        decode = new TABLocCodec(format);
+        decode = new TABLocCodec(format, false);
 
         feature = decode.decode("1	10177	10178	A	ACC");
         Assert.assertEquals(feature.beg, 10177);
@@ -62,7 +62,7 @@ public class TABLocCodecTest {
         format.altPositionColumn = 5;
 
 
-        TABLocCodec decode = new TABLocCodec(format);
+        TABLocCodec decode = new TABLocCodec(format,false);
         LocFeature feature = decode.decode("1	10177	.	A	ACC");
         Assert.assertEquals(feature.chr, "1");
         Assert.assertEquals(feature.beg, 10176);
@@ -74,7 +74,7 @@ public class TABLocCodecTest {
 
 
         format.endPositionColumn = 3;
-        decode = new TABLocCodec(format);
+        decode = new TABLocCodec(format, false);
 
         feature = decode.decode("1	10177	10180	A	ACC");
         Assert.assertEquals(feature.beg, 10176);

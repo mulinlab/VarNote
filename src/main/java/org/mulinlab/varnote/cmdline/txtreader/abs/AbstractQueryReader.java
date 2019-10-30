@@ -74,7 +74,7 @@ public abstract class AbstractQueryReader<T> implements RunReaderInterface<T> {
 
 	@Override
 	public boolean filterLine(String line) {
-		if(line.startsWith(COMMENT_LINE) && line.equals("")) {
+		if(line.startsWith(COMMENT_LINE) || line.trim().equals("")) {
 			return true;
 		} else {
 			return false;

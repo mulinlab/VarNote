@@ -3,7 +3,6 @@ package org.mulinlab.varnote.filters.iterator;
 
 import org.mulinlab.varnote.filters.query.line.LineFilter;
 import org.mulinlab.varnote.utils.node.LocFeature;
-
 import java.util.Iterator;
 import java.util.List;
 

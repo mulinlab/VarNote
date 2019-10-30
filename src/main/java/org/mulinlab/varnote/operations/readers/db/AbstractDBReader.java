@@ -148,8 +148,9 @@ public abstract class AbstractDBReader {
     };
     
     public List<String> getResults() {
-    		return stack.getResultProcessor().getResult();
+    	return stack.getResultProcessor().getResult();
     }
+
 	public Database getDb() {
 		return db;
 	}

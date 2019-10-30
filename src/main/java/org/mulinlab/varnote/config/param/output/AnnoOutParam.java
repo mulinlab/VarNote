@@ -10,9 +10,6 @@ import java.text.Normalizer;
 
 public final class AnnoOutParam extends OutParam {
 
-    private static String ANNO_RESULT_SUFFIX = GlobalParameter.ANNO_RESULT_SUFFIX;
-    private final static String ANNO_RESULT_SUFFIX_GZ = GlobalParameter.ANNO_RESULT_SUFFIX_GZ;
-
     private AnnoOutFormat annoOutFormat ;
 
 
@@ -29,18 +26,6 @@ public final class AnnoOutParam extends OutParam {
     public void init() {
 
     }
-
-    @Override
-    public void setDefalutOutPath(final String queryPath) {
-        if(outputPath == null) {
-            if(isGzip) {
-                ANNO_RESULT_SUFFIX = ANNO_RESULT_SUFFIX_GZ;
-            }
-            this.outputPath = queryPath + ANNO_RESULT_SUFFIX ;
-        }
-//        log.printKVKCYNSystem("IntersetOutput path is not defined, redirect output folder to", outputFolder);
-    }
-
 
 
     public AnnoOutFormat getAnnoOutFormat() {

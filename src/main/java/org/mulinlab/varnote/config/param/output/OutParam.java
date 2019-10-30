@@ -1,18 +1,17 @@
 package org.mulinlab.varnote.config.param.output;
 
-import htsjdk.samtools.util.IOUtil;
 import org.mulinlab.varnote.config.param.Param;
 import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.utils.VannoUtils;
 import org.mulinlab.varnote.utils.enumset.OutMode;
-import org.mulinlab.varnote.utils.format.Format;
-
 import java.io.File;
 
-public abstract class OutParam extends Param {
+public class OutParam extends Param {
 
     protected String outputName;
     protected String outputPath;
+    protected String outFileSuffix = GlobalParameter.OVERLAP_RESULT_SUFFIX;
+
     protected boolean loj = GlobalParameter.DEFAULT_LOJ;
     protected boolean isGzip = GlobalParameter.DEFAULT_IS_GZIP;
     protected OutMode outputMode = GlobalParameter.DEFALT_OUT_MODE;
@@ -33,7 +32,15 @@ public abstract class OutParam extends Param {
         logger.info(String.format("Output Mode: %s", outputMode));
     }
 
-    public abstract void setDefalutOutPath(final String queryPath);
+    public void setDefalutOutPath(final String queryPath) {
+        if(outputPath == null) {
+            if(isGzip) {
+                setOutputPath(queryPath + outFileSuffix + ".gz");
+            } else {
+                setOutputPath(queryPath + outFileSuffix);
+            }
+        }
+    }
 
     public boolean isLoj() {
         return loj;
@@ -52,6 +59,10 @@ public abstract class OutParam extends Param {
     }
 
     public String getOutputPath() {
+        if(isGzip && VannoUtils.hasExtension(VannoUtils.FileExt.GZ, outputPath)) {
+            outputPath = outputPath + ".gz";
+            outputName = outputName + ".gz";
+        }
         return outputPath;
     }
 
@@ -78,5 +89,14 @@ public abstract class OutParam extends Param {
 
     public void setOutputMode(int outMode) {
         this.outputMode = VannoUtils.checkOutMode(outMode);
+    }
+
+    public void setOutFileSuffix(String outFileSuffix) {
+        this.outFileSuffix = outFileSuffix;
+    }
+
+    @Override
+    public void checkParam() {
+
     }
 }

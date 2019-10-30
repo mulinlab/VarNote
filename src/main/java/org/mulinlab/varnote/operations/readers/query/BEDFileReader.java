@@ -1,6 +1,5 @@
 package org.mulinlab.varnote.operations.readers.query;
 
-import htsjdk.tribble.bed.BEDCodec;
 import org.mulinlab.varnote.filters.iterator.LocFilterIterator;
 import org.mulinlab.varnote.filters.iterator.NoFilterIterator;
 import org.mulinlab.varnote.filters.query.line.BEDHeaderLineFilter;
@@ -28,12 +27,12 @@ public final class BEDFileReader extends AbstractFileReader {
         super(path, fileType, format);
     }
 
-    public void defaultCodec() {
-        if (codec == null) {
-            System.out.println("create codec");
-            codec = new BEDCodec(BEDCodec.StartOffset.ZERO);
-        }
-    }
+//    public void defaultCodec() {
+//        if (codec == null) {
+//            System.out.println("create codec");
+//            codec = new BEDCodec(BEDCodec.StartOffset.ZERO);
+//        }
+//    }
 
     public void checkFormat() {
     }
@@ -44,15 +43,9 @@ public final class BEDFileReader extends AbstractFileReader {
     }
 
     @Override
-    public Object getHeader() {
-        return null;
-    }
-
-
-    @Override
     public LineFilterIterator getFilterIterator() {
         if(iterator == null) {
-            iterator = new LocFilterIterator(new NoFilterIterator(reader), lineFilters, new BEDLocCodec(format));
+            iterator = new LocFilterIterator(new NoFilterIterator(reader), lineFilters, new BEDLocCodec(format, decodeFull));
         }
         return iterator;
     }

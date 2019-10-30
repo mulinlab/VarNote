@@ -4,8 +4,8 @@ import org.mulinlab.varnote.utils.format.Format;
 
 public final class TABLocCodec extends LocCodec {
 
-    public TABLocCodec(final Format format) {
-        super(format, format.getHeaderPart() == null ? -1 : format.getHeaderPart().length);
+    public TABLocCodec(final Format format, final boolean isFull) {
+        super(format, format.getHeaderPart() == null ? -1 : format.getHeaderPartSize(), isFull);
     }
 
     @Override
@@ -24,5 +24,10 @@ public final class TABLocCodec extends LocCodec {
         if(format.isPos() && format.refPositionColumn > 1) {
             intv.end = intv.beg + parts[format.refPositionColumn - 1].length();
         }
+    }
+
+    @Override
+    public TABLocCodec clone() {
+        return new TABLocCodec(this.format, this.isFull);
     }
 }

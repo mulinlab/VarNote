@@ -13,7 +13,7 @@ public class VCFLocCodecTest {
 
     @Test
     public void test() throws Exception {
-        VCFLocCodec decode = new VCFLocCodec();
+        VCFLocCodec decode = new VCFLocCodec(false);
         LocFeature feature = decode.decode("1	10177	.	A	A	22041.2");
         Assert.assertEquals(feature.chr, "1");
         Assert.assertEquals(feature.beg, 10176);

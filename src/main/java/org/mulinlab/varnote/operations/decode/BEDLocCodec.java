@@ -4,12 +4,12 @@ import org.mulinlab.varnote.utils.format.Format;
 
 public final class BEDLocCodec extends LocCodec {
 
-    public BEDLocCodec() {
-        this(Format.BED);
+    public BEDLocCodec(final boolean isFull) {
+        this(Format.BED, isFull);
     }
 
-    public BEDLocCodec(final Format format) {
-        super(format, format.getHeaderPart() == null ? -1 : format.getHeaderPart().length);
+    public BEDLocCodec(final Format format, final boolean isFull) {
+        super(format, format.getHeaderPart() == null ? -1 : format.getHeaderPartSize(), isFull);
     }
 
     @Override
@@ -24,5 +24,10 @@ public final class BEDLocCodec extends LocCodec {
 
     @Override
     public void processOther() {
+    }
+
+    @Override
+    public BEDLocCodec clone() {
+        return new BEDLocCodec(this.format, this.isFull);
     }
 }

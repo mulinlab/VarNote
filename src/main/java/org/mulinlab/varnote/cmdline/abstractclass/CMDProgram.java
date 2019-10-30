@@ -1,36 +1,24 @@
 package org.mulinlab.varnote.cmdline.abstractclass;
 
 
-import htsjdk.samtools.util.Log;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.broadinstitute.barclay.argparser.*;
-import org.mulinlab.varnote.cmdline.constant.Arguments;
-import org.mulinlab.varnote.constants.GlobalParameter;
-import org.mulinlab.varnote.utils.LoggingUtils;
-
 import java.util.Collections;
 import java.util.HashSet;
 
 
 public abstract class CMDProgram {
-    protected final Logger logger = LoggingUtils.logger;
+//    protected final Logger logger = LoggingUtils.logger;
 
     private CommandLineParser commandLineParser;
     private String commandLine;
 
-    protected void onStartup() {}
     protected abstract int doWork();
-    protected void onShutdown() {}
-
-    @Argument(fullName = Arguments.LOG_LONG, doc = "Whether to print log.", optional = true)
-    protected Boolean islog = GlobalParameter.DEFAULT_LOG;
+    protected abstract void onShutdown();
+    protected abstract void onStartup();
 
     public final int runTool() {
         try {
-//            logger.info("Initializing engine");
             onStartup();
-//            logger.info("Done initializing engine");
             return doWork();
         } finally {
             onShutdown();
@@ -42,9 +30,6 @@ public abstract class CMDProgram {
             return 1;
         }
         try {
-            if(!islog) LoggingUtils.setLoggingLevel(Log.LogLevel.ERROR);
-            else LoggingUtils.setLoggingLevel(Log.LogLevel.INFO);
-
             return runTool();
         } finally {
 

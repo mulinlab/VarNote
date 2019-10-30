@@ -22,6 +22,10 @@ public final class TbiDatabase extends Database{
 		else return false;	
 	}
 
+	public TbiDatabase clone() {
+		return (TbiDatabase)setParam(new TbiDatabase(this.config));
+	}
+
 	@Override
 	protected String indexExtension() {
 		return IndexType.TBI.getExtIndex();

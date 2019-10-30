@@ -3,13 +3,20 @@ package org.mulinlab.varnote.utils;
 import htsjdk.samtools.seekablestream.SeekableStream;
 import htsjdk.samtools.util.BlockCompressedInputStream;
 import org.mulinlab.varnote.constants.GlobalParameter;
-import org.mulinlab.varnote.filters.query.LocFeatureFilter;
-import org.mulinlab.varnote.filters.query.VCFContextFilter;
+import org.mulinlab.varnote.operations.decode.BEDLocCodec;
+import org.mulinlab.varnote.operations.decode.LocCodec;
+import org.mulinlab.varnote.operations.decode.TABLocCodec;
+import org.mulinlab.varnote.operations.decode.VCFLocCodec;
+import org.mulinlab.varnote.operations.query.AbstractQuery;
+import org.mulinlab.varnote.operations.query.SweepQuery;
+import org.mulinlab.varnote.operations.query.TabixQuery;
+import org.mulinlab.varnote.operations.query.VannoQuery;
 import org.mulinlab.varnote.operations.readers.itf.QueryReaderItf;
 import org.mulinlab.varnote.operations.readers.query.AbstractFileReader;
 import org.mulinlab.varnote.operations.readers.query.BEDFileReader;
 import org.mulinlab.varnote.operations.readers.query.TABFileReader;
 import org.mulinlab.varnote.operations.readers.query.VCFFileReader;
+import org.mulinlab.varnote.utils.database.Database;
 import org.mulinlab.varnote.utils.enumset.*;
 import htsjdk.samtools.seekablestream.SeekableStreamFactory;
 import htsjdk.samtools.util.BlockCompressedStreamConstants;
@@ -35,7 +42,8 @@ public final class VannoUtils {
 			" or " + IntersectType.EXACT.getVal() + "(" + IntersectType.EXACT.getName() + ") or " + IntersectType.FULLCLOASE.getVal() + "(" + IntersectType.FULLCLOASE.getName() + ")" +
 			". default is:" +  IntersectType.INTERSECT.getName() + ".";
 
-	 
+	public final static Map<String, ChromosomeType> chrToTypeMap = new HashMap<>();
+
 	public enum FileExt {
 		GZ(Arrays.asList(".gz", ".gzip", ".bgz", ".bgzf")),
 		VCF(Arrays.asList(".vcf", ".vcf.gz", ".vcf.bgz")),
@@ -208,19 +216,18 @@ public final class VannoUtils {
 	public static String trimAndLC(String str) {
 		return str.trim().toLowerCase();
 	}
-	
+
 	public static Format parseIndexFileFormat(String str) {
 		str = trimAndLC(str);
-//        if(str.equalsIgnoreCase(ENUMSet.FormatType.BED.getName())) {
-//        		return Format.newBED();
-//        } else if(str.equalsIgnoreCase(ENUMSet.FormatType.VCF.getName())) {
-//        		return Format.newVCF();
-//        } else if(str.equalsIgnoreCase(ENUMSet.FormatType.TAB.getName())) {
-//        		return Format.newTAB();
-//        } else {
-//        		throw new InvalidArgumentException("We support bed, vcf or tab format. but we get: " + str);
-		return null;
-//        }
+        if(str.equalsIgnoreCase("bed")) {
+			return Format.BED;
+        } else if(str.equalsIgnoreCase("vcf")) {
+			return Format.VCF;
+        } else if(str.equalsIgnoreCase("tab")) {
+			return Format.newTAB();
+        } else {
+			throw new InvalidArgumentException("We support bed, vcf or tab format. but we get: " + str);
+		}
 	}
 	
 	public static String replaceQuote(String str) {
@@ -312,7 +319,7 @@ public final class VannoUtils {
 	
 	public static void checkValidBGZ(final String path) {
 		if(VannoUtils.checkFileType(path) != FileType.BGZ) 
-			throw new InvalidArgumentException("Input file " + path + " is not in valid block compressed format(.gz, .bgz). ");
+			throw new InvalidArgumentException(String.format("Input file %s is not in valid block compressed format(.gz, .bgz). ", path));
 	}
 	
 	public static FileType checkFileType(final String path) {
@@ -415,7 +422,7 @@ public final class VannoUtils {
 		String[] parts = header.split(splitChar);
 
 		if (parts.length < 2)
-			throw new InvalidArgumentException("there are not enough columns present in the header line: " + header);
+			throw new InvalidArgumentException(String.format("there are not enough columns present in the header line: %s", header));
 
 		return parts;
 	}
@@ -426,7 +433,7 @@ public final class VannoUtils {
 			strings = header.split(GlobalParameter.COMMA);
 
 			if (strings.length < 2)
-				throw new InvalidArgumentException("there are not enough columns present in the header line: " + header);
+				throw new InvalidArgumentException(String.format("there are not enough columns present in the header line: %s", header));
 		}
 		return strings;
 	}
@@ -457,5 +464,51 @@ public final class VannoUtils {
 		} else {
 			return new TABFileReader(itf, format);
 		}
+	}
+
+	public static LocCodec getDefaultLocCodec(final Format format, final boolean isFull) {
+		LocCodec locCodec;
+		if(format.type == FormatType.VCF) {
+			locCodec = new VCFLocCodec(format, isFull);
+		} else if(format.type == FormatType.BED) {
+			locCodec = new BEDLocCodec(format, isFull);
+		} else {
+			locCodec = new TABLocCodec(format, isFull);
+		}
+		return locCodec;
+	}
+
+	public static AbstractQuery getQuery(final Mode mode, final List<Database> dbs, final boolean isCount) {
+		if(mode == Mode.TABIX) {
+			return new TabixQuery(dbs);
+		} else if(mode == Mode.SWEEP) {
+			return new SweepQuery(dbs);
+		} else {
+			return new VannoQuery(dbs, isCount);
+		}
+	}
+
+	public static ChromosomeType toChromosomeType(final String chr) {
+		if(chrToTypeMap.get(chr) != null) chrToTypeMap.get(chr);
+
+		String uppercase = chr.toUpperCase().replaceFirst("CHR", "");
+		if(uppercase.equals("X")) {
+			chrToTypeMap.put(chr, ChromosomeType.X_CHROMOSOMAL);
+		} else if(uppercase.equals("Y")) {
+			chrToTypeMap.put(chr, ChromosomeType.Y_CHROMOSOMAL);
+		} else {
+			try {
+				int chrno = Integer.parseInt(uppercase);
+				if(chrno >= 1 && chrno <= 22) {
+					chrToTypeMap.put(chr, ChromosomeType.AUTOSOMAL);
+				} else {
+					throw new InvalidArgumentException(String.format("Unknown chromosome: %s", chr));
+				}
+			} catch (NumberFormatException e) {
+				chrToTypeMap.put(chr, ChromosomeType.OTHER);
+			}
+		}
+
+		return chrToTypeMap.get(chr);
 	}
 }

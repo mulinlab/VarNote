@@ -30,9 +30,9 @@ public final class VannoQuery extends AbstractQuery {
 
 		for (Database dbf : dbs) {
 			if(dbf.getConfig().getIndexType() == IndexType.TBI) {
-				readers.add(new TbiMixReader(dbf, isCount));
+				readers.add(new TbiMixReader(dbf.clone(), isCount));
 			} else {
-				readers.add(new VannoMixReader(dbf, isCount));
+				readers.add(new VannoMixReader(dbf.clone(), isCount));
 			}
 		}
 	}

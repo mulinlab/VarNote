@@ -1,102 +1,110 @@
 package org.mulinlab.varnote.config.anno.query;
 
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.StringJoiner;
 import htsjdk.samtools.util.StringUtil;
 import htsjdk.variant.vcf.VCFCodec;
 import htsjdk.variant.vcf.VCFHeader;
-import org.mulinlab.varnote.config.anno.VCFParser;
-import org.mulinlab.varnote.config.anno.ab.AbstractQueryParser;
-import org.mulinlab.varnote.config.param.query.QueryFileParam;
 import org.mulinlab.varnote.filters.iterator.NoFilterIterator;
-import org.mulinlab.varnote.utils.node.RefNode;
 import org.mulinlab.varnote.constants.GlobalParameter;
+import org.mulinlab.varnote.operations.readers.query.AbstractFileReader;
+import org.mulinlab.varnote.utils.VannoUtils;
+import org.mulinlab.varnote.utils.format.Format;
+import org.mulinlab.varnote.utils.node.LocFeature;
 
 
 public final class QueryBEDParser extends AbstractQueryParser{
+
 	private String vcfHeaderPathForBED;
-	public QueryBEDParser(final QueryFileParam query, final String vcfHeaderPathForBED) {
-		super(query);
+    private HashMap<String, Integer> colMap;
+
+	public QueryBEDParser(final Format format, final String vcfHeaderPathForBED) {
+		super(format);
 		this.vcfHeaderPathForBED = vcfHeaderPathForBED;
+
+        colMap = new HashMap<>();
+        String[] parts = format.getHeaderPart();
+        for (int i = 0; i < parts.length; i++) {
+            colMap.put(parts[i].toUpperCase(), i+1);
+        }
 	}
-	
+
 	@Override
 	public String toVCFHeader() {
-		return VCFParser.VCF_HEADER_INDICATOR + VCFParser.VCF_FIELD ;
+		return VCF_HEADER_INDICATOR + StringUtil.join(TAB, VCF_FIELD) ;
 	}
 
-	@Override
-	public String toVCFRecord(final RefNode query, final List<String> extractDB) {
-		List<String> fieldList = basicCol(query, false, true);
-		
-		//get basic
-		for (int i = 2; i < requiredColForVCF.size() - 1; i++) {
-			if(requiredColForVCF.get(i) == -1) {
-				fieldList.add(".");
-			} else {
-				fieldList.add(query.getField(requiredColForVCF.get(i)));
-			}
-		}
-		
-		//get info 
-		List<String> infoList = new ArrayList<String>();
-		for (Integer col : otherColForVCF) {
-			infoList.add(format.getColOriginalField(col) + VCF_INFO_EQUAL + query.getField(col));
-		}
-		
-		if(extractDB.size() > 0) {
-			for (String s : extractDB) {
-				infoList.add(s);
-			}
-		}
-		
-		if(infoList.size() == 0) {
-			fieldList.add(NULLVALUE);
-		} else {
-			fieldList.add(StringUtil.join(VCFParser.INFO_FIELD_SEPARATOR, infoList));
-		}
-		
-		//combine
-		return StringUtil.join(TAB, fieldList);
-	}
+    @Override
+    public String toVCFRecord(final LocFeature query, final StringJoiner dbjoiner) {
+        StringJoiner joiner = new StringJoiner(TAB);
+        String[] parts = query.parts;
 
-	@Override
-	public String toBEDHeader(final String extractDBHeader) {
-		List<String> headerList = new ArrayList<String>();
-		for (Integer col : requiredColForBED) {
-			headerList.add(format.getColField(col));
-		}
-		for (Integer col : otherColForBED) headerList.add(format.getColOriginalField(col));
-		
-		if((extractDBHeader != null) && !extractDBHeader.trim().equals("")) headerList.add(extractDBHeader);
-		return StringUtil.join(TAB, headerList);
-	}
+        joiner.add(query.chr);
+        joiner.add(String.valueOf(query.beg + 1));
+        joiner.add(NULLVALUE);
+        joiner.add(query.ref);
+        joiner.add(query.alt);
+        joiner.add(NULLVALUE);
+        joiner.add(NULLVALUE);
+        joiner.add(getInfo(query, dbjoiner));
 
-	@Override
-	public String toBEDRecord(RefNode query, final List<String> extractDB) {
-		List<String> fieldList = basicCol(query, false, false);
-		for (Integer col : otherColForBED) fieldList.add(query.getField(col));
-		
-		if(extractDB.size() > 0) {
-			for (String s : extractDB) {
-				fieldList.add(s);
-			}
-		}
+        return joiner.toString();
+    }
 
-		return StringUtil.join(TAB, fieldList);
-	}
-	
+    @Override
+    public String toBEDHeader(final StringJoiner joiner) {
+        StringJoiner tj = new StringJoiner(TAB);
+        tj = getBEDHeaderStart(tj);
+
+        for (int i = 3; i < format.getHeaderPartSize(); i++) {
+            tj.add(format.getColumnName(i));
+        }
+        tj.merge(joiner);
+	    return tj.toString();
+    }
+
+    @Override
+    public String toBEDRecord(final LocFeature query, StringJoiner dbjoiner) {
+        StringJoiner joiner = new StringJoiner(TAB);
+        joiner = getBEDDataStart(joiner, query);
+
+        String[] parts = query.parts;
+        for (int i = 1; i <= parts.length; i++) {
+            if(i != format.sequenceColumn && i != format.startPositionColumn && i != format.endPositionColumn) {
+                joiner.add(parts[i - 1]);
+            }
+        }
+        if(dbjoiner != null && dbjoiner.length() > 0) joiner.merge(dbjoiner);
+        return joiner.toString();
+    }
+
+    private String getInfo(final LocFeature query, final StringJoiner dbjoiner) {
+        StringJoiner infojoiner = new StringJoiner(INFO_FIELD_SEPARATOR);
+        String[] parts = query.parts;
+
+        for (int i = 1; i <= parts.length; i++) {
+            if(i != format.sequenceColumn && i != format.startPositionColumn && i != format.endPositionColumn &&
+                    i != format.refPositionColumn && i != format.altPositionColumn) {
+                infojoiner.add(format.getColumnName(i) + VCF_INFO_EQUAL + parts[i - 1]);
+            }
+        }
+        if(dbjoiner != null && dbjoiner.length() > 0) infojoiner.merge(dbjoiner);
+        return infojoiner.toString();
+    }
+
+    private String getDefaultVal(final String val) {
+        return (val == null || val.equals("")) ? NULLVALUE : val;
+    }
 
 	@Override
 	public VCFHeader getVCFHeader() {
 		if(vcfHeaderPathForBED == null) {
-			System.out.println(GlobalParameter.KRED + "Note: Your output format is vcf, you should define --vcf-header-for-bed or -V for vcf header or we won't output header." + GlobalParameter.KNRM);
+            logger.info(String.format("%sNote: Your output format is vcf, you should define --vcf-header-for-bed or -V for vcf header or we won't output header.%s" ,GlobalParameter.KRED, GlobalParameter.KNRM));
 			return null;
 		} else {
-			NoFilterIterator reader = new NoFilterIterator(vcfHeaderPathForBED, query.getFileType());
-			VCFHeader header = (VCFHeader) (new VCFCodec()).readActualHeader(reader);
-			reader.close();
+			NoFilterIterator iterator = new NoFilterIterator(vcfHeaderPathForBED, VannoUtils.checkFileType(vcfHeaderPathForBED));
+			VCFHeader header = (VCFHeader) (new VCFCodec()).readActualHeader(iterator);
+            iterator.close();
 			return header;
 		}
 	}

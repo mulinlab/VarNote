@@ -16,10 +16,10 @@ import org.mulinlab.varnote.utils.format.Format;
 
 import java.io.File;
 
-public abstract class IndexProgram extends CMDProgram {
+public abstract class IndexProgram extends RunProgram {
 
     @Argument(
-            fullName = Arguments.INDEX_INPUT_LONG, shortName = Arguments.INDEX_INPUT_SHORT,
+            fullName = Arguments.INPUT_SHORT, shortName = Arguments.INPUT_LONG,
             doc = "Path of compressed database (or annotation file, \".gz\" format) to be indexed. The file must be position-sorted (first by sequence name and then by leftmost coordinate). \n\n" +
             "Possible Tags: {vcf, bed, tab} \n\n" +
             "Possible attributes for \"tab\" tag: {c, b, e, ref, alt, ci}\n" +

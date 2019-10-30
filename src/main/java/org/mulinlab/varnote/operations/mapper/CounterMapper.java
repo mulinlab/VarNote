@@ -9,13 +9,14 @@ import org.mulinlab.varnote.utils.node.LocFeature;
 import java.io.IOException;
 
 
-public final class CounterMapper<T> extends AbstractMapper {
+public final class CounterMapper extends AbstractMapper {
 
 	private Long count;
 
 	public CounterMapper(final CountRunConfig config, final int index) {
 		super(config, index);
 		queryEngine = new VannoQuery(config.getDatabses(), true);
+		count = 0l;
 	}
 
 	public AbstractFileReader getQueryForThread() {
@@ -24,11 +25,11 @@ public final class CounterMapper<T> extends AbstractMapper {
 
 	@Override
 	public void processResult(final LocFeature node) throws IOException {
-		this.count = queryEngine.getResultCount();
+		this.count += queryEngine.getResultCount();
 	}
 
 	@Override
-	public T getResult() {
-		return (T)this.count;
+	public Long getResult() {
+		return this.count;
 	}
 }

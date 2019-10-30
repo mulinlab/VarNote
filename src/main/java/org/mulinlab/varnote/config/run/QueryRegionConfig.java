@@ -3,7 +3,6 @@ package org.mulinlab.varnote.config.run;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import org.mulinlab.varnote.config.anno.ab.AbstractParser;
 import org.mulinlab.varnote.config.param.DBParam;
 import org.mulinlab.varnote.config.param.query.QueryRegionParam;
 import org.mulinlab.varnote.constants.GlobalParameter;
@@ -38,7 +37,6 @@ public final class QueryRegionConfig extends RunConfig {
 
 	@Override
 	protected void initOutput() {
-
 	}
 
 	@Override
@@ -48,17 +46,16 @@ public final class QueryRegionConfig extends RunConfig {
 
 	@Override
 	protected void initOther() {
-		super.initOther();
 	}
 
-	public void printRecord(final Map<String, List<String>> results) throws IOException {
-		List<String> list;
+	public void printRecord(final Map<String, String[]> results) throws IOException {
+		String[] list;
 		for (DBParam databaseConfig : dbParams) {
 			list = results.get(databaseConfig.getOutName());
-			if(list != null && list.size() > 0)
+			if(list != null && list.length > 0)
 				for (String str : list) {
 					if(isDisplayLabel()) {
-						System.out.println(databaseConfig.getOutName() + AbstractParser.TAB + str);
+						System.out.println(databaseConfig.getOutName() + TAB + str);
 					} else {
 						System.out.println(str);
 					}

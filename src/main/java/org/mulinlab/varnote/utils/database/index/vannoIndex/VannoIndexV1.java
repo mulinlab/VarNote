@@ -10,7 +10,7 @@ import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.utils.database.index.IndexFactory;
 import org.mulinlab.varnote.utils.format.Format;
 
-public class VannoIndexV1 extends VannoIndex{
+public final class VannoIndexV1 extends VannoIndex{
 	
 	public VannoIndexV1(final BlockCompressedInputStream is, final int version) {
 		super(is, version);
@@ -37,7 +37,7 @@ public class VannoIndexV1 extends VannoIndex{
 		
 		l = GlobalParameter.readInt(is);
 		if(l > 0 ) {
-			headerColList = new ArrayList<String>(l);
+			headerParts = new String[l];
 			readHeader();
 		}
 		
@@ -47,6 +47,7 @@ public class VannoIndexV1 extends VannoIndex{
 		int alt = GlobalParameter.readInt(is);
 		int info = GlobalParameter.readInt(is);
         this.format = new Format(mPreset, mSc, mBc, mEc, mSkip, commentIndicator, ref, alt, GlobalParameter.readBoolean(is));
+		this.format.setHeaderPart(headerParts, false);
 //        GlobalParameter.readInt(is); //type
 //        GlobalParameter.readInt(is);
         mSeq = new String[GlobalParameter.readInt(is)]; // # sequences
@@ -54,15 +55,15 @@ public class VannoIndexV1 extends VannoIndex{
 	
 	protected void readHeader() throws IOException {
 		byte[] buf = new byte[4];
-		int i, j, l = GlobalParameter.readInt(is);
+		int i, j, l = GlobalParameter.readInt(is), k=0;
 		buf = new byte[l];
 		is.read(buf);
 		for (i = j = 0; i < buf.length; ++i) {
 			if (buf[i] == 0) {
 				byte[] b = new byte[i - j];
 				System.arraycopy(buf, j, b, 0, b.length);
-				String col = new String(b);
-				headerColList.add(col);
+
+				headerParts[k++] = new String(b);
 				j = i + 1;
 			}
 		}
@@ -77,16 +78,5 @@ public class VannoIndexV1 extends VannoIndex{
 			minOffForChr.put(GlobalParameter.readInt(is), GlobalParameter.readLong(is, buf));
 		}
 	}
-	
-	public static void main(String[] args) {
-		VannoIndexV1 index = (VannoIndexV1)IndexFactory.readIndex("/Users/hdd/Desktop/vanno/vanno_help/AF.ANN.bgz.vanno.vi") ;
-		System.out.println(index.mSc);
-		System.out.println(index.mBc);
-		System.out.println(index.mEc);
-		System.out.println(index.commentIndicator);
-		Map<Integer, Long> map = index.getMinOffForChr();
-		for (Integer key : map.keySet()) {
-			System.out.println(key + ", " +  map.get(key));
-		}
-	}
+
 }

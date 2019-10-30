@@ -23,9 +23,9 @@ public final class SweepQuery extends AbstractQuery{
 
 		for (Database dbf : dbs) {
 			if(dbf.getConfig().getIndexType() == IndexType.TBI) {
-				readers.add(new TbiSweepReader(dbf));
+				readers.add(new TbiSweepReader(dbf.clone()));
 			} else {
-				readers.add(new VannoSweepReader(dbf));
+				readers.add(new VannoSweepReader(dbf.clone()));
 			}
 		}
 	}

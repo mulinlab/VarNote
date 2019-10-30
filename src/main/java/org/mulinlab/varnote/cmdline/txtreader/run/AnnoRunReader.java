@@ -1,33 +1,27 @@
 package org.mulinlab.varnote.cmdline.txtreader.run;
 
 import org.mulinlab.varnote.config.param.output.AnnoOutParam;
+import org.mulinlab.varnote.config.param.query.QueryFileParam;
 import org.mulinlab.varnote.config.run.AnnoRunConfig;
 
 
 public final class AnnoRunReader<T> extends FileQueryReader<T> {
 
-	public static final String OVERLAP_FILE = "overlap_file";
 	public static final String ANNO_CONFIG = "anno_config";
 	public static final String VCF_HEADER_PATH_FOR_BED = "vcf_header_for_bed";
 	public static final String FORCE_OVERLAP = "force_overlap";
 	public static final String ANNO_FORMAT = "out_format";
 
-
 	@Override
 	public T doEnd() {
+		super.doEnd();
 
-		AnnoRunConfig annoRunConfig = null;
+		queryFileParam = new QueryFileParam(valueHash.get(QUERY), format, true);
+
+		AnnoRunConfig annoRunConfig = new AnnoRunConfig(queryFileParam, dbParams);
+		annoRunConfig.setRunParam(runParam);
+
 		AnnoOutParam outParam = new AnnoOutParam();
-
-		if(valueHash.get(OVERLAP_FILE) != null) {
-			annoRunConfig = new AnnoRunConfig();
-			((AnnoRunConfig)annoRunConfig).setOverlapFile(valueHash.get(OVERLAP_FILE));
-		} else {
-			super.doEnd();
-			annoRunConfig = new AnnoRunConfig(queryFileParam, dbParams);
-			annoRunConfig.setRunParam(runParam);
-		}
-
 		outParam = (AnnoOutParam)setOutParam(outParam);
 		annoRunConfig.setOutParam(outParam);
 

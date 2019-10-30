@@ -1,33 +1,55 @@
 package org.mulinlab.varnote.filters.iterator;
 
-import htsjdk.variant.vcf.VCFCodec;
-import org.mulinlab.varnote.filters.query.LocFeatureFilter;
+import htsjdk.variant.variantcontext.Genotype;
+import org.mulinlab.varnote.config.param.FilterParam;
+import org.mulinlab.varnote.filters.query.gt.GenotypeFilter;
+import org.mulinlab.varnote.filters.query.VariantFilter;
 import org.mulinlab.varnote.filters.query.line.LineFilter;
-import org.mulinlab.varnote.utils.node.VCFFeature;
+import org.mulinlab.varnote.operations.decode.VCFLocCodec;
+import org.mulinlab.varnote.utils.node.LocFeature;
 import java.util.List;
 
 public final class VCFFilterIterator extends LineFilterIterator {
 
-    private final List<LocFeatureFilter> locFilters;
-    private final VCFCodec decode;
+    private final FilterParam filterParam;
+    private final VCFLocCodec decode;
 
-    public VCFFilterIterator(final NoFilterIterator iterator, List<LineFilter> filters, final List<LocFeatureFilter> locFilters,
-                             final VCFCodec decode) {
+    public VCFFilterIterator(final NoFilterIterator iterator, List<LineFilter> filters, final FilterParam filterParam, final VCFLocCodec decode) {
         super(iterator, filters);
-        this.locFilters = locFilters;
+        this.filterParam = filterParam;
         this.decode = decode;
     }
 
     @Override
-    public VCFFeature processLine(final String line) {
+    public LocFeature processLine(final String line) {
         super.processLine(line);
         if(!isFiltered) {
-            final VCFFeature ctx = new VCFFeature(decode.decode(line));
-            for (LocFeatureFilter locFeatureFilter: locFilters) {
-                if(locFeatureFilter.isFilterLine(ctx)) {
-                    return null;
+            final LocFeature ctx = decode.decode(line);
+
+            if(ctx.chr.equals("2") && ctx.beg == 219513555) {
+                System.out.println();
+            }
+
+            if(filterParam.getVariantFilters() != null) {
+                for (VariantFilter vaFilter: filterParam.getVariantFilters()) {
+                    if(vaFilter.isFilterLine(ctx)) {
+                        return null;
+                    }
                 }
             }
+
+            if(filterParam.getGenotypeFilters() != null) {
+                for (final Genotype gt : ctx.variantContext.getGenotypes()) {
+                    for (final GenotypeFilter filter : filterParam.getGenotypeFilters()) {
+                       if(filter.isFilterLine(ctx, gt)) {
+                           return null;
+                       }
+                    }
+                }
+            }
+
+            if(filterParam.getMiFilter() != null && filterParam.getMiFilter().isFilterLine(ctx)) return null;
+
             ctx.origStr = line;
             return ctx;
         } else {

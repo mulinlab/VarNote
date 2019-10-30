@@ -14,7 +14,7 @@ public class BEDLocCodecTest {
     @Test
     public void test() throws Exception {
 
-        BEDLocCodec decode = new BEDLocCodec();
+        BEDLocCodec decode = new BEDLocCodec(false);
 
         LocFeature feature = decode.decode("chr22	2000	6000	cloneB	900	-	2000    6000    0   2   433,399,0,3601");
         Assert.assertEquals(feature.chr, "chr22");

@@ -12,18 +12,17 @@ public class FileQueryReader<T> extends QueryReader<T> {
 
 	protected QueryFileParam queryFileParam;
 	protected RunParam runParam;
+	protected Format format;
 
 	@Override
 	public T doEnd() {
 		super.doEnd();
 
 		checkDB();
-		Format format = null;
 		if(valueHash.get(QUERY_FORMAT) != null) format =  VannoUtils.parseIndexFileFormat(valueHash.get(QUERY_FORMAT));
-		queryFileParam = new QueryFileParam(valueHash.get(QUERY), format);
+		else format = Format.defaultFormat(valueHash.get(QUERY), true);
 
-		format = queryFileParam.getQueryFormat();
-		queryFileParam.setQueryFormat(setformat(format));
+		format = setformat(format);
 
 		runParam = new RunParam();
 		if(valueHash.get(THREAD) != null) runParam.setThread(Integer.parseInt(valueHash.get(THREAD)));

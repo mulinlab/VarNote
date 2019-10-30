@@ -16,7 +16,6 @@ import org.mulinlab.varnote.utils.gz.MyEndianOutputStream;
 import htsjdk.samtools.util.BlockCompressedFilePointerUtil;
 import org.mulinlab.varnote.utils.format.Format;
 import org.mulinlab.varnote.utils.node.LocFeature;
-import org.mulinlab.varnote.utils.node.NodeFactory;
 import org.mulinlab.varnote.exceptions.InvalidArgumentException;
 import org.apache.logging.log4j.Logger;
 import java.io.ByteArrayOutputStream;
@@ -93,8 +92,7 @@ public final class IndexWriter {
 
 	public void writeIndexForBGZ(final AbstractFileReader reader) throws IOException {
 		reader.addLineFilters(new SkipLineFilter(formatSpec.numHeaderLinesToSkip));
-		reader.readHeader();
-		reader.checkFormat();
+		reader.readFormatFromHeader();
 
 		logger.info(String.format("Input format: %s", param.getFormat().logFormat()));
 		final LineFilterIterator iterator = reader.getFilterIterator();
@@ -288,11 +286,7 @@ public final class IndexWriter {
 		sequenceNames.add(sequenceName);
 		sequenceNamesSeen.add(sequenceName);
 	}
-    
-    public LocFeature decodeFeature(final String s, LocFeature node, ByteArrayOutputStream bufStream) {
-		return NodeFactory.createBasic(s, formatSpec, node, bufStream);
-	}
-    
+
     public final class BlockBean {
 		private long filePointer;
     		

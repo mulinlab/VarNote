@@ -12,25 +12,18 @@ import java.util.List;
 
 public class CountRunConfig extends RunConfig {
 
-	protected final Logger logger = LogManager.getLogger(this.getClass());
-
-	private final static String QUERY_START = GlobalParameter.QUERY_START;
-	protected boolean isCount = GlobalParameter.DEFAULT_IS_COUNT;
-
 	public CountRunConfig() {
 		super();
 	}
 
 	public CountRunConfig(final String queryPath, final String[] dbPaths) {
 		super();
-		setQueryParam(new QueryFileParam(queryPath));
+		setQueryParam(new QueryFileParam(queryPath, false));
 		setDbParams(dbPaths);
 	}
 
 	public CountRunConfig(final QueryFileParam query, final List<DBParam> dbConfigs) {
-		super();
-		setQueryParam(query);
-		setDbParams(dbConfigs);
+		super(query, dbConfigs);
 	}
 
 	public CountRunConfig(final String queryPath, final String[] dbPaths, final int thread) {
@@ -66,7 +59,7 @@ public class CountRunConfig extends RunConfig {
 
 	@Override
 	protected void initOther() {
-		super.initOther();
+
 	}
 
 	@Override

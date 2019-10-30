@@ -1,47 +1,53 @@
 package org.mulinlab.varnote.config.anno;
 
-import htsjdk.samtools.util.StringUtil;
-import java.util.ArrayList;
-import java.util.List;
 
+import org.mulinlab.varnote.constants.GlobalParameter;
+
+import java.util.StringJoiner;
 
 public class NormalField {
-	public static final String COMMA = ",";
-	
-	protected List<String> valList;
-	protected final FieldFormat format;
-	protected boolean useList;
-	
-	public NormalField(final FieldFormat format) {
-		super();
-		this.format = format;
-		initNodeList();
-	}
-	
-	public void initNodeList() {
-		valList = new ArrayList<String>();
-		useList = true;
-	}
-	
-	public void addDBVal(final String val) {
 
+	private final String COMMA = GlobalParameter.COMMA;
+
+	private final String fileName;
+	private String[] dbValues;
+	private int index;
+
+	public NormalField(final String fileName) {
+		this.fileName = fileName;
+	}
 	
-		if(val != null && !val.trim().equals("")) {
-			if(format != null) {
-				final String[] vals = val.split(COMMA);
-				for (String str : vals) {
-					ValWithAllele va = format.getFieldValWithFormat(str);
-					if(va.allele != null) valList.add(va.getStrWithAllele());
-					else valList.add(va.getStr());
-				}
-			} else {
-				valList.add(val);
+	public void init(final int length) {
+		dbValues = new String[length];
+		index = 0;
+	}
+
+	public void addDB(final String val)  {
+		try {
+			if(val != null) {
+				dbValues[index++] = val;
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println(index + ", " + dbValues.length);
 		}
 	}
-	
-	public String nodesTostr() {
-		if(valList != null && valList.size() > 0) return StringUtil.join(COMMA, valList);
-		else return "";
+
+	public String getVal()  {
+		if(index == 0) {
+			return null;
+		} else if(index == 1) {
+			return dbValues[0];
+		} else {
+			StringJoiner joiner = new StringJoiner(COMMA);
+			for (int i = 0; i < index; i++) {
+				joiner.add(dbValues[i]);
+			}
+			return joiner.toString();
+		}
+	}
+
+	public String getFileName() {
+		return fileName;
 	}
 }

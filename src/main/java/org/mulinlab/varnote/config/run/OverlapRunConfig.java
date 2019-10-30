@@ -19,6 +19,7 @@ import org.mulinlab.varnote.utils.headerparser.BEDHeaderParser;
 import org.mulinlab.varnote.utils.node.LocFeature;
 
 public class OverlapRunConfig extends RunConfig {
+
 	protected final static String OVERLAP_EQUAL = GlobalParameter.OVERLAP_EQUAL;
 	protected final static String OVERLAP_NOTE = GlobalParameter.OVERLAP_NOTE;
 	private final static String QUERY_START = GlobalParameter.QUERY_START;
@@ -29,7 +30,7 @@ public class OverlapRunConfig extends RunConfig {
 	
 	public OverlapRunConfig(final String queryPath, final String[] dbPaths) {
 		super();
-		setQueryParam(new QueryFileParam(queryPath));
+		setQueryParam(new QueryFileParam(queryPath, false));
 		setDbParams(dbPaths);
 	}
 
@@ -67,38 +68,43 @@ public class OverlapRunConfig extends RunConfig {
 
 	@Override
 	protected void initOutput() {
-		if(outParam == null) {
-			setOutParam(new IntersetOutParam());
-		}
+		if(outParam == null) setOutParam(new IntersetOutParam());
+		outParam.setOutFileSuffix(GlobalParameter.OVERLAP_RESULT_SUFFIX);
 	}
 
 
 	@Override
 	protected void initOther() {
-		super.initOther();
-		outParam.setDefalutOutPath(((QueryFileParam)queryParam).getQueryPath());
-		outParam.checkParam();
+		initPrintter();
+	}
+
+	protected void initPrintter() {
 		initPrintter(outParam, runParam.getThread());
 	}
 
 	@Override
-	public List<String> getHeader() {
-		List<String> comments = new ArrayList<>();
-		QueryFileParam queryParam = (QueryFileParam)this.queryParam;
+	protected List<String> getHeader() {
+		List<String> comments = null;
+		if(!((IntersetOutParam)outParam).isRemoveCommemt()) {
+			comments = new ArrayList<>();
 
-		comments.add(getComment(QueryReader.QUERY, queryParam.getQueryPath()));
-		comments.add(getComment(QueryReader.QUERY_FORMAT, queryParam.getQueryFormat().toString()));
-		if(queryParam.getQueryFormat().getHeaderPath() != null) comments.add(getComment(QueryReader.HEADER_PATH, queryParam.getQueryFormat().getHeaderPath()));
-		comments.add(getComment(QueryReader.HEADER, StringUtil.join(BEDHeaderParser.TAB, queryParam.getQueryFormat().getHeaderPart())));
+			QueryFileParam queryParam = (QueryFileParam)this.queryParam;
 
-		for (DBParam db : dbParams) {
-			comments.add(getComment(QueryReader.DB_PATH, db.getDbPath()));
-			comments.add(getComment(QueryReader.DB_INDEX_TYPE, db.getIndexType().toString()));
-			comments.add(getComment(QueryReader.DB_LABEL, db.getOutName()));
+			comments.add(getComment(QueryReader.QUERY, queryParam.getQueryPath()));
+			comments.add(getComment(QueryReader.QUERY_FORMAT, queryParam.getQueryFormat().toString()));
+			if(queryParam.getQueryFormat().getHeaderPath() != null) comments.add(getComment(QueryReader.HEADER_PATH, queryParam.getQueryFormat().getHeaderPath()));
+			comments.add(getComment(QueryReader.HEADER, queryParam.getQueryFormat().getHeaderPartStr()));
+
+			for (DBParam db : dbParams) {
+				comments.add(getComment(QueryReader.DB_PATH, db.getDbPath()));
+				comments.add(getComment(QueryReader.DB_INDEX_TYPE, db.getIndexType().toString()));
+				comments.add(getComment(QueryReader.DB_LABEL, db.getOutName()));
+			}
+
+			comments.add(getComment(QueryReader.OUTPUT_PATH, outParam.getOutputPath()));
+			comments.add(String.format("%s%s",  OVERLAP_NOTE, AbstractQueryReader.END));
 		}
 
-		comments.add(getComment(QueryReader.OUTPUT_PATH, outParam.getOutputPath()));
-		comments.add(String.format("%s%s",  OVERLAP_NOTE, AbstractQueryReader.END));
 		return comments;
 	}
 
@@ -113,10 +119,15 @@ public class OverlapRunConfig extends RunConfig {
 			e.printStackTrace();
 		}
 	}
+
+	protected void printRecord(final LocFeature node, String result, final int index) throws IOException {
+		printter.getPrintter(index).print(result);
+	}
 	
-	public void printRecord(final LocFeature node, final Map<String, List<String>> results, final int index) throws IOException {
+	public void printRecord(final LocFeature node, final Map<String, String[]> results, final int index) throws IOException {
 		IntersetOutParam outParam = (IntersetOutParam)this.outParam;
 		ThreadPrintter threadPrintter = printter.getPrintter(index);
+
 		if(outParam.isLoj()) {
 			threadPrintter.print(String.format("%s%s%s", QUERY_START, TAB, node.origStr));
 		} else if(results.size() > 0 && outParam.getOutputMode() != OutMode.DB) {

@@ -54,15 +54,21 @@ public abstract class RunConfig {
 		}
 
 		initOutput();
-		initOther();
+
+		if(outParam != null && queryParam instanceof QueryFileParam)
+			outParam.setDefalutOutPath(((QueryFileParam)queryParam).getQueryPath());
 
 		logger.info(VannoUtils.printLogHeader("OTHER  SETTING"));
 		if(runParam != null) logger.info(String.format("Thread number: %d", runParam.getThread()));
+
+		initOther();
+
 	}
 	
 	protected abstract void initQuery();
 	protected abstract void initDB();
 	protected abstract void initOutput();
+	protected abstract void initOther();
 
 	protected abstract List<String> getHeader();
 
@@ -86,10 +92,6 @@ public abstract class RunConfig {
 		}
 		printter.init();
 		printter.setPrintter(thread);
-	}
-
-	protected void initOther() {
-
 	}
 	
 	public List<Database> getDatabses() {

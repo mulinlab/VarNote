@@ -1,18 +1,39 @@
 package org.mulinlab.varnote.operations.decode;
 
-import org.mulinlab.varnote.config.anno.VCFParser;
+import htsjdk.variant.vcf.VCFCodec;
+import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.utils.format.Format;
+import org.mulinlab.varnote.utils.node.LocFeature;
 
 public final class VCFLocCodec extends LocCodec {
 
-    protected final static int INFO_FIELD = 8;
+    private VCFCodec codec;
 
-    public VCFLocCodec() {
-        this(Format.VCF);
+    public VCFLocCodec(final boolean isFull) {
+        this(Format.VCF, isFull);
     }
 
-    public VCFLocCodec(final Format format) {
-        super(format, INFO_FIELD + 1);
+    public VCFLocCodec(final Format format, final boolean isFull) {
+        super(format, isFull ? (format.getHeaderPart() == null ? -1 : format.getHeaderPartSize()) : 6, isFull);
+    }
+
+    public VCFLocCodec(final Format format, final boolean isFull, final VCFCodec codec) {
+        this(format, isFull);
+        this.codec = codec;
+    }
+
+    @Override
+    public VCFLocCodec clone() {
+        return new VCFLocCodec(this.format, this.isFull, this.codec);
+    }
+
+    @Override
+    public LocFeature decode(final String s) {
+        super.decode(s);
+        if(codec != null) {
+            intv.variantContext = codec.decode(s);
+        }
+        return intv;
     }
 
     @Override
@@ -35,8 +56,8 @@ public final class VCFLocCodec extends LocCodec {
         if(info == null) return;
         ajustEND(info);
         if((info.indexOf("SVTYPE") != -1) && (info.indexOf("CIPOS") != -1) && (info.indexOf("CIEND") != -1)) {
-            int posbegin = info.indexOf("CIPOS"), posend = info.indexOf(VCFParser.INFO_FIELD_SEPARATOR, info.indexOf("CIPOS")),
-                    endbegin = info.indexOf("CIEND"), endend = info.indexOf(VCFParser.INFO_FIELD_SEPARATOR, info.indexOf("CIEND"));
+            int posbegin = info.indexOf("CIPOS"), posend = info.indexOf(GlobalParameter.INFO_FIELD_SEPARATOR, info.indexOf("CIPOS")),
+                    endbegin = info.indexOf("CIEND"), endend = info.indexOf(GlobalParameter.INFO_FIELD_SEPARATOR, info.indexOf("CIEND"));
             if(posend == -1) posend = info.length();
             if(endend == -1) endend = info.length();
 
@@ -61,5 +82,9 @@ public final class VCFLocCodec extends LocCodec {
             i = info.indexOf(';', e_off);
             intv.end = Integer.parseInt(i > e_off ? info.substring(e_off, i) : info.substring(e_off));
         }
+    }
+
+    public void setCodec(VCFCodec codec) {
+        this.codec = codec;
     }
 }

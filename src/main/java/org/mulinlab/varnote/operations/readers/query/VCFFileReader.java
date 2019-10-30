@@ -1,8 +1,8 @@
 package org.mulinlab.varnote.operations.readers.query;
 
-import htsjdk.variant.vcf.VCFCodec;
-import org.mulinlab.varnote.filters.query.LocFeatureFilter;
-import org.mulinlab.varnote.filters.query.line.LineFilter;
+import htsjdk.variant.vcf.VCFHeader;
+import org.mulinlab.varnote.config.anno.databse.VCFParser;
+import org.mulinlab.varnote.config.param.FilterParam;
 import org.mulinlab.varnote.filters.query.line.VCFHeaderLineFilter;
 import org.mulinlab.varnote.filters.iterator.NoFilterIterator;
 import org.mulinlab.varnote.operations.readers.itf.QueryReaderItf;
@@ -12,10 +12,13 @@ import org.mulinlab.varnote.filters.iterator.LocFilterIterator;
 import org.mulinlab.varnote.filters.iterator.VCFFilterIterator;
 import org.mulinlab.varnote.utils.enumset.FileType;
 import org.mulinlab.varnote.utils.format.Format;
-
 import java.util.List;
 
+
 public final class VCFFileReader extends AbstractFileReader {
+
+    private FilterParam filterParam;
+    private VCFParser vcfParser;
 
     public VCFFileReader(QueryReaderItf itf, Format format) {
         super(itf, format);
@@ -24,17 +27,27 @@ public final class VCFFileReader extends AbstractFileReader {
     public VCFFileReader(final String path) {
         super(path, Format.VCF);
     }
-
     public VCFFileReader(final String path, final Format format) {
         super(path, format);
     }
-
     public VCFFileReader(final String path, final FileType fileType, final Format format) {
         super(path, fileType, format);
     }
 
+    public void setVcfParser(final VCFParser vcfParser) {
+        this.vcfParser = vcfParser;
+    }
+
     @Override
     public void checkFormat() {
+
+    }
+
+    public VCFParser getVcfParser() {
+        if(vcfParser == null) {
+            vcfParser = VCFParser.defaultVCFParser(format, getFilePath(), getFileType());
+        }
+        return vcfParser;
     }
 
     @Override
@@ -42,39 +55,42 @@ public final class VCFFileReader extends AbstractFileReader {
         lineFilters.add(new VCFHeaderLineFilter());
     }
 
-    @Override
-    public Object getHeader() {
-        if(header == null) {
-            NoFilterIterator iterator = new NoFilterIterator(getReader(filePath, fileType));
-            header = codec.readActualHeader(iterator);
-            iterator.close();
-        }
-        return header;
+    public VCFHeader getHeader() {
+        return (VCFHeader)getVcfParser().getVcfHeader();
     }
 
-    public void defaultCodec() {
-        if(codec == null) {
-            System.out.println("create codec");
-            codec = new VCFCodec();
-            getHeader();
+    public void setVariantFilters(final FilterParam filterParam) {
+        if(filterParam.isNotNull()) {
+            this.isDecodeLoc = false;
+            this.filterParam = filterParam;
         }
     }
 
-    public void setLocFilters(final List<LocFeatureFilter> locFilters) {
-        this.isDecodeLoc = false;
-        this.locFilters = locFilters;
+    public void setDecodeLoc(boolean decodeLoc) {
+        isDecodeLoc = decodeLoc;
+    }
+
+    public VCFLocCodec getVCFcodec() {
+        return new VCFLocCodec(format, decodeFull, getVcfParser().getCodec());
+    }
+
+    public VCFLocCodec getLoccodec() {
+        return new VCFLocCodec(format, decodeFull);
     }
 
     @Override
     public LineFilterIterator getFilterIterator() {
         if(iterator == null) {
             if(isDecodeLoc) {
-                iterator = new LocFilterIterator(new NoFilterIterator(reader), lineFilters, new VCFLocCodec(format));
+                iterator = new LocFilterIterator(new NoFilterIterator(reader), lineFilters, getLoccodec());
             } else {
-                defaultCodec();
-                iterator = new VCFFilterIterator(new NoFilterIterator(reader), lineFilters, locFilters, (VCFCodec)codec);
+                iterator = new VCFFilterIterator(new NoFilterIterator(reader), lineFilters, filterParam, getVCFcodec());
             }
         }
         return iterator;
+    }
+
+    public List<String> getInfoKeys() {
+        return getVcfParser().getInfoKeys();
     }
 }

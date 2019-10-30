@@ -8,8 +8,8 @@ public final class Arguments {
     public static final String USE_JDK_SHORT = "UJD";
     public static final String USE_JDK_LONG = "use-jdk-deflater";
 
-    public static final String INDEX_INPUT_SHORT = "I";
-    public static final String INDEX_INPUT_LONG = "input";
+    public static final String INPUT_SHORT = "I";
+    public static final String INPUT_LONG = "input";
 
     public static final String INDEX_OUTPUT_SHORT = "O";
     public static final String INDEX_OUTPUT_LONG = "out-floder";

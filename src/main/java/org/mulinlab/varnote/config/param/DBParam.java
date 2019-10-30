@@ -1,5 +1,6 @@
 package org.mulinlab.varnote.config.param;
 
+import htsjdk.samtools.seekablestream.SeekableStreamFactory;
 import htsjdk.samtools.util.IOUtil;
 import htsjdk.samtools.util.StringUtil;
 import org.mulinlab.varnote.constants.GlobalParameter;
@@ -15,12 +16,16 @@ public final class DBParam extends Param {
 
     private String dbPath;
     private String outName;
-    private IntersectType intersect;
-    private IndexType indexType;
+    private IntersectType intersect = GlobalParameter.DEFAULT_INTERSECT;;
+    private IndexType indexType = IndexType.VARNOTE;
 
     public DBParam(final String dbPath) {
-        IOUtil.assertInputIsValid(dbPath);
-        this.dbPath = new File(dbPath).getAbsolutePath();
+        if(SeekableStreamFactory.isFilePath(dbPath))
+            this.dbPath = new File(dbPath).getAbsolutePath();
+        else
+            this.dbPath = dbPath;
+
+        IOUtil.assertInputIsValid(this.dbPath);
     }
 
     public DBParam(final File dbFile) {
@@ -56,7 +61,6 @@ public final class DBParam extends Param {
 
     @Override
     public void checkParam() {
-        if(this.intersect == null) this.intersect = GlobalParameter.DEFAULT_INTERSECT;
     }
 
     public String getDbPath() {

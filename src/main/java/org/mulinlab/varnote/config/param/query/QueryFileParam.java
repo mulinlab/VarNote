@@ -1,14 +1,11 @@
 package org.mulinlab.varnote.config.param.query;
 
 import htsjdk.samtools.util.IOUtil;
-import htsjdk.samtools.util.StringUtil;
-import htsjdk.tribble.AsciiFeatureCodec;
-import htsjdk.variant.vcf.VCFCodec;
+import org.mulinlab.varnote.config.anno.databse.HeaderFormatReader;
+import org.mulinlab.varnote.config.anno.databse.VCFParser;
+import org.mulinlab.varnote.config.param.FilterParam;
 import org.mulinlab.varnote.exceptions.InvalidArgumentException;
-import org.mulinlab.varnote.filters.iterator.NoFilterIterator;
-import org.mulinlab.varnote.filters.query.LocFeatureFilter;
-import org.mulinlab.varnote.filters.query.VCFContextFilter;
-import org.mulinlab.varnote.operations.readers.itf.LongLineReader;
+import org.mulinlab.varnote.filters.query.InfoFilter;
 import org.mulinlab.varnote.operations.readers.itf.QueryReaderItf;
 import org.mulinlab.varnote.operations.readers.itf.thread.GZIPThreadReader;
 import org.mulinlab.varnote.operations.readers.itf.thread.SpiderReader;
@@ -18,7 +15,6 @@ import org.mulinlab.varnote.utils.VannoUtils;
 import org.mulinlab.varnote.utils.enumset.FileType;
 import org.mulinlab.varnote.utils.enumset.FormatType;
 import org.mulinlab.varnote.utils.format.Format;
-import org.mulinlab.varnote.utils.headerparser.BEDHeaderParser;
 import org.mulinlab.varnote.utils.stream.BZIP2InputStream;
 import org.mulinlab.varnote.utils.stream.GZInputStream;
 import java.io.File;
@@ -29,43 +25,48 @@ import java.util.List;
 
 public final class QueryFileParam extends QueryParam {
 
-    private String queryPath;
-    private String queryName;
+    private final String path;
+    private final FileType fileType;
+    private final Format queryFormat;
+    private final String fileName;
 
-    private Format queryFormat;
-    private FileType fileType;
-
-    private AsciiFeatureCodec codec;
-    private Object header;
+    private final boolean isFull;
+    private FilterParam filterParam;
 
     protected List<AbstractFileReader> threadReaders;
 
 
-    public QueryFileParam(final String path) {
-        this(path, null);
+    public QueryFileParam(final String path, final boolean isFull) {
+        this(path, null, isFull, null);
     }
 
-    public QueryFileParam(final String path, final Format queryFormat) {
-//        ThreadReader.readHeader = false;
+    public QueryFileParam(final String path, Format queryFormat, final boolean isFull) {
+        this(path, queryFormat, isFull, null);
+    }
+
+    public QueryFileParam(final String path, Format queryFormat, final boolean isFull, final FilterParam filterParam) {
         if(path == null || path.trim().equals("")) throw new InvalidArgumentException("Query file is required.");
 
-        this.queryPath = VannoUtils.getAbsolutePath(path);
-        IOUtil.assertInputIsValid(this.queryPath);
+        IOUtil.assertInputIsValid(path);
 
+        this.path = VannoUtils.getAbsolutePath(path);
+        this.fileName = new File(this.path).getName();
         this.fileType = VannoUtils.checkFileType(path);
-        queryName = new File(this.queryPath).getName();
+        this.isFull = isFull;
+        this.filterParam = filterParam;
 
-        if(queryFormat == null) this.queryFormat = Format.defaultFormat(path, true);
-        else this.queryFormat = queryFormat;
+        if(queryFormat == null) queryFormat = Format.defaultFormat(path, true);
+        queryFormat = HeaderFormatReader.readFormatFromHeader(queryFormat, path, fileType);
+
+        this.queryFormat = queryFormat;
     }
-
 
     public void splitFile(int thread) {
         if(threadReaders == null) threadReaders = new ArrayList<>();
 
         try {
             if (fileType == FileType.BGZ || fileType == FileType.TXT) {
-                BZIP2InputStream bz2_text = new BZIP2InputStream(queryPath, thread);
+                BZIP2InputStream bz2_text = new BZIP2InputStream(path, thread);
                 bz2_text.adjustPos();
                 bz2_text.creatSpider();
 
@@ -77,7 +78,7 @@ public final class QueryFileParam extends QueryParam {
                     threadReaders.add(getReader(new SpiderReader(bz2_text.spider[i])));
                 }
             } else {
-                GZInputStream in = new GZInputStream(queryPath, thread);
+                GZInputStream in = new GZInputStream(path, thread);
                 for (int i = 0; i < thread; i++) {
                     threadReaders.add(getReader((new GZIPThreadReader(in.getReader(i)))));
                 }
@@ -97,63 +98,44 @@ public final class QueryFileParam extends QueryParam {
         return threadReaders.get(index);
     }
 
-    private void getVCFCodec() throws FileNotFoundException {
-        if(codec == null) {
-            codec = new VCFCodec();
-            header = codec.readActualHeader(new NoFilterIterator(new LongLineReader(queryPath)));
-        }
-    }
-
     public AbstractFileReader getReader(final QueryReaderItf itf) throws FileNotFoundException {
-        AbstractFileReader reader = VannoUtils.getReader(itf, queryFormat);
-        if(queryFormat.getHeaderPart() == null) {
-            reader.readHeader();
-            queryFormat = reader.getFormat();
+        AbstractFileReader r = VannoUtils.getReader(itf, this.queryFormat);
+
+        if(queryFormat.type == FormatType.VCF) {
+            if(filterParam != null) {
+                ((VCFFileReader)r).setVariantFilters(filterParam);
+            }
         }
-
-        if(queryFormat.getType() == FormatType.VCF)  {
-
-            List<LocFeatureFilter> locFilters = new ArrayList<>();
-            locFilters.add(new VCFContextFilter());
-
-            getVCFCodec();
-            reader.setCodec(codec, header);
-
-            ((VCFFileReader)reader).setLocFilters(locFilters);
-        }
-        reader.checkFormat();
-        return reader;
+        r.setDecodeFull(isFull);
+        r.checkFormat();
+        return r;
     }
 
     public Format getQueryFormat() {
         return queryFormat;
     }
-
     public String getQueryName() {
-        return queryName;
+        return fileName;
     }
-
     public String getQueryPath() {
-        return queryPath;
+        return path;
     }
-
-    public void setQueryFormat(Format queryFormat) {
-        this.queryFormat = queryFormat;
-    }
-
-    public FileType getFileType() {
-        return fileType;
-    }
-
 
     public void printLog() {
-        List<String> colNmaes = queryFormat.getOriginalField();
-
         logger.info(VannoUtils.printLogHeader("QUERY"));
         logger.info(String.format("Query File: %s", getQueryName()));
         logger.info(String.format("Query Format: %s", queryFormat.logFormat()));
 
         if(!queryFormat.getCommentIndicator().equals("##")) logger.info(String.format("Comment indicator of query is: %s", queryFormat.getCommentIndicator()));
-        if(colNmaes != null && queryFormat.isHasHeader()) logger.info(String.format("QueryRegion header is: %s", StringUtil.join(BEDHeaderParser.COMMA, colNmaes)));
+        if(queryFormat.isHasHeader()) logger.info(String.format("QueryRegion header is: %s", queryFormat.getHeaderPartStr()));
+    }
+
+
+    public FileType getFileType() {
+        return fileType;
+    }
+
+    public FilterParam getFilterParam() {
+        return filterParam;
     }
 }

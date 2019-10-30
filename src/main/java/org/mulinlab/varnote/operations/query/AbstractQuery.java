@@ -12,11 +12,13 @@ import org.mulinlab.varnote.utils.node.LocFeature;
 
 public abstract class AbstractQuery implements Query{
 
-
 	protected final List<Database> dbs;
 	protected List<AbstractDBReader> readers;
 	protected boolean isCount = GlobalParameter.DEFAULT_IS_COUNT;
-	
+
+	protected Map<String, String[]> results = new HashMap<String, String[]>();
+	protected Map<String, LocFeature[]> resultsFeatures = new HashMap<String, LocFeature[]>();
+
 	protected AbstractQuery(final List<Database> dbs, final boolean isCount) { //, final int threadIndex, final ThreadReader queryLineReader
 		super();
 		this.dbs = dbs;
@@ -52,23 +54,43 @@ public abstract class AbstractQuery implements Query{
 			}
 		}
 	}
-
 	
 	@Override
-	public Map<String, List<String>> getResults() {
-		Map<String, List<String>> results = new HashMap<String, List<String>>();
-
+	public Map<String, String[]> getResults() {
 		List<String> hits;
-		if(readers != null) {
-			for(int i=0; i< readers.size(); i++) {
-				hits = readers.get(i).getResults();
-				if(hits.size() > 0)
-					results.put(readers.get(i).getDb().getConfig().getOutName(), readers.get(i).getResults());
+		for(int i=0; i< readers.size(); i++) {
+			hits = readers.get(i).getResults();
+			if(hits.size() > 0)
+				results.put(readers.get(i).getDb().getOutName(), hits.toArray(new String[hits.size()]));
+			else {
+				results.put(readers.get(i).getDb().getOutName(), null);
 			}
 		}
+
 		return results;
 	}
-	
+
+	@Override
+	public Map<String, LocFeature[]> getResultFeatures(){
+		List<String> hits;
+		LocFeature[] locFeatures;
+
+		for(int i=0; i< readers.size(); i++) {
+			hits = readers.get(i).getResults();
+			if(hits.size() > 0) {
+				locFeatures = new LocFeature[hits.size()];
+				for (int j = 0; j < hits.size(); j++) {
+					locFeatures[j] = readers.get(i).getDb().decode(hits.get(j)).clone();
+				}
+				resultsFeatures.put(readers.get(i).getDb().getOutName(), locFeatures);
+			} else {
+				resultsFeatures.put(readers.get(i).getDb().getOutName(), null);
+			}
+		}
+		return resultsFeatures;
+	}
+
+
 	@Override
 	public long getResultCount() {
 		long count = 0;

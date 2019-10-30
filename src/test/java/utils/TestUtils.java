@@ -1,11 +1,6 @@
 package utils;
 
-import org.junit.Assert;
 import org.mulinlab.varnote.cmdline.abstractclass.CMDProgram;
-import org.mulinlab.varnote.cmdline.query.Intersect;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 
 public final class TestUtils {
 

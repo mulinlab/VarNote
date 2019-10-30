@@ -5,12 +5,12 @@ import java.io.IOException;
 
 import org.mulinlab.varnote.config.param.DBParam;
 import org.mulinlab.varnote.constants.GlobalParameter;
+import org.mulinlab.varnote.operations.decode.LocCodec;
 import org.mulinlab.varnote.utils.database.DatabaseFactory;
 import org.mulinlab.varnote.utils.enumset.IntersectType;
 import htsjdk.tribble.util.TabixUtils.TIndex;
 import org.mulinlab.varnote.utils.database.Database;
 import org.mulinlab.varnote.utils.node.LocFeature;
-import org.mulinlab.varnote.utils.node.NodeFactory;
 import org.mulinlab.varnote.exceptions.InvalidArgumentException;
 import org.mulinlab.varnote.utils.VannoUtils;
 import org.mulinlab.varnote.operations.process.TabixResultProcess;
@@ -22,6 +22,7 @@ import org.mulinlab.varnote.utils.database.index.TbiIndex;
 public abstract class TbiReader extends AbstractDBReader {
 
 	protected TIndex[] idxArr;
+	protected LocCodec codec;
 
 	protected TbiReader(final Database db, final boolean isCount) throws IOException {
 		super(db, isCount);
@@ -36,6 +37,9 @@ public abstract class TbiReader extends AbstractDBReader {
 			throw new InvalidArgumentException(VannoUtils.INTERSECT_ERROR);
 		}
 		idxArr = ((TbiIndex)idx).getmIndex();
+		codec = db.getLocCodec().clone();
+		codec.setFull(false);
+
 	}
 
 	protected TbiReader(final Database db) throws IOException {
@@ -54,15 +58,10 @@ public abstract class TbiReader extends AbstractDBReader {
 		protected int tid;
 		protected boolean iseof;
 		protected LocFeature node;
-		protected ByteArrayOutputStream bufStream;
-		protected int max;
 		
 		public TbiIteratorImpl(final int tid) {
-		    	iseof = false;
-		    	this.tid = tid;
-		    	node = new LocFeature();
-		    	max = 8192;
-			bufStream = new ByteArrayOutputStream(this.max);
+			iseof = false;
+			this.tid = tid;
 	    }
 
 		@Override
@@ -80,12 +79,7 @@ public abstract class TbiReader extends AbstractDBReader {
 				iseof = true;
 				return null;
 			} else {
-				if(s.length() > this.max) {
-					this.max = s.length() + 500;
-					this.bufStream = new ByteArrayOutputStream(this.max);
-				}
-//				System.out.println(s);
-				node = NodeFactory.createBasic(s, idx.getFormat(), node, bufStream);
+				node = codec.decode(s);
 				node.origStr = s;
 				if(chr2tid(node.chr) != tid) {
 					iseof = true;

@@ -13,7 +13,7 @@ public final class VCFHeaderLineFilter extends HeaderLineFilter {
 
     @Override
     public boolean isHeaderLine(String line) {
-        System.out.println("is header" + line);
+//        System.out.println("is header" + line);
         return line.startsWith("#");
     }
 }

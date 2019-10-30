@@ -19,7 +19,7 @@ public final class QueryRegionParam extends QueryParam {
 
     @Override
     public void printLog() {
-        logger.info(VannoUtils.parseIndexFileFormat("QUERY"));
+        logger.info(VannoUtils.printLogHeader("QUERY"));
         logger.info(String.format("Query Region: %s", region));
     }
 }

@@ -27,11 +27,9 @@ public final class TABFileReader extends AbstractFileReader {
 
     public void checkFormat() {
         if(!format.hasLoc()) {
-            readHeader();
+            readFormatFromHeader();
         }
-        format.checkLoc();
     }
-
 
     @Override
     protected void initLineFilters() {
@@ -39,15 +37,9 @@ public final class TABFileReader extends AbstractFileReader {
     }
 
     @Override
-    public Object getHeader() {
-        return null;
-    }
-
-
-    @Override
     public LineFilterIterator getFilterIterator() {
         if(iterator == null) {
-            iterator = new LocFilterIterator(new NoFilterIterator(reader), lineFilters, new TABLocCodec(format));
+            iterator = new LocFilterIterator(new NoFilterIterator(reader), lineFilters, new TABLocCodec(format, decodeFull));
         }
         return iterator;
     }

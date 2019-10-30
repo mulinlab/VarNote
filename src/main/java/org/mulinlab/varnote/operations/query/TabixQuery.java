@@ -7,8 +7,6 @@ import htsjdk.tribble.readers.TabixReader;
 import htsjdk.tribble.readers.TabixReader.Iterator;
 import org.mulinlab.varnote.utils.database.Database;
 import org.mulinlab.varnote.utils.node.LocFeature;
-import org.mulinlab.varnote.utils.node.NodeFactory;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,10 +16,9 @@ import java.util.Map;
 public final class TabixQuery extends AbstractQuery{
 
 	private List<TabixReader> tbiReaders;
-	private List<Database> dbFiles;
-	private ByteArrayOutputStream bufStream;
-	private int max;
-	private Map<String, List<String>> results;
+	private List<Database> databases;
+
+	private Map<String, String[]> results = new HashMap<String, String[]>();
 	
 	public TabixQuery(final List<Database> dbs) {
 		super(dbs, false);
@@ -32,15 +29,15 @@ public final class TabixQuery extends AbstractQuery{
 		
 		tbiReaders = new ArrayList<TabixReader>(dbs.size());
 		for (int i = 0; i < this.dbs.size(); i++) {
+			this.dbs.get(i).setDefaultLocCodec(false);
+
 			if(this.dbs.get(i).getConfig().getIndexType() == IndexType.TBI) {
 				tbiReaders.add(new TabixReader(this.dbs.get(i).getConfig().getDbPath(), this.dbs.get(i).getDbIndexPath()));
 			} else {
 				throw new IllegalArgumentException("You must have a tabix index file(.tbi) first to use mode 0!");
 			}
 		}
-		
-		max = 8192;
-		bufStream = new ByteArrayOutputStream(this.max);
+
 	}
 	
 	@Override
@@ -53,7 +50,7 @@ public final class TabixQuery extends AbstractQuery{
 	}
 	
 	@Override
-	public Map<String, List<String>> getResults() {
+	public Map<String, String[]> getResults() {
 		return results;
 	}
 	
@@ -75,36 +72,41 @@ public final class TabixQuery extends AbstractQuery{
 	
 	public void randomAccessQuery(LocFeature node) {
 		try {
-			Iterator it ;
-			results = new HashMap<String, List<String>>();
+			Iterator it;
 			List<String> list;
-			for (int i = 0; i < dbFiles.size(); i++) {
-				
-				if(dbFiles.get(i).getConfig().getIntersect() == IntersectType.FULLCLOASE) {
+			Database db;
+
+			for (int i = 0; i < databases.size(); i++) {
+
+				db = databases.get(i);
+				if(db.getConfig().getIntersect() == IntersectType.FULLCLOASE) {
 					it = tbiReaders.get(i).query(node.chr, node.beg-1, node.end+1);
 				} else {
 					it = tbiReaders.get(i).query(node.chr, node.beg, node.end);
 				}
 				
 				list = new ArrayList<String>();
-				LocFeature db;
+				LocFeature feature;
 				String s = null;
+
 				while((s = it.next()) != null) {
-					if(dbFiles.get(i).getConfig().getIntersect() == IntersectType.EXACT) {
-						if(s.length() > this.max) {
-							max = s.length() + 500;
-							bufStream = new ByteArrayOutputStream(this.max);
-						}
-						db = NodeFactory.createBasic(s, dbFiles.get(i).getFormat(), node, bufStream);
-						if((node.beg == db.beg) && (node.end == db.end)) {
+					if(db.getConfig().getIntersect() == IntersectType.EXACT) {
+						feature = db.decode(s);
+						if((node.beg == feature.beg) && (node.end == feature.end)) {
 							list.add(s);
 						}
 					} else {
 						list.add(s);
 					}
 				}
-				results.put(dbFiles.get(i).getConfig().getOutName(), list);
+
+				if(list.size() > 0) {
+					results.put(db.getConfig().getOutName(), list.toArray(new String[list.size()]));
+				} else {
+					results.put(db.getConfig().getOutName(), null);
+				}
 			}
+
 //			printResult(node, results);	
 		} catch (IOException e) {
 			e.printStackTrace();

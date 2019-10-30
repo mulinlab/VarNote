@@ -1,8 +1,7 @@
 package org.mulinlab.varnote.cmdline;
 
 import org.junit.Test;
-import org.mulinlab.varnote.cmdline.query.Annotation;
-import org.mulinlab.varnote.cmdline.query.Intersect;
+import org.mulinlab.varnote.cmdline.tools.Intersect;
 import utils.TestUtils;
 
 
@@ -12,9 +11,15 @@ public final class IntersectTest {
     @Test
     public void testVCF() {
         String[] args = new String[]{
-                "-D", "src/test/resources/database3.sorted.tab.gz",
+                "-D", "src/test/resources/database4.sorted.vcf.gz",
                 "-Q", "src/test/resources/test5.vcf",
-                "-T", "1", "--log", "true" , "-O", "src/test/resources/out/q3.out", "-Z", "false"};
+                "-T", "1",
+                "-O", "src/test/resources/out/q3.out",
+                "-Z", "false",
+                "-OM", "2",
+                "-RC", "false",
+                "--log", "true"
+        };
         TestUtils.initClass(Intersect.class, args);
     }
 

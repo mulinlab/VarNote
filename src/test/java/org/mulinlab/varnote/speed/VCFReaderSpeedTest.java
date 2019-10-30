@@ -7,9 +7,7 @@ import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.variant.vcf.VCFHeader;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
-import org.mulinlab.varnote.cmdline.query.Count;
 import org.mulinlab.varnote.utils.LoggingUtils;
-import utils.TestUtils;
 
 import java.io.File;
 

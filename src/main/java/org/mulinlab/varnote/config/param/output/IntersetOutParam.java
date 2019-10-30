@@ -8,10 +8,6 @@ import org.mulinlab.varnote.utils.enumset.OutMode;
 
 public final class IntersetOutParam extends OutParam {
 
-    private static String OVERLAP_RESULT_SUFFIX = GlobalParameter.OVERLAP_RESULT_SUFFIX;
-    private final static String OVERLAP_RESULT_SUFFIX_GZ = GlobalParameter.OVERLAP_RESULT_SUFFIX_GZ;
-
-
     private boolean removeCommemt = GlobalParameter.DEFAULT_REMOVE_COMMENT;
 
     public IntersetOutParam() {
@@ -22,19 +18,8 @@ public final class IntersetOutParam extends OutParam {
         super(outputPath);
     }
 
-    @Override
-    public void setDefalutOutPath(final String queryPath) {
-        if(outputPath == null) {
-            if(isGzip) OVERLAP_RESULT_SUFFIX = OVERLAP_RESULT_SUFFIX_GZ;
-
-            setOutputPath(queryPath + OVERLAP_RESULT_SUFFIX);
-        }
-//        log.printKVKCYNSystem("IntersetOutput path is not defined, redirect output folder to", outputFolder);
-    }
 
     public void init() {
-
-//        log.printKVKCYNSystem("Intersect output file path is", outputPath);
     }
 
     public OutMode getOutputMode() {

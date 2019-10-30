@@ -44,9 +44,9 @@ public final class IndexWriteConfig {
 	
 	public void printHeader() {
 		final VannoIndex idx = getIndex();
-		List<String> colNames = idx.getHeaderColList();
-		if(colNames != null && colNames.size() > 0) {
-			System.out.println("Header contains " + colNames.size() + " columns as following:");
+		String[] colNames = idx.getColumnNames();
+		if(colNames != null && colNames.length > 0) {
+			System.out.println(String.format("Header contains %d columns as following:", colNames.length));
 			for (String colName : colNames) {
 				System.out.println(colName);
 			}

@@ -13,7 +13,7 @@ public final class SkipLineFilter implements LineFilter {
     @Override
     public boolean isFilterLine(String line) {
         if(count++ < max) {
-            System.out.println("skip line " + count);
+//            System.out.println("skip line " + line);
             return true;
         } else {
             return false;

@@ -91,6 +91,7 @@ public abstract class QueryReader<T> extends AbstractQueryReader<T> {
             if(valueHash.get(DB_PATH) != null) {
                 setDB();
             }
+
             return true;
         } else return false;
     }
@@ -101,20 +102,18 @@ public abstract class QueryReader<T> extends AbstractQueryReader<T> {
     }
 
     protected void setDB() {
-        if(dbParams.size() > 0) {
-            DBParam last = dbParams.get(dbParams.size() - 1);
-            last.setDbPath(valueHash.get(DB_PATH));
+        DBParam dbParam = new DBParam(valueHash.get(DB_PATH));
 
-            if(valueHash.get(DB_MODE) != null) {
-                last.setIntersect(valueHash.get(DB_MODE));
-            }
-            if(valueHash.get(DB_INDEX_TYPE) != null) {
-                last.setIndexType(valueHash.get(DB_INDEX_TYPE));
-            }
-            if(valueHash.get(DB_LABEL) != null) {
-                last.setOutName(valueHash.get(DB_LABEL));
-            }
+        if(valueHash.get(DB_MODE) != null) {
+            dbParam.setIntersect(valueHash.get(DB_MODE));
         }
+        if(valueHash.get(DB_INDEX_TYPE) != null) {
+            dbParam.setIndexType(valueHash.get(DB_INDEX_TYPE));
+        }
+        if(valueHash.get(DB_LABEL) != null) {
+            dbParam.setOutName(valueHash.get(DB_LABEL));
+        }
+        dbParams.add(dbParam);
     }
 
     protected OutParam setOutParam(OutParam outParam) {
@@ -127,6 +126,7 @@ public abstract class QueryReader<T> extends AbstractQueryReader<T> {
 
     protected Format setformatHeader(Format format) {
         if(valueHash.get(HEADER_PATH) != null) format.setHeaderPath(valueHash.get(HEADER_PATH));
+        if(valueHash.get(HAS_HEADER) != null) format.setHasHeader(VannoUtils.strToBool(valueHash.get(HAS_HEADER)));
         if(valueHash.get(HEADER) != null) format.setHeaderPart(VannoUtils.parserHeader(valueHash.get(HEADER), GlobalParameter.TAB), false);
         return format;
     }
@@ -136,11 +136,11 @@ public abstract class QueryReader<T> extends AbstractQueryReader<T> {
 
         format = setformatHeader(format);
         if(valueHash.get(ZERO_BASED) != null && VannoUtils.strToBool(valueHash.get(ZERO_BASED))) format.setZeroBased();
-        if(valueHash.get(QUERY_CHROM) != null) format.sequenceColumn = Integer.parseInt(QUERY_CHROM);
-        if(valueHash.get(QUERY_BEGIN) != null) format.startPositionColumn = Integer.parseInt(QUERY_BEGIN);
-        if(valueHash.get(QUERY_END) != null) format.endPositionColumn = Integer.parseInt(QUERY_END);
-        if(valueHash.get(QUERY_REF) != null) format.refPositionColumn = Integer.parseInt(QUERY_REF);
-        if(valueHash.get(QUERY_ALT) != null) format.altPositionColumn = Integer.parseInt(QUERY_ALT);
+        if(valueHash.get(QUERY_CHROM) != null) format.sequenceColumn = Integer.parseInt(valueHash.get(QUERY_CHROM));
+        if(valueHash.get(QUERY_BEGIN) != null) format.startPositionColumn = Integer.parseInt(valueHash.get(QUERY_BEGIN));
+        if(valueHash.get(QUERY_END) != null) format.endPositionColumn = Integer.parseInt(valueHash.get(QUERY_END));
+        if(valueHash.get(QUERY_REF) != null) format.refPositionColumn = Integer.parseInt(valueHash.get(QUERY_REF));
+        if(valueHash.get(QUERY_ALT) != null) format.altPositionColumn = Integer.parseInt(valueHash.get(QUERY_ALT));
 
         return format;
     }

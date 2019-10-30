@@ -2,41 +2,32 @@ package org.mulinlab.varnote.config.run;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import htsjdk.samtools.util.IOUtil;
-import org.mulinlab.varnote.config.anno.ab.AbstractDatababseParser;
-import org.mulinlab.varnote.config.anno.ab.AbstractQueryParser;
-import org.mulinlab.varnote.config.anno.ab.AnnoParser;
 import org.mulinlab.varnote.cmdline.txtreader.anno.AnnoConfigReader;
-import org.mulinlab.varnote.config.anno.databse.DatabaseBEDParser;
-import org.mulinlab.varnote.config.anno.databse.DatabaseVCFParser;
-import org.mulinlab.varnote.config.anno.databse.DatabseAnnoConfig;
-import org.mulinlab.varnote.config.anno.query.QueryBEDParser;
-import org.mulinlab.varnote.config.anno.query.QueryVCFParser;
+import org.mulinlab.varnote.config.parser.AnnoParser;
+import org.mulinlab.varnote.config.anno.databse.anno.ExtractConfig;
+import org.mulinlab.varnote.config.param.postDB.DBAnnoParam;
 import org.mulinlab.varnote.config.param.DBParam;
 import org.mulinlab.varnote.config.param.output.AnnoOutParam;
 import org.mulinlab.varnote.config.param.query.QueryFileParam;
 import org.mulinlab.varnote.cmdline.txtreader.anno.OverlapHeaderReader;
+import org.mulinlab.varnote.config.parser.ResultParser;
 import org.mulinlab.varnote.constants.GlobalParameter;
-import org.mulinlab.varnote.utils.database.Database;
-import org.mulinlab.varnote.utils.enumset.AnnoOutFormat;
-import org.mulinlab.varnote.utils.format.Format;
-import org.mulinlab.varnote.utils.node.LocFeature;
-import org.mulinlab.varnote.utils.node.NodeFactory;
-import org.mulinlab.varnote.utils.node.RefNode;
 import org.mulinlab.varnote.utils.VannoUtils;
+import org.mulinlab.varnote.utils.database.Database;
+import org.mulinlab.varnote.utils.node.LocFeature;
 
 public final class AnnoRunConfig extends OverlapRunConfig{
 
-
-	private List<AnnoParser> parsers;
 	private String overlapFile;
 	private boolean forceOverlap = GlobalParameter.DEFAULT_FORCE_OVERLAP;
 	private String annoConfig;
 	private String vcfHeaderPathForBED;
+
+	private ResultParser[] annoParsers;
 
 	public AnnoRunConfig() {
 		super();
@@ -47,17 +38,12 @@ public final class AnnoRunConfig extends OverlapRunConfig{
 	}
 
 	public AnnoRunConfig(final String queryPath, final String[] dbPaths) {
-		super();
-		this.overlapFile = null;
-		setQueryParam(new QueryFileParam(queryPath));
+		setQueryParam(new QueryFileParam(queryPath, true));
 		setDbParams(dbPaths);
 	}
 
 	public AnnoRunConfig(final QueryFileParam query, final List<DBParam> dbConfigs) {
-		super();
-		this.overlapFile = null;
-		setQueryParam(query);
-		setDbParams(dbConfigs);
+		super(query, dbConfigs);
 	}
 
 	public AnnoRunConfig(final String queryPath, final String[] dbPaths, final String annoConfig, final AnnoOutParam output, final int thread) {
@@ -89,114 +75,66 @@ public final class AnnoRunConfig extends OverlapRunConfig{
 	@Override
 	protected void initOutput() {
 		if(outParam == null) {
-			outParam = new AnnoOutParam();
-			setOutParam(outParam);
+			setOutParam(new AnnoOutParam());
 		}
+		outParam.setOutFileSuffix(GlobalParameter.ANNO_RESULT_SUFFIX);
 	}
 
 	public void initOther() {
 		super.initOther();
 
+		logger.info(VannoUtils.printLogHeader("ANNOTATION  SETTING"));
+
 		QueryFileParam queryParam = (QueryFileParam)this.queryParam;
 		AnnoOutParam outParam = (AnnoOutParam)this.outParam;
-		outParam.setDefalutOutFormat(((QueryFileParam)queryParam).getQueryFormat());
+		outParam.setDefalutOutFormat(queryParam.getQueryFormat());
 
-		AnnoOutFormat annoOutFormat = outParam.getAnnoOutFormat();
-		Integer thread = runParam.getThread();
-
-		//get database anno config
-		Map<String, DatabseAnnoConfig> dbAnnoConfigMap = null;
+		Map<String, DBAnnoParam> map = null;
 		if(annoConfig == null) annoConfig = queryParam.getQueryPath() + GlobalParameter.ANNO_CONFIG_SUFFIX;
 		if(new File(annoConfig).exists()) {
-			final List<DatabseAnnoConfig> dbAnnoConfigList = new AnnoConfigReader<List<DatabseAnnoConfig>>().read(annoConfig);
-			if(dbAnnoConfigList.size() > 0) {
-				dbAnnoConfigMap = new HashMap<String, DatabseAnnoConfig>();
-				for (DatabseAnnoConfig config : dbAnnoConfigList) {
-					dbAnnoConfigMap.put(config.getLabel(), config);
-				}
-			}
-		}
-		
-		//set forceOverlap
-		queryParam.getQueryFormat().checkRefAndAlt();
-		if(!queryParam.getQueryFormat().isRefAndAltExsit()) forceOverlap = true;
-		
-		DatabseAnnoConfig dnAnnoconfig;
-		String dbOutName;
-		
-		List<Map<String, AbstractDatababseParser>> dbPareserList = new ArrayList<Map<String, AbstractDatababseParser>>();
-		for (int i = 0; i < thread; i++) {
-			dbPareserList.add(new HashMap<String, AbstractDatababseParser>());
+			map = new AnnoConfigReader<Map<String, DBAnnoParam>>().read(annoConfig);
 		}
 
-		List<String> databaseNames = new ArrayList<String>();
-		for (Database db : databses) {
-			dbOutName = db.getConfig().getOutName();
-			databaseNames.add(dbOutName);
-
-			logger.info(VannoUtils.printLogHeader("ANNO  CONFIGURATION: " + dbOutName));
-			if(dbAnnoConfigMap == null) {
-				dnAnnoconfig = new DatabseAnnoConfig(dbOutName); //get all information for annotation
+		Map<String, ExtractConfig> extractConfigMap = new HashMap<>();
+		DBAnnoParam annoParam = null;
+		for (Database db: databses) {
+			if(map == null) {
+				annoParam = DBAnnoParam.defaultParam(db.getOutName());
 			} else {
-				dnAnnoconfig = dbAnnoConfigMap.get(dbOutName);
+				annoParam = map.get(db.getOutName());
 			}
-			if(dnAnnoconfig == null) {
-				logger.info(String.format("We can't find annotation config for %s, please check whehter the label is correct.", dbOutName));
-			} else dnAnnoconfig.checkRequired();
-			
-			if(dnAnnoconfig != null)	 {
-				dnAnnoconfig.setDBPath(db.getDbPath(), (db.getFormat().getFlags() == Format.VCF_FLAGS), (annoOutFormat == AnnoOutFormat.VCF));
-				for (int i = 0; i < thread; i++) {
-					if(db.getFormat().getFlags() == Format.VCF_FLAGS) {
-						dbPareserList.get(i).put(dbOutName, new DatabaseVCFParser(db, dnAnnoconfig, forceOverlap, annoOutFormat));
-					} else {
-						dbPareserList.get(i).put(dbOutName, new DatabaseBEDParser(db, dnAnnoconfig, forceOverlap, annoOutFormat));
-					}
-				}
-			}	
-			
-			if(dbPareserList.size() > 0) {
-				if(dbPareserList.get(0).get(dbOutName) != null)
-				for (String s : dbPareserList.get(0).get(dbOutName).getLog()) {
-					logger.info(s);
-				}
-			}	
+			if(annoParam != null) {
+				extractConfigMap.put(db.getOutName(), new ExtractConfig(annoParam, db));
+			} else {
+				logger.info(String.format("%sThe tag for database %s was not found in the configuration file, so its annotation would not be extracted.%s", GlobalParameter.KRED, db.getOutName(), GlobalParameter.KNRM));
+			}
 		}
-	
-		AbstractQueryParser queryParser;
-		if(queryParam.getQueryFormat().getFlags() == Format.VCF_FLAGS)  {
-			queryParser = new QueryVCFParser(queryParam);
-		} else {
-			queryParser = new QueryBEDParser(queryParam, vcfHeaderPathForBED);
+
+		final int threadSize = queryParam.getThreadSize();
+		annoParsers = new AnnoParser[threadSize];
+
+		for (int i = 0; i < threadSize; i++) {
+			annoParsers[i] = new AnnoParser(this, extractConfigMap, i);
 		}
-		
-		parsers = new ArrayList<AnnoParser>(thread);
-		for (int i = 0; i < thread; i++) {
-			parsers.add(new AnnoParser(queryParser, dbPareserList.get(i), databaseNames, annoOutFormat, outParam.isLoj()));
-		}
+		annoParsers[0].printLog();
 	}
 
 
 	@Override
-	public List<String> getHeader() {
-		return parsers.get(runParam.getThread() - 1).getHeader();
+	protected List<String> getHeader() {
+		return ((AnnoParser)annoParsers[0]).getHeader();
 	}
 
 	public void mergeResult() {
 		super.mergeResult();
 	}
 
-	public void printRecord(final LocFeature node, final Map<String, List<String>> results, final int index) throws IOException {
-		String r = doQuery(NodeFactory.createRefAlt(node.origStr, ((QueryFileParam)queryParam).getQueryFormat()), results, index);
-		printter.print(r, index);
-	}
-	
-	public String doQuery(final RefNode node, final Map<String, List<String>> results, final int index) {
-		return parsers.get(index).doQuery(node, results);
+	public void annoRecord(final LocFeature node, final Map<String, LocFeature[]> results, final int index) throws IOException {
+		printter.print(doAnno(node, results, index), index);
 	}
 
-	public String getAnnoConfig() {
-		return annoConfig;
+	private String doAnno(final LocFeature node, final Map<String, LocFeature[]> results, final int index) {
+		return annoParsers[index].processNode(node, results);
 	}
 
 	public void setAnnoConfig(final String annoConfig) {
