@@ -12,6 +12,7 @@ public final class NoFilterIterator implements LineIterator {
     private QueryReaderItf reader;
     private String next;
     private boolean iterating = false;
+    protected long pos;
 
     public NoFilterIterator(final QueryReaderItf reader) {
         this.reader = reader;
@@ -24,13 +25,26 @@ public final class NoFilterIterator implements LineIterator {
     public boolean hasNext() {
         try {
             if (!iterating) {
-                next = reader.readLine();
+                getString();
+
                 iterating = true;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return next != null;
+    }
+
+    public void getString() {
+        try {
+            pos = reader.getPosition();
+            next = reader.readLine();
+            if(next != null && next.charAt(next.length() - 1) == '\r') {
+                next = next.substring(0, next.length() - 1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -40,9 +54,8 @@ public final class NoFilterIterator implements LineIterator {
         }
 
         String ret = next;
-
         try {
-            next = reader.readLine();
+            getString();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -62,7 +75,6 @@ public final class NoFilterIterator implements LineIterator {
     }
 
     public long getPosition() {
-        return reader.getPosition();
+        return pos;
     }
-
 }

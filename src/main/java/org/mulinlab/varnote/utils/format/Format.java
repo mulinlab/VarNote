@@ -105,9 +105,9 @@ public class Format extends TabixFormat {
 		} else if(this.type == FormatType.BED) {
 			return "BED";
 		} else {
-			return String.format("TAB, CHROM:%s BEGIN:%s END:%s REF:%s ALT:%s", sequenceColumn, startPositionColumn, endPositionColumn,
+			return String.format("TAB, CHROM:%s BEGIN:%s END:%s REF:%s ALT:%s ZeroBased:%s", sequenceColumn, startPositionColumn, endPositionColumn,
 					refPositionColumn == -1 ? '-' : refPositionColumn + "",
-					altPositionColumn == -1 ? '-' : altPositionColumn + "");
+					altPositionColumn == -1 ? '-' : altPositionColumn + "", isZeroBased());
 		}
 	}
 	
@@ -230,7 +230,7 @@ public class Format extends TabixFormat {
 				int col = 1;
 				int count = 0;
 				for ( String str : headerPart ) {
-					str = str.toUpperCase();
+					str = str.toUpperCase().trim();
 					if(str.equals("CHROM") || str.equals("CHR")) {
 						sequenceColumn = col;
 						count ++;

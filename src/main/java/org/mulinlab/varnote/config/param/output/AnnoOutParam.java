@@ -36,7 +36,7 @@ public final class AnnoOutParam extends OutParam {
         this.annoOutFormat = annoOutFormat;
     }
     public void setAnnoOutFormat(final String _annoOutFormat) {
-        setAnnoOutFormat(VannoUtils.checkFileFormat(_annoOutFormat));
+        setAnnoOutFormat(VannoUtils.checkOutFormat(_annoOutFormat));
     }
 
 

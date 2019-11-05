@@ -59,7 +59,7 @@ public class OutParam extends Param {
     }
 
     public String getOutputPath() {
-        if(isGzip && VannoUtils.hasExtension(VannoUtils.FileExt.GZ, outputPath)) {
+        if(isGzip && !VannoUtils.hasExtension(VannoUtils.FileExt.GZ, outputPath)) {
             outputPath = outputPath + ".gz";
             outputName = outputName + ".gz";
         }

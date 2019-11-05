@@ -14,12 +14,14 @@ public class RegParser implements ResultParser {
     private Map<String, CellMark> cellMarkMap;
     private int count;
     private final ThreadPrintter printter;
+    private final List<String> cellTypes;
     private final String[] token = new String[2];
 
-    public RegParser(final ThreadPrintter printter) {
+    public RegParser(final ThreadPrintter printter, final List<String> cellTypes) {
         setDefaultCellMark();
         this.count = 0;
         this.printter = printter;
+        this.cellTypes = cellTypes;
     }
 
 
@@ -81,11 +83,12 @@ public class RegParser implements ResultParser {
 		LocFeature[] roadmapFeatures = dbNodeMap.get(CEPIPRunConfig.ROAD_MAP_LABEL);
         LocFeature[] regbaseFeature = dbNodeMap.get(CEPIPRunConfig.REGBASE_MAP_LABEL);
 
-        double combined_p = 1, prior_p = 0.5;
+        double combined_p = 0.1, reg_p = -1, prior_p = 0.5, a = 0.5;
         if(regbaseFeature != null) {
             for (LocFeature locFeature: regbaseFeature) {
                 if(locFeature.parts[3].equals(query.ref) && locFeature.parts[4].equals(query.alt) && !locFeature.parts[5].equals(".")) {
                     combined_p = Double.parseDouble(locFeature.parts[5]);
+                    reg_p = Double.parseDouble(locFeature.parts[6]);
                 }
             }
         }
@@ -109,9 +112,9 @@ public class RegParser implements ResultParser {
                 }
 
                 double score;
-                for (String cell: cellMap.keySet()) {
+                for (String cell: cellTypes) {
                     score = compute(cellMap.get(cell));
-                    printter.print(String.format("%s\t%s\t%f", query.origStr, cell, (score * combined_p)/prior_p));
+                    printter.print(String.format("%s\t%s\t%f\t%f\t%f\t%f", query.origStr, cell, score, combined_p, reg_p, a*(score * combined_p)/prior_p));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -126,9 +129,10 @@ public class RegParser implements ResultParser {
     private double compute(final List<CellMark> marks) {
         setDefaultCellMark();
 
-        for (CellMark cellMark: marks) {
-            cellMarkMap.put(cellMark.name, cellMark);
-        }
+        if(marks != null)
+            for (CellMark cellMark: marks) {
+                cellMarkMap.put(cellMark.name, cellMark);
+            }
 
         CellMark H3K4me1 = cellMarkMap.get("H3K4me1");
         CellMark DNase = cellMarkMap.get("DNase");
@@ -142,7 +146,7 @@ public class RegParser implements ResultParser {
         double prior = 1 / (
                 1 + Math.exp( -( -0.5339527052 + 1.0513562209 * H3K4me1.hit + 1.5659681399 * H3K36me3.hit + 1.2131942069 * DNase.hit + 0.9750312605 * H3K79me2.hit
                         + -0.4843821400 * H3K9me3.hit + 1.5150317212 * H3K27me3.hit + 0.0008691201 * H3K4me2.score +
-                        0.0003089830 * H3K4me3.score + 0.0043517819 * H3K4me3.score + -0.0001497833 * H3K36me3.centrality))
+                        0.0003089830 * H3K4me3.score + 0.0043517819 * H3K36me3.score + -0.0001497833 * H3K79me2.centrality))
         );
         if ( prior < 0.3696304 ) {
             prior = 0.3696304;

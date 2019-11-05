@@ -76,16 +76,7 @@ public final class TagArgument implements TaggedArgument {
     public Format getFormat() {
         if(this.tagName == null) return null;
 
-        String tagName = this.tagName.trim().toUpperCase();
-        if(tagName.equals(FormatType.VCF)) {
-            return Format.VCF;
-        } else if(tagName.equals(FormatType.BED)) {
-            return Format.BED;
-        } else if(tagName.equals(FormatType.TAB)) {
-            return Format.newTAB();
-        } else {
-            return null;
-        }
+        return VannoUtils.checkQueryFormat(this.tagName);
     }
 
     public Format setFormat(Format format) {

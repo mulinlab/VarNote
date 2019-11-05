@@ -12,7 +12,7 @@ public abstract class LineFilterIterator implements Iterator<LocFeature> {
     protected final NoFilterIterator iterator;
     protected final List<LineFilter> filters;
     protected boolean isFiltered;
-    protected long pos;
+
 
     protected LocFeature feature;
     private boolean iterating = false;
@@ -33,7 +33,6 @@ public abstract class LineFilterIterator implements Iterator<LocFeature> {
 
     @Override
     public LocFeature next() {
-        pos = iterator.getPosition();
         return processLine(iterator.next());
     }
 
@@ -46,11 +45,10 @@ public abstract class LineFilterIterator implements Iterator<LocFeature> {
                 break;
             }
         }
-
         return null;
     }
 
     public long getPosition() {
-        return pos;
+        return iterator.getPosition();
     }
 }

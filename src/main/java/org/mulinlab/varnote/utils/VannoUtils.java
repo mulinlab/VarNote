@@ -190,8 +190,21 @@ public final class VannoUtils {
 			else return null;
 		}
 	}
-	
-	public static AnnoOutFormat checkFileFormat(String format) {
+
+	public static Format checkQueryFormat(String format) {
+		format = format.toUpperCase();
+		if(format.equals(FormatType.VCF.toString())) {
+			return Format.VCF;
+		} else if(format.equals(FormatType.BED.toString())) {
+			return Format.BED;
+		} else if(format.equals(FormatType.TAB.toString())) {
+			return Format.newTAB();
+		} else {
+			return null;
+		}
+	}
+
+	public static AnnoOutFormat checkOutFormat(String format) {
 		format = trimAndLC(format);
 		if (format.equals("vcf")) {
 			return AnnoOutFormat.VCF;
