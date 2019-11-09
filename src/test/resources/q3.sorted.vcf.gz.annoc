@@ -1,4 +1,0 @@
-@database1.sorted.bed.gz
-header_path=/Users/hdd/Downloads/test_data/database1.sorted.bed.gz.header
-fields=[VAL]
-out_names=[VAL:d1_VAL]
