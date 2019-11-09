@@ -54,7 +54,7 @@ public final class HeaderFormatReader {
                 if(line.startsWith(GlobalParameter.VCF_HEADER_INDICATOR)) line = line.substring(1);
                 parts = VannoUtils.parserHeader(line, GlobalParameter.TAB);
                 format.setHeaderPart(parts, true);
-                checkDataIsValid(format, lineIterator.next().split(GlobalParameter.TAB));
+                if(lineIterator.hasNext()) checkDataIsValid(format, lineIterator.next().split(GlobalParameter.TAB));
 
                 break;
             } else {

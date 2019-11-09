@@ -1,6 +1,5 @@
 package org.mulinlab.varnote.utils;
 
-import com.sun.javafx.binding.StringFormatter;
 import htsjdk.samtools.seekablestream.SeekableStream;
 import htsjdk.samtools.util.BlockCompressedInputStream;
 import org.mulinlab.varnote.constants.GlobalParameter;

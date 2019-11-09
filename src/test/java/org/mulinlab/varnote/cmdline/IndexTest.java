@@ -52,8 +52,9 @@ public final class IndexTest {
     @Test
     public void testIndexBED1() {
         String[] args = new String[]{
-                "-I:bed,ref=4,alt=5", "/Users/hdd/Desktop/vanno/cepip/regbase_part.bed.gz",
-                "-HP", "/Users/hdd/Desktop/vanno/cepip/regbase.header"};
+                "-I", "/Users/hdd/Desktop/vanno/random/hg19/VarNoteDB_FP_Roadmap_127Epi.bed.gz",
+                "-HP", "/Users/hdd/Desktop/vanno/random/hg19/roadmap.header"
+        };
         TestUtils.initClass(Index.class, args, false);
     }
 
