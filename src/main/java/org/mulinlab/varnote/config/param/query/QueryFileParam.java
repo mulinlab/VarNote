@@ -56,7 +56,9 @@ public final class QueryFileParam extends QueryParam {
         this.filterParam = filterParam;
 
         if(queryFormat == null) queryFormat = Format.defaultFormat(path, true);
-        queryFormat = HeaderFormatReader.readFormatFromHeader(queryFormat, path, fileType);
+        if(queryFormat.getHeaderPart() == null) {
+            queryFormat = HeaderFormatReader.readFormatFromHeader(queryFormat, path, fileType);
+        }
 
         this.queryFormat = queryFormat;
     }

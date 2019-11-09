@@ -19,6 +19,7 @@ public final class VCFFileReader extends AbstractFileReader {
 
     private FilterParam filterParam;
     private VCFParser vcfParser;
+    private boolean isDecodeLoc = true;
 
     public VCFFileReader(QueryReaderItf itf, Format format) {
         super(itf, format);

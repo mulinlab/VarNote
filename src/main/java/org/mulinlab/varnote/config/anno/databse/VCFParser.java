@@ -17,6 +17,10 @@ public final class VCFParser {
     private final VCFCodec codec;
     private List<String> infoKeys;
 
+    public VCFParser(final String path) {
+        this(path, VannoUtils.checkFileType(path));
+    }
+
     public VCFParser(final String path, final FileType fileType) {
         codec = new VCFCodec();
 

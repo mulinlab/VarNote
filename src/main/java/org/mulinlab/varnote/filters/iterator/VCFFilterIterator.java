@@ -26,29 +26,27 @@ public final class VCFFilterIterator extends LineFilterIterator {
         if(!isFiltered) {
             final LocFeature ctx = decode.decode(line);
 
-            if(ctx.chr.equals("2") && ctx.beg == 219513555) {
-                System.out.println();
-            }
-
-            if(filterParam.getVariantFilters() != null) {
-                for (VariantFilter vaFilter: filterParam.getVariantFilters()) {
-                    if(vaFilter.isFilterLine(ctx)) {
-                        return null;
+            if(filterParam != null) {
+                if(filterParam.getVariantFilters() != null) {
+                    for (VariantFilter vaFilter: filterParam.getVariantFilters()) {
+                        if(vaFilter.isFilterLine(ctx)) {
+                            return null;
+                        }
                     }
                 }
-            }
 
-            if(filterParam.getGenotypeFilters() != null) {
-                for (final Genotype gt : ctx.variantContext.getGenotypes()) {
-                    for (final GenotypeFilter filter : filterParam.getGenotypeFilters()) {
-                       if(filter.isFilterLine(ctx, gt)) {
-                           return null;
-                       }
+                if(filterParam.getGenotypeFilters() != null) {
+                    for (final Genotype gt : ctx.variantContext.getGenotypes()) {
+                        for (final GenotypeFilter filter : filterParam.getGenotypeFilters()) {
+                            if(filter.isFilterLine(ctx, gt)) {
+                                return null;
+                            }
+                        }
                     }
                 }
-            }
 
-            if(filterParam.getMiFilter() != null && filterParam.getMiFilter().isFilterLine(ctx)) return null;
+                if(filterParam.getMiFilter() != null && filterParam.getMiFilter().isFilterLine(ctx)) return null;
+            }
 
             ctx.origStr = line;
             return ctx;

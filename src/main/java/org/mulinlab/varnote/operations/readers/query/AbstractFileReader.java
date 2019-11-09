@@ -24,8 +24,6 @@ public abstract class AbstractFileReader {
     protected Format format;
 
     protected LineFilterIterator iterator;
-
-    protected boolean isDecodeLoc = true;
     protected boolean decodeFull = false;
 
     public AbstractFileReader(final QueryReaderItf itf, final Format format) {
@@ -97,4 +95,5 @@ public abstract class AbstractFileReader {
     public boolean isDecodeFull() {
         return decodeFull;
     }
+
 }

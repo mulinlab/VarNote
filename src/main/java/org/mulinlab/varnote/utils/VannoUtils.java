@@ -1,5 +1,6 @@
 package org.mulinlab.varnote.utils;
 
+import com.sun.javafx.binding.StringFormatter;
 import htsjdk.samtools.seekablestream.SeekableStream;
 import htsjdk.samtools.util.BlockCompressedInputStream;
 import org.mulinlab.varnote.constants.GlobalParameter;
@@ -68,6 +69,15 @@ public final class VannoUtils {
                 return true;
         }
         return false;
+	}
+
+	public static String getExtension(final FileExt ext, final String fileName) {
+		String cleanedPath = stripQueryStringIfPathIsAnHttpUrl(fileName);
+		for (final String extension : ext.getSuffix()) {
+			if (cleanedPath.toLowerCase().endsWith(extension))
+				return extension;
+		}
+		return null;
 	}
 	
 	public static String stripQueryStringIfPathIsAnHttpUrl(String path) {
@@ -189,6 +199,20 @@ public final class VannoUtils {
 			else if(hasExtension(FileExt.GZBED, fileName)) return Format.BED;
 			else return null;
 		}
+	}
+
+	public static boolean formatIsMatch(String fileName, final Format format) {
+		fileName = trimAndLC(fileName);
+		String ext = getExtension(FileExt.VCF, fileName);
+		if(ext != null && format.type != FormatType.VCF) {
+			throw new InvalidArgumentException(String.format("The input has an extension of %s, but we get a %s format. Please check!", ext, format.type));
+		}
+
+		ext = getExtension(FileExt.BED, fileName);
+		if(ext != null && format.type != FormatType.BED) {
+			throw new InvalidArgumentException(String.format("The input has an extension of %s, but we get a %s format. Please check!", ext, format.type));
+		}
+		return true;
 	}
 
 	public static Format checkQueryFormat(String format) {
