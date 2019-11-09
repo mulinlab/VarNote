@@ -42,3 +42,5 @@ overridedb.*
 .factorypath
 dump.rdb
 transaction-logs
+
+src/test/resources/
