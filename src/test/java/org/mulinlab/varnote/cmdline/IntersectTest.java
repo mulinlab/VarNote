@@ -2,8 +2,13 @@ package org.mulinlab.varnote.cmdline;
 
 import org.junit.Test;
 import org.mulinlab.varnote.cmdline.tools.Intersect;
+import org.mulinlab.varnote.operations.readers.db.VannoMixReader;
+import org.mulinlab.varnote.operations.readers.db.VannoReader;
 import org.mulinlab.varnote.utils.LoggingUtils;
 import utils.TestUtils;
+
+import java.io.IOException;
+import java.util.List;
 
 
 public final class IntersectTest {
@@ -46,6 +51,27 @@ public final class IntersectTest {
             "-D", "src/test/resources/database3.sorted.tab.gz",
             "-Q:tab,c=2,b=3,e=4,ref=5,alt=6", "src/test/resources/q4.sorted.tab.gz",
             "-OM", "1"};
+
+        TestUtils.initClass(Intersect.class, args, true);
+    }
+
+    @Test
+    public void testTAB1() {
+
+        String[] args = new String[]{
+                "-D", "/Users/hdd/Desktop/vanno/random/hg19/1kg.phase3.v5.shapeit2.eur.hg19.all.vcf.gz",
+                "-Q:tab,c=2,b=3,e=4,ref=5,alt=6", "src/test/resources/q4.sorted.tab.gz",
+                "-Z", "false", "-OM", "2"};
+
+        try {
+            VannoReader reader = new VannoMixReader("/Users/hdd/Desktop/vanno/random/hg19/1kg.phase3.v5.shapeit2.eur.hg19.all.vcf.gz");
+            reader.query("2:1-110554");
+            List<String> results = reader.getResults();
+
+            System.out.println("");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         TestUtils.initClass(Intersect.class, args, true);
     }

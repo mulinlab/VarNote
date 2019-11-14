@@ -56,7 +56,7 @@ public abstract class AbstractDBReader {
 	
 	public boolean query(final LocFeature query) throws IOException {
 		getProcess().initResult();
-
+		if(query.beg < 1) query.beg = 1;
 //		System.out.println(query.toString());
 		int tid = chr2tid(query.chr);
 		if(tid == -1) {

@@ -18,7 +18,7 @@ public final class IndexTest {
 
     @Test
     public void testIndexVCF1() {
-        String[] args = new String[]{"-I", "/Users/hdd/Desktop/vanno/random/hg19/1kg.phase3.v5.shapeit2.eas.hg19.all.vcf.gz"};
+        String[] args = new String[]{"-I", "/Users/hdd/Desktop/vanno/random/hg19/VarNoteDB_AF_1000G_phase3.vcf.gz"};
 
         TestUtils.initClass(Index.class, args, false);
     }
@@ -36,6 +36,14 @@ public final class IndexTest {
     public void testIndexTAB1() {
         String[] args = new String[]{
                 "-I:tab,c=1,b=4,e=5,0=true", "/Users/hdd/Desktop/vanno/random/hg19/gencode.v32lift37.annotation.gene.sort.gtf.gz"};
+
+        TestUtils.initClass(Index.class, args, false);
+    }
+
+    @Test
+    public void testIndexTAB2() {
+        String[] args = new String[]{
+                "-I:tab,c=1,b=2,e=2,ref=3,alt=4,0=false", "/Users/hdd/Desktop/vanno/random/hg19/EUR.gz"};
 
         TestUtils.initClass(Index.class, args, false);
     }
