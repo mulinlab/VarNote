@@ -43,4 +43,5 @@ overridedb.*
 dump.rdb
 transaction-logs
 
+out/
 src/test/resources/
