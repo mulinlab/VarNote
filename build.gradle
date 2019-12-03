@@ -56,6 +56,8 @@ jar {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     }
     exclude 'log4j.properties'
+    exclude '**/*.SF'
+    exclude '**/*.RSA'
 }
 
 
