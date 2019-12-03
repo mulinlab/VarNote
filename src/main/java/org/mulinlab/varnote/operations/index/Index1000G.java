@@ -89,7 +89,7 @@ public final class Index1000G {
 		}
 
 		if(binList != null) {
-			chrMap.put(sequenceNames.size() - 1, binList);
+			chrMap.put(sequenceNames.size(), binList);
 		}
 
 		writeIdx();
@@ -107,7 +107,7 @@ public final class Index1000G {
 			gtIndexOS.writeBytes(sequenceNames.get(i));
 		}
 
-		for (int i = 0; i < sequenceNames.size(); i++) {
+		for (int i = 1; i <= sequenceNames.size(); i++) {
 			writeBins(chrMap.get(i));
 		}
 	}
