@@ -8,8 +8,11 @@ plugins {
 group 'com.mulinlab'
 version '1.1-SNAPSHOT'
 
+// jdk版本
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+// java编译的时候缺省状态下会因为中文字符而失败
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 repositories {
     mavenCentral()
@@ -52,12 +55,13 @@ jar {
                 'Main-Class': 'org.mulinlab.varnote.cmdline.VarNoteCommandLine')
     }
 
-    from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-    exclude 'log4j.properties'
-    exclude '**/*.SF'
-    exclude '**/*.RSA'
+//    from {
+//        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+//    }
+//    exclude 'log4j.properties'
+//    exclude '**/*.SF'
+//    exclude '**/*.RSA'
+      exclude 'log4j2.xml'
 }
 
 
@@ -83,10 +87,12 @@ javadoc {
     include '**/*.java'
 }
 
+
+
 artifacts {
     archives jar
-    archives javadocJar
-    archives sourcesJar
+  //  archives javadocJar
+//    archives sourcesJar
 }
 
 uploadArchives {
