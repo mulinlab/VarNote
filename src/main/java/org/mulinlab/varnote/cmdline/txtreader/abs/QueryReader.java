@@ -126,8 +126,8 @@ public abstract class QueryReader<T> extends AbstractQueryReader<T> {
 
     protected Format setformatHeader(Format format) {
         if(valueHash.get(HEADER_PATH) != null) format.setHeaderPath(valueHash.get(HEADER_PATH));
-        if(valueHash.get(HAS_HEADER) != null) format.setHasHeader(VannoUtils.strToBool(valueHash.get(HAS_HEADER)));
-        if(valueHash.get(HEADER) != null) format.setHeaderPart(VannoUtils.parserHeader(valueHash.get(HEADER), GlobalParameter.TAB), false);
+        if(valueHash.get(HAS_HEADER) != null) format.setHasHeaderInFile(VannoUtils.strToBool(valueHash.get(HAS_HEADER)));
+        if(valueHash.get(HEADER) != null) format.setHeaderPart(VannoUtils.parserHeader(valueHash.get(HEADER), GlobalParameter.TAB));
         return format;
     }
 

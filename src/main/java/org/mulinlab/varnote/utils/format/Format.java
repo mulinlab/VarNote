@@ -2,8 +2,6 @@ package org.mulinlab.varnote.utils.format;
 
 
 import java.io.File;
-import java.util.*;
-
 import htsjdk.samtools.util.StringUtil;
 import htsjdk.tribble.index.tabix.TabixFormat;
 import org.mulinlab.varnote.constants.GlobalParameter;
@@ -15,20 +13,12 @@ import org.mulinlab.varnote.exceptions.InvalidArgumentException;
 import org.mulinlab.varnote.utils.VannoUtils;
 
 public class Format extends TabixFormat {
-
-	public static final String HEADER_POS = "POS";
-
+	public final static String DEFAULT_COMMENT_INDICATOR = GlobalParameter.DEFAULT_COMMENT_INDICATOR;
 	public final static int MAX_HEADER_COMPARE_LENGTH = 128;
 	public final static int START_COMPARE_LENGTH = 7;
 
-	public static final String COL = GlobalParameter.COL;
-	public final static String DEFAULT_COMMENT_INDICATOR = GlobalParameter.DEFAULT_COMMENT_INDICATOR;
-	public final static int DEFAULT_COL = -1;
-
-
 	public static Format VCF = new Format(VCF_FLAGS, 1, 2, 0, 0, DEFAULT_COMMENT_INDICATOR, 4, 5, true, FormatType.VCF);
 	public static Format BED = new Format(UCSC_FLAGS, 1, 2, 3, 0, DEFAULT_COMMENT_INDICATOR, -1, -1, false, FormatType.BED);
-//	public static Format TAB = new Format(GENERIC_FLAGS, -1, -1, -1, 0, DEFAULT_COMMENT_INDICATOR, -1, -1, false);
 
 
 	public int refPositionColumn;
@@ -37,7 +27,6 @@ public class Format extends TabixFormat {
 	private String extHeaderPath;
 	private String commentIndicator;
 	private boolean hasHeaderInFile;
-	private boolean isRefAndAltExsit = false;
 
 	private String[] headerPart;
 	public FormatType type;
@@ -74,10 +63,10 @@ public class Format extends TabixFormat {
 		this.type = type;
     }
 	
-	public static Format defaultFormat(final String input, final boolean isQuery) {    
+	public static Format defaultFormat(final String input, final boolean isQuery) {
 		Format defaultFormat;
 
-		defaultFormat = VannoUtils.determineFileType(input, isQuery);
+		defaultFormat = VannoUtils.determineFileType(input);
 		if(defaultFormat == null) {
 			if(isQuery) {
 				return Format.newTAB();
@@ -127,7 +116,7 @@ public class Format extends TabixFormat {
 		return hasHeaderInFile;
 	}
 
-	public void setHasHeader(final boolean hasHeaderInFile) {
+	public void setHasHeaderInFile(boolean hasHeaderInFile) {
 		this.hasHeaderInFile = hasHeaderInFile;
 	}
 
@@ -138,7 +127,7 @@ public class Format extends TabixFormat {
 	public void setHeaderPath(String headerPath) {
 		IOUtil.assertInputIsValid(headerPath);
 		this.extHeaderPath = VannoUtils.getAbsolutePath(headerPath);
-		this.setHasHeader(false);
+		this.setHasHeaderInFile(false);
 	}
 
 	public boolean isRefAndAltExsit() {
@@ -150,8 +139,9 @@ public class Format extends TabixFormat {
 	}
 
 	public void checkLoc() {
-		if(sequenceColumn < 1) throw new InvalidArgumentException("You should define -c in command line or define CHROM in header");
-		if(startPositionColumn < 1 || endPositionColumn < 0) throw new InvalidArgumentException("You should define -b and -e in command line or define POS or BEGIN,END in header");
+		if(sequenceColumn < 1) throw new InvalidArgumentException("You should define column of sequence name with -c");
+		if(startPositionColumn < 1) throw new InvalidArgumentException("You should define column of start chromosomal position with -b");
+		if(endPositionColumn < 0) throw new InvalidArgumentException("You should define column of end chromosomal position with -e");
 
 		if(endPositionColumn == 0) {
 			endPositionColumn = startPositionColumn;
@@ -171,10 +161,6 @@ public class Format extends TabixFormat {
 	public void setCommentIndicator(String commentIndicator) {
 		if((commentIndicator == null) || commentIndicator.equals(""))  return;
 		this.commentIndicator = VannoUtils.replaceQuote(commentIndicator.trim());
-	}
-
-	public boolean isPos() {
-		return ((endPositionColumn == 0) || (endPositionColumn == startPositionColumn));
 	}
 
 	public int getFlags() {
@@ -201,6 +187,10 @@ public class Format extends TabixFormat {
 		return headerPart[col - 1];
 	}
 
+	public void setHeaderPart(final String[] headerPart) {
+		this.headerPart = headerPart;
+	}
+
 	public void setHeader(String header) {
 		this.headerStr = header.substring(0, (header.length() > MAX_HEADER_COMPARE_LENGTH) ? MAX_HEADER_COMPARE_LENGTH : header.length());
 		this.headerStart = header.substring(0, (header.length() > START_COMPARE_LENGTH) ? START_COMPARE_LENGTH : header.length());
@@ -214,6 +204,10 @@ public class Format extends TabixFormat {
 		return headerStart;
 	}
 
+	public boolean isPos() {
+		return ((endPositionColumn == 0) || (endPositionColumn == startPositionColumn));
+	}
+
 	public String getDataStr() {
 		return dataStr;
 	}
@@ -222,62 +216,13 @@ public class Format extends TabixFormat {
 		this.dataStr = dataStr;
 	}
 
-	public void setHeaderPart(final String[] headerPart, final boolean isCheck) {
-		if(this.headerPart == null) {
-			this.headerPart = headerPart;
-
-			if(isCheck) {
-				int col = 1;
-				int count = 0;
-				for ( String str : headerPart ) {
-					str = str.toUpperCase().trim();
-					if(str.equals("CHROM") || str.equals("CHR")) {
-						sequenceColumn = col;
-						count ++;
-					} else if(str.equals("BEGIN")) {
-						startPositionColumn = col;
-						count++;
-					} else if(str.equals("POS")) {
-						startPositionColumn = col;
-						endPositionColumn = col;
-						count = count + 2;
-					} else if(str.equals("END")) {
-						endPositionColumn = col;
-						count++;
-					} else if(str.equals("REF")) {
-						refPositionColumn = col;
-					} else if(str.equals("ALT")) {
-						altPositionColumn = col;
-					}
-
-					col++;
-				}
-
-				if(count < 3) throw new InvalidArgumentException(String.format("Invalid header line: %s, " +
-						"header line should include CHROM, POS (or BEGIN, END) columns.", StringUtil.join(GlobalParameter.TAB, headerPart)));
-			}
-		}
-	}
-
 	public int getCol(String str) {
 		str = str.toUpperCase();
-		if(str.equals("CHROM") || str.equals("CHR")) {
-			return sequenceColumn;
-		} else if(str.equals("POS") || str.equals("BEGIN")) {
-			return startPositionColumn;
-		} else if(str.equals("END")) {
-			return endPositionColumn;
-		} else if(str.equals("REF")) {
-			return refPositionColumn;
-		} else if(str.equals("ALT")) {
-			return altPositionColumn;
-		} else {
-			for (int i = 0; i < headerPart.length; i++) {
-				if(headerPart[i].toUpperCase().equals(str)) {
-					return i+1;
-				}
+		for (int i = 0; i < headerPart.length; i++) {
+			if(headerPart[i].toUpperCase().equals(str)) {
+				return i+1;
 			}
-			return -1;
 		}
+		return -1;
 	}
 }

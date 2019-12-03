@@ -7,6 +7,7 @@ import java.util.StringJoiner;
 
 public class NormalField {
 
+	public static final String NO_VAL = "No-val";
 	private final String COMMA = GlobalParameter.COMMA;
 
 	private final String fileName;
@@ -24,7 +25,7 @@ public class NormalField {
 
 	public void addDB(final String val)  {
 		try {
-			if(val != null) {
+			if(val != null && !val.equals(NO_VAL)) {
 				dbValues[index++] = val;
 			}
 		} catch (Exception e) {

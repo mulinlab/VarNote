@@ -14,8 +14,6 @@ import org.mulinlab.varnote.operations.readers.db.VannoMixReader;
 
 public final class VannoQuery extends AbstractQuery {
 
-
-
 	public VannoQuery(final List<Database> dbs) {
 		super(dbs, false);
 	}

@@ -2,10 +2,8 @@ package org.mulinlab.varnote.config.param.query;
 
 import htsjdk.samtools.util.IOUtil;
 import org.mulinlab.varnote.config.anno.databse.HeaderFormatReader;
-import org.mulinlab.varnote.config.anno.databse.VCFParser;
 import org.mulinlab.varnote.config.param.FilterParam;
 import org.mulinlab.varnote.exceptions.InvalidArgumentException;
-import org.mulinlab.varnote.filters.query.InfoFilter;
 import org.mulinlab.varnote.operations.readers.itf.QueryReaderItf;
 import org.mulinlab.varnote.operations.readers.itf.thread.GZIPThreadReader;
 import org.mulinlab.varnote.operations.readers.itf.thread.SpiderReader;
@@ -57,7 +55,7 @@ public final class QueryFileParam extends QueryParam {
 
         if(queryFormat == null) queryFormat = Format.defaultFormat(path, true);
         if(queryFormat.getHeaderPart() == null) {
-            queryFormat = HeaderFormatReader.readFormatFromHeader(queryFormat, path, fileType);
+            queryFormat = HeaderFormatReader.readHeader(queryFormat, path, fileType);
         }
 
         this.queryFormat = queryFormat;
@@ -109,7 +107,6 @@ public final class QueryFileParam extends QueryParam {
             }
         }
         r.setDecodeFull(isFull);
-        r.checkFormat();
         return r;
     }
 
@@ -139,5 +136,8 @@ public final class QueryFileParam extends QueryParam {
 
     public FilterParam getFilterParam() {
         return filterParam;
+    }
+    public void setFilterParam(FilterParam filterParam) {
+        this.filterParam = filterParam;
     }
 }

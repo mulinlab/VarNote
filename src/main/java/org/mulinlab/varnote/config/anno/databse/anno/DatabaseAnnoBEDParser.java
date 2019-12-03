@@ -8,6 +8,6 @@ public final class DatabaseAnnoBEDParser extends AbstractDatababseAnnoParser {
 	public DatabaseAnnoBEDParser(final ExtractConfig config, boolean isForceOverlap, final AnnoOutFormat annoOutFormat) {
 		super(config, isForceOverlap, annoOutFormat);
 
-		config.getDb().setDefaultLocCodec(true);
+//		config.getDb().setDefaultLocCodec(true);
 	}
 }

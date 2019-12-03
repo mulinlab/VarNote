@@ -125,7 +125,7 @@ public abstract class Database {
 		return locCodec;
 	}
 
-	public void readFormatFromHeader() {
-		this.format = HeaderFormatReader.readFormatFromHeader(this.format, getDbPath(), FileType.BGZ);
+	public void readHeader() {
+		this.format = HeaderFormatReader.readHeader(this.format, getDbPath(), FileType.BGZ);
 	}
 }

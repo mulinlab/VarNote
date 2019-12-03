@@ -75,29 +75,34 @@ public final class TagArgument implements TaggedArgument {
 
     public Format getFormat() {
         if(this.tagName == null) return null;
-
         return VannoUtils.checkQueryFormat(this.tagName);
     }
 
     public Format setFormat(Format format) {
-        String zeroBased = tagAttributes.get("0");
-        String chrom = tagAttributes.get("c");
-        String begin = tagAttributes.get("b");
-        String end = tagAttributes.get("e");
-        String ref = tagAttributes.get("ref");
-        String alt = tagAttributes.get("alt");
-        String commentIndicator = tagAttributes.get("ci");
+        if(format.type == FormatType.TAB) {
+            String chrom = tagAttributes.get("c");
+            String begin = tagAttributes.get("b");
+            String end = tagAttributes.get("e");
+            if(chrom != null) format.sequenceColumn = Integer.parseInt(chrom);
+            if(begin != null) format.startPositionColumn = Integer.parseInt(begin);
+            if(end != null) format.endPositionColumn = Integer.parseInt(end);
 
-        if(zeroBased != null && VannoUtils.strToBool(zeroBased)) format.setZeroBased();
+            String zeroBased = tagAttributes.get("0");
+            if(zeroBased != null && VannoUtils.strToBool(zeroBased)) format.setZeroBased();
+        }
 
-        if(chrom != null) format.sequenceColumn = Integer.parseInt(chrom);
-        if(begin != null) format.startPositionColumn = Integer.parseInt(begin);
-        if(end != null) format.endPositionColumn = Integer.parseInt(end);
-        if(ref != null) format.refPositionColumn = Integer.parseInt(ref);
-        if(alt != null) format.altPositionColumn = Integer.parseInt(alt);
+        if(format.type == FormatType.TAB || format.type == FormatType.BED) {
+            String ref = tagAttributes.get("ref");
+            String alt = tagAttributes.get("alt");
+            String commentIndicator = tagAttributes.get("ci");
 
-        if(commentIndicator != null &&!commentIndicator.equals(GlobalParameter.DEFAULT_COMMENT_INDICATOR))
-            format.setCommentIndicator(commentIndicator);
+            if(ref != null) format.refPositionColumn = Integer.parseInt(ref);
+            if(alt != null) format.altPositionColumn = Integer.parseInt(alt);
+
+            if(commentIndicator != null &&!commentIndicator.equals(GlobalParameter.DEFAULT_COMMENT_INDICATOR))
+                format.setCommentIndicator(commentIndicator);
+        }
+
         return format;
     }
 }

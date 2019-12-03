@@ -1,6 +1,8 @@
 plugins {
     id 'java'
     id 'application'
+    id 'maven'
+    id 'maven-publish'
 }
 
 group 'com.mulinlab'
@@ -12,6 +14,7 @@ targetCompatibility = 1.8
 repositories {
     mavenCentral()
 }
+
 
 dependencies {
     compile('com.intel.gkl:gkl:0.8.6') {
@@ -27,6 +30,7 @@ dependencies {
 //    compile 'org.apache.logging.log4j:log4j-core:2.3'
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
     compile group: 'org.broadinstitute', name: 'barclay', version: '2.1.0'
+    compile group: 'de.charite.compbio', name: 'jannovar-core', version: '0.34'
     compile group: 'de.charite.compbio', name: 'jannovar-stats', version: '0.33'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.10.0'
     testCompile group: 'junit', name: 'junit', version: '4.12'
@@ -34,6 +38,11 @@ dependencies {
 
 application {
     mainClassName = 'org.mulinlab.varnote.cmdline.VarNoteCommandLine'
+}
+
+configurations.all {
+    exclude group: "org.slf4j", module: "slf4j-log4j12"
+    exclude group: "log4j", module: "log4j"
 }
 
 jar {
@@ -46,5 +55,45 @@ jar {
     from {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     }
-//    exclude 'log4j.properties'
+    exclude 'log4j.properties'
+}
+
+
+tasks.withType(Javadoc) {
+    options.addStringOption('Xdoclint:none')
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+javadoc {
+    // This is a hack to disable the java 8 default javadoc lint until we fix the html formatting
+    // We only want to do this for the javadoc task, not gatkDoc
+    options.addStringOption('Xdoclint:none', '-quiet')
+    source = sourceSets.main.allJava
+    include '**/*.java'
+}
+
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        snapshotRepository(url: "http://39.106.221.241:8081/repository/maven-snapshots") {//快照
+            authentication(userName: 'admin', password: 'admin123')
+        }
+        repository(url: "http://39.106.221.241:8081/repository/maven-releases") {//RELEASE
+            authentication(userName: 'admin', password: 'admin123')
+        }
+    }
 }

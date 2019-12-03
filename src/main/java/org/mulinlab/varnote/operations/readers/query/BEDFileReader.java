@@ -27,15 +27,6 @@ public final class BEDFileReader extends AbstractFileReader {
         super(path, fileType, format);
     }
 
-//    public void defaultCodec() {
-//        if (codec == null) {
-//            System.out.println("create codec");
-//            codec = new BEDCodec(BEDCodec.StartOffset.ZERO);
-//        }
-//    }
-
-    public void checkFormat() {
-    }
 
     @Override
     protected void initLineFilters() {

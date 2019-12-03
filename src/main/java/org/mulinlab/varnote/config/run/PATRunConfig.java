@@ -1,54 +1,69 @@
 package org.mulinlab.varnote.config.run;
 
-import htsjdk.variant.variantcontext.VariantContext;
 import org.mulinlab.varnote.config.param.DBParam;
 import org.mulinlab.varnote.config.param.FilterParam;
 import org.mulinlab.varnote.config.param.query.QueryFileParam;
+import org.mulinlab.varnote.config.parser.PATParser;
+import org.mulinlab.varnote.config.parser.ResultParser;
 import org.mulinlab.varnote.filters.mendelian.MendelianInheritanceADFilter;
 import org.mulinlab.varnote.filters.query.gt.DepthFilter;
 import org.mulinlab.varnote.filters.query.gt.GenotypeQualityFilter;
-import org.mulinlab.varnote.utils.enumset.IndexType;
+import org.mulinlab.varnote.utils.JannovarUtils;
+import org.mulinlab.varnote.utils.database.Database;
 import org.mulinlab.varnote.utils.enumset.IntersectType;
+import org.mulinlab.varnote.utils.format.Format;
 import org.mulinlab.varnote.utils.node.LocFeature;
 import org.mulinlab.varnote.utils.pedigree.PedFiles;
 import org.mulinlab.varnote.utils.pedigree.Pedigree;
 import org.mulinlab.varnote.utils.pedigree.PedigreeConverter;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public final class PATRunConfig extends OverlapRunConfig {
+public final class PATRunConfig extends AdvanceToolRunConfig {
 
-	private List<DBParam> dbParams;
-	private String[] token = new String[2];
-	private int count = 0;
+	private final static String DEFAULT_OUT_FILE_SUFFIX = ".pat.txt";
 
-	public PATRunConfig(final QueryFileParam query) {
-		getDBPath();
-		setQueryParam(query);
-		setDbParams(dbParams);
+
+	public PATRunConfig(final QueryFileParam query, final List<DBParam> dbConfigs, final JannovarUtils jannovarUtils, final File pedigree) {
+		super(query, dbConfigs, jannovarUtils);
+		query.setFilterParam(getFilterParam(pedigree));
+
+		requiredDB.put(GENOMAD_LABEL, IntersectType.EXACT);
+		requiredDB.put(REGBASE_MAP_LABEL, IntersectType.EXACT);
+		requiredDB.put(DBNSFP_LABEL, IntersectType.EXACT);
+	}
+
+	@Override
+	protected void initDB() {
+		super.initDB();
 	}
 
 	@Override
 	protected void initOutput() {
-		outParam.setOutFileSuffix(".pat");
+		outParam.setOutFileSuffix(DEFAULT_OUT_FILE_SUFFIX);
 	}
 
 	@Override
 	protected void initOther() {
-		initPrintter();
-		databses.get(0).setVCFLocCodec(true, databses.get(0).getVcfParser().getCodec());
-	}
+		super.initOther();
+		super.initDatabaseByDefault();
 
-	private void getDBPath() {
-		if(dbParams == null) {
-			dbParams = new ArrayList<>();
-			dbParams.add(new DBParam("/Users/hdd/Desktop/data/data/gnomad.genomes.r2.0.1.sites.GRCh38.noVEP.vcf.gz", "d0",
-					IntersectType.EXACT, IndexType.VARNOTE));
+		for (Database db: databses) {
+			if(db.getOutName().equals(DBNSFP_LABEL)) {
+				Format format = db.getFormat();
+				format.sequenceColumn = 1;
+				format.startPositionColumn = 2;
+				format.endPositionColumn = 2;
+			}
+		}
+
+		final int threadSize = ((QueryFileParam)queryParam).getThreadSize();
+		parsers = new ResultParser[threadSize];
+		for (int i = 0; i < threadSize; i++) {
+			parsers[i] = new PATParser();
 		}
 	}
-
 
 	@Override
 	public List<String> getHeader() {
@@ -56,43 +71,11 @@ public final class PATRunConfig extends OverlapRunConfig {
 	}
 
 	public void processNode(final LocFeature node, final Map<String, LocFeature[]> results, final int index) {
-		LocFeature[] gnomad = results.get("d0");
-
-//		System.out.println("query: " + node.origStr);
-		if(node.chr.equals("2") && node.beg == 219513555) {
-			System.out.println();
-		}
-
-		VariantContext ctx;
-		String AF;
-		if(gnomad != null) {
-			for (LocFeature feature : gnomad) {
-				ctx = feature.variantContext;
-				AF = ctx.getAttributeAsString("AF", "ERROR");
-				AF = AF.replace("[", "").replace("]", "");
-				if (!AF.equals("ERROR") && AF.indexOf(",") != -1) {
-					for (String part : AF.split(",")) {
-						if (Double.parseDouble(part) < 0.05) {
-							System.out.println("hit gnomad: " + node.origStr);
-							count++;
-							break;
-						}
-					}
-				} else {
-					if (Double.parseDouble(AF) < 0.05) {
-						System.out.println("hit gnomad: " + node.origStr);
-						count++;
-					}
-				}
-			}
-		} else {
-			System.out.println("not hit: " + node.origStr);
-			count++;
-		}
+		parsers[index].processNode(node, results);
 	}
 
-	public static FilterParam getFilterParam() {
-		Pedigree pedigree = PedFiles.readPedigree(new File("/Users/hdd/Desktop/vanno/wkegg/FSGS_0.ped").toPath());
+	public FilterParam getFilterParam(final File pedigreeFile) {
+		Pedigree pedigree = PedFiles.readPedigree(pedigreeFile.toPath());
 
 		FilterParam filterParam = new FilterParam();
 		filterParam.setMiFilter(new MendelianInheritanceADFilter(PedigreeConverter.convertToJannovarPedigree(pedigree)));
@@ -103,6 +86,21 @@ public final class PATRunConfig extends OverlapRunConfig {
 	}
 
 	public int getCount() {
-		return count;
+		int c = 0;
+		for (int i = 0; i < parsers.length; i++) {
+			c += ((PATParser)parsers[i]).getCount();
+		}
+		return c;
+	}
+
+	public void mergeResult() {
+		for (int i = 0; i < parsers.length; i++) {
+			System.out.println(((PATParser)parsers[i]).getResults().size());
+//			for (LocFeature locFeature: ((PATParser)patParsers[i]).getResults()) {
+//				System.out.println(locFeature.getOrigStr());
+//			}
+		}
+
+		((QueryFileParam)queryParam).getFilterParam().printLog();
 	}
 }

@@ -4,11 +4,9 @@ import htsjdk.samtools.util.StringUtil;
 import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFInfoHeaderLine;
 import org.mulinlab.varnote.cmdline.txtreader.anno.VcfInfoReader;
-import org.mulinlab.varnote.config.anno.databse.HeaderFormatReader;
 import org.mulinlab.varnote.config.param.postDB.DBAnnoParam;
 import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.utils.database.Database;
-import org.mulinlab.varnote.utils.enumset.FileType;
 import org.mulinlab.varnote.utils.enumset.FormatType;
 import org.mulinlab.varnote.utils.format.Format;
 import org.mulinlab.varnote.exceptions.InvalidArgumentException;
@@ -42,12 +40,12 @@ public final class ExtractConfig {
 		this.db = db;
 
 		Format dbformat = db.getFormat();
-		if(param.isHasHeader()) dbformat.setHasHeader(true);
+		if(param.isHasHeader()) dbformat.setHasHeaderInFile(true);
 		if(param.getHeaderPath() != null) dbformat.setHeaderPath(param.getHeaderPath());
 		if(param.getCommentIndicator() != null) dbformat.setCommentIndicator(param.getCommentIndicator());
 
 		if(param.isHasHeader() || param.getHeaderPath() != null || dbformat.getHeaderPart() == null) {
-			db.readFormatFromHeader();
+			db.readHeader();
 		}
 		this.format = db.getFormat();
 

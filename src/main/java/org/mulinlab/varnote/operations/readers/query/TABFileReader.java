@@ -25,12 +25,6 @@ public final class TABFileReader extends AbstractFileReader {
         super(path, fileType, format);
     }
 
-    public void checkFormat() {
-        if(!format.hasLoc()) {
-            readFormatFromHeader();
-        }
-    }
-
     @Override
     protected void initLineFilters() {
         lineFilters.add(new TABHeaderLineFilter(format));

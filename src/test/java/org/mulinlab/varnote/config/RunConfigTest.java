@@ -83,6 +83,7 @@ public class RunConfigTest {
 
         Assert.assertEquals(runConfig.isForceOverlap(), true);
     }
+    ///Users/hdd/Downloads/up/tell_workspace/workspace_201911172159137590
 
     @Test
     public void testRunIntersect() {
@@ -93,6 +94,12 @@ public class RunConfigTest {
     @Test
     public void testRunAnno() {
         String[] args = new String[]{ "-I", "src/test/resources/config/q3.sorted.anno.run.config.full"};
+        TestUtils.initClass(RunAnnotationConfig.class, args);
+    }
+
+    @Test
+    public void testRunAnno1() {
+        String[] args = new String[]{ "-I", "/Users/hdd/Downloads/up/tell_workspace/workspace_201911181133131453/run.config"};
         TestUtils.initClass(RunAnnotationConfig.class, args);
     }
 }

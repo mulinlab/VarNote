@@ -88,7 +88,7 @@ public class OutParam extends Param {
     }
 
     public void setOutputMode(int outMode) {
-        this.outputMode = VannoUtils.checkOutMode(outMode);
+        this.outputMode = OutMode.toOutMode(outMode);
     }
 
     public void setOutFileSuffix(String outFileSuffix) {

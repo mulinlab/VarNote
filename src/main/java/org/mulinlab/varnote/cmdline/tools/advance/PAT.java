@@ -1,9 +1,12 @@
 package org.mulinlab.varnote.cmdline.tools.advance;
 
+import org.broadinstitute.barclay.argparser.Argument;
 import org.broadinstitute.barclay.argparser.ArgumentCollection;
 import org.broadinstitute.barclay.argparser.CommandLineProgramProperties;
 import org.mulinlab.varnote.cmdline.abstractclass.QueryFileProgram;
 import org.mulinlab.varnote.cmdline.collection.OutputArgumentCollection;
+import org.mulinlab.varnote.cmdline.collection.VariantEffectArgumentCollection;
+import org.mulinlab.varnote.cmdline.constant.Arguments;
 import org.mulinlab.varnote.cmdline.programgroups.AdvanceProgramGroup;
 import org.mulinlab.varnote.config.param.FilterParam;
 import org.mulinlab.varnote.config.param.output.OutParam;
@@ -42,17 +45,21 @@ public final class PAT extends QueryFileProgram {
     @ArgumentCollection()
     public final OutputArgumentCollection outputArguments = new OutputArgumentCollection();
 
+    @ArgumentCollection()
+    public final VariantEffectArgumentCollection variantEffectArgument = new VariantEffectArgumentCollection();
+
+    @Argument( shortName = "P", fullName = "pedigree", optional = false, doc = "Pedigree File.")
+    public File pedigreeFile = null;
 
     @Override
     protected int doWork() {
         Format format = getFormat();
 
-
-        PATRunConfig runConfig = new PATRunConfig(new QueryFileParam(inputArguments.getQueryFilePath(), format, false, PATRunConfig.getFilterParam()));
+        PATRunConfig runConfig = new PATRunConfig(new QueryFileParam(inputArguments.getQueryFilePath(), format, false), dbArguments.getDBList(), variantEffectArgument.getJannovarUtils(), pedigreeFile);
         runConfig.setOutParam(outputArguments.getOutParam(new OutParam()));
         runConfig.setThread(runArguments.getThreads());
 
-        RunFactory.runPAT(runConfig);
+        RunFactory.runADTools(runConfig, "PAT");
         return -1;
     }
 }

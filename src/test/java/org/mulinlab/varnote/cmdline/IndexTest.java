@@ -26,7 +26,7 @@ public final class IndexTest {
     @Test
     public void testIndexTAB() {
         String[] args = new String[]{
-                "-I", "src/test/resources/database3.sorted.tab.gz" ,
+                "-I:tab,c=1,b=2,e=2", "src/test/resources/database3.sorted.tab.gz" ,
                 "-HP", "src/test/resources/database3.sorted.tab.gz.header"};
 
         TestUtils.initClass(Index.class, args, false);
@@ -51,8 +51,8 @@ public final class IndexTest {
     @Test
     public void testIndexBED() {
         String[] args = new String[]{
-                "-I", "/Users/hdd/Desktop/vanno/VarNoteDB_FP_Roadmap_127Epi.bed.gz",
-                "-HP", "/Users/hdd/Desktop/vanno/VarNoteDB_FP_Roadmap_127Epi.bed.gz.header"};
+                "-I", "/Users/hdd/Desktop/vanno/cepip/hg19/VarNoteDB_FP_Roadmap_127Epi.bed.gz",
+                "-HP", "/Users/hdd/Desktop/vanno/cepip/hg19/header"};
 
         TestUtils.initClass(Index.class, args, false);
     }

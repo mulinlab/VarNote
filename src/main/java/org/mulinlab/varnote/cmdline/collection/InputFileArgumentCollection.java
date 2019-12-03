@@ -58,9 +58,7 @@ public final class InputFileArgumentCollection {
 //    public Boolean zeroBased = GlobalParameter.DEFAULT_ZERO_BASED;
 
     @Argument(shortName = Arguments.FORMAT_HEADER_SHORT, fullName = Arguments.FORMAT_HEADER_LONG, optional = true,
-            doc = "Indicate whether input file contains a column header line. If --" + Arguments.FORMAT_HEADER_LONG + " is included, the first line below the comment line will be considered as a header line." +
-                    "\nHeader line could start with '#' or have no indicator.\n" +
-                    "To facilitate the automatic inference, header should at least include CHROM and POS (or, alternatively, BEGIN and END) columns, while, REF, ALT and other columns are optional. Other column names could be any words defined by user.")
+            doc = "Indicate whether input file contains a column header line. If --" + Arguments.FORMAT_HEADER_LONG + " is included, the first line below the comment line will be considered as a header line.")
     public Boolean hasHeader = GlobalParameter.DEFAULT_HAS_HEADER;
 
     @Argument(shortName = Arguments.FORMAT_HEADER_PATH_SHORT, fullName = Arguments.FORMAT_HEADER_PATH_LONG, optional = true,
@@ -82,7 +80,7 @@ public final class InputFileArgumentCollection {
         if(format == null) format = Format.defaultFormat(queryFilePath, isQuery);
         format = queryFile.setFormat(format);
 
-        if(hasHeader) format.setHasHeader(true);
+        if(hasHeader) format.setHasHeaderInFile(true);
         if(extHeaderFile != null) format.setHeaderPath(extHeaderFile.getAbsolutePath());
 
 

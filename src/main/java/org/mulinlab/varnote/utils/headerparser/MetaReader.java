@@ -10,7 +10,7 @@ import org.mulinlab.varnote.utils.VannoUtils;
 
 public final class MetaReader {
 	public static void readHeader(final Format formatSpec, final String path, final String label) {
-		
+
 		VannoUtils.checkValidBGZ(path);
 		final BlockCompressedInputStream reader = VannoUtils.makeBGZ(path);
 

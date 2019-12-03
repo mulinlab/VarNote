@@ -73,6 +73,7 @@ public class LocFeature implements Feature {
                 cloned.parts[i] = this.parts[i];
             }
         }
+        if(this.variantContext != null) cloned.variantContext = this.variantContext;
         return cloned;
     }
 

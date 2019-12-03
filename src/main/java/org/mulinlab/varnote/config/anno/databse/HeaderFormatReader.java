@@ -11,7 +11,7 @@ import org.mulinlab.varnote.utils.format.Format;
 import java.io.IOException;
 
 public final class HeaderFormatReader {
-    public static Format readFormatFromHeader(Format format, final String path, final FileType fileType) {
+    public static Format readHeader(Format format, final String path, final FileType fileType) {
         if(format.getHeaderPath() != null) {
             format = readDefaultHeader(format.getHeaderPath(), VannoUtils.checkFileType(format.getHeaderPath()), format, true);
         } else {
@@ -53,7 +53,7 @@ public final class HeaderFormatReader {
 
                 if(line.startsWith(GlobalParameter.VCF_HEADER_INDICATOR)) line = line.substring(1);
                 parts = VannoUtils.parserHeader(line, GlobalParameter.TAB);
-                format.setHeaderPart(parts, true);
+                format.setHeaderPart(parts);
                 if(lineIterator.hasNext()) checkDataIsValid(format, lineIterator.next().split(GlobalParameter.TAB));
 
                 break;
@@ -61,7 +61,7 @@ public final class HeaderFormatReader {
                 format.setDataStr(line);
 
                 parts = VannoUtils.setDefaultCol(VannoUtils.parserHeader(line, GlobalParameter.TAB));
-                format.setHeaderPart(parts, false);
+                format.setHeaderPart(parts);
                 break;
             }
         }
@@ -91,7 +91,7 @@ public final class HeaderFormatReader {
     }
 
     public static Format readHeaderFromArray(final String[] header, final Format format) {
-        format.setHeaderPart(header, true);
+        format.setHeaderPart(header);
         return format;
     }
 

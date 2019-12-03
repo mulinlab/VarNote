@@ -2,101 +2,58 @@ package org.mulinlab.varnote.config.parser;
 
 import htsjdk.tribble.util.ParsingUtils;
 import org.mulinlab.varnote.config.io.temp.ThreadPrintter;
-import org.mulinlab.varnote.config.run.CEPIPRunConfig;
+import org.mulinlab.varnote.config.run.AdvanceToolRunConfig;
+import org.mulinlab.varnote.utils.JannovarUtils;
+import org.mulinlab.varnote.utils.enumset.CellType;
+import org.mulinlab.varnote.utils.jannovar.VariantAnnotation;
 import org.mulinlab.varnote.utils.node.LocFeature;
 
+import javax.xml.transform.sax.SAXSource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RegParser implements ResultParser {
+public class REGParser extends AbstractParser {
     private Map<String, CellMark> cellMarkMap;
     private int count;
-    private final ThreadPrintter printter;
-    private final List<String> cellTypes;
+
     private final String[] token = new String[2];
 
-    public RegParser(final ThreadPrintter printter, final List<String> cellTypes) {
+    private final ThreadPrintter printter;
+    private final List<CellType> cellTypes;
+    private JannovarUtils jannovarUtils = null;
+
+    public REGParser(final ThreadPrintter printter, final List<CellType> cellTypes, final JannovarUtils jannovarUtils) {
         setDefaultCellMark();
         this.count = 0;
         this.printter = printter;
         this.cellTypes = cellTypes;
+        this.jannovarUtils = jannovarUtils;
     }
-
-
-//    @Override
-//    public String processNode(LocFeature query, Map<String, LocFeature[]> dbNodeMap) {
-//        try {
-//            LocFeature[] features = dbNodeMap.get(CEPIPRunConfig.ROAD_MAP_LABEL);
-//
-//            count++;
-//            String begin = "";
-//            String[] token = null;
-//            if (features != null) {
-//
-//                Map<String, List<CellMark>> cellMap = new HashMap<>();
-//                List<CellMark> marks = null;
-//                for (LocFeature feature : features) {
-//
-//                    token = feature.parts[10].split("-");
-//
-//
-//                    if (cellMap.get(token[0]) == null) {
-//                        marks = new ArrayList<>();
-//                    } else {
-//                        marks = cellMap.get(token[0]);
-//                    }
-//                    marks.add(new CellMark(token[1], 1, Integer.parseInt(feature.parts[4]),
-//                            Math.abs(Integer.parseInt(feature.parts[9]) - (query.beg - Integer.parseInt(feature.parts[1])))));
-//                    cellMap.put(token[0], marks);
-//                }
-//
-//                begin = query.origStr;
-//                List<CellMark> E116 = cellMap.get("E116");
-//                if (E116 != null) {
-//                    for (CellMark cellMark : E116) {
-//                        if (cellMark.hit == 1) {
-//                            printter.print(String.format("%s\t%d\t%s\t%s\t%f", query.origStr, count, "E116", cellMark.name, compute(E116)));
-//                        }
-//                    }
-//                }
-//
-//                begin = query.origStr;
-//                List<CellMark> E124 = cellMap.get("E124");
-//                if (E124 != null) {
-//                    for (CellMark cellMark : E124) {
-//                        if (cellMark.hit == 1) {
-//                            printter.print(String.format("%s\t%d\t%s\t%s\t%f", query.origStr, count, "E124", cellMark.name, compute(E124)));
-//                        }
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
 
     @Override
     public String processNode(LocFeature query, Map<String, LocFeature[]> dbNodeMap) {
-		LocFeature[] roadmapFeatures = dbNodeMap.get(CEPIPRunConfig.ROAD_MAP_LABEL);
-        LocFeature[] regbaseFeature = dbNodeMap.get(CEPIPRunConfig.REGBASE_MAP_LABEL);
+		LocFeature[] roadmapFeatures = dbNodeMap.get(AdvanceToolRunConfig.ROAD_MAP_LABEL);
+        VariantAnnotation annotation = null;
 
-        double combined_p = 0.1, reg_p = -1, prior_p = 0.5, a = 0.5;
-        if(regbaseFeature != null) {
-            for (LocFeature locFeature: regbaseFeature) {
-                if(locFeature.parts[3].equals(query.ref) && locFeature.parts[4].equals(query.alt) && !locFeature.parts[5].equals(".")) {
-                    combined_p = Double.parseDouble(locFeature.parts[5]);
-                    reg_p = Double.parseDouble(locFeature.parts[6]);
-                }
-            }
+        if(query.chr.equals("1")) {
+            System.out.println();
         }
 
-		if(roadmapFeatures != null) {
-            try {
-                Map<String, List<CellMark>> cellMap = new HashMap<>();
-                List<CellMark> marks;
+        double combined_p = 0.1, reg_p = -1, prior_p = 0.5, a = 0.5;
+
+
+        LocFeature regBase = getRegBase(query, dbNodeMap.get(AdvanceToolRunConfig.REGBASE_MAP_LABEL));
+        if(regBase != null) {
+            combined_p = Double.parseDouble(regBase.parts[5]);
+            reg_p = Double.parseDouble(regBase.parts[6]);
+        }
+
+        try {
+            Map<String, List<CellMark>> cellMap = new HashMap<>();
+            List<CellMark> marks;
+            if(roadmapFeatures != null) {
                 for (LocFeature feature: roadmapFeatures) {
                     ParsingUtils.split(feature.parts[10], token, '-', true);
 
@@ -110,16 +67,23 @@ public class RegParser implements ResultParser {
                             Math.abs( Integer.parseInt(feature.parts[9]) - ( query.beg - Integer.parseInt(feature.parts[1])))));
                     cellMap.put(token[0], marks);
                 }
-
-                double score;
-                for (String cell: cellTypes) {
-                    score = compute(cellMap.get(cell));
-                    printter.print(String.format("%s\t%s\t%f\t%f\t%f\t%f", query.origStr, cell, score, combined_p, reg_p, a*(score * combined_p)/prior_p));
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
-		}
+
+
+            if(jannovarUtils != null) {
+                annotation = jannovarUtils.annotate(query);
+                query.origStr += "\t" + annotation.getVariantEffect() + "\t" + annotation.getGeneId() + "\t" + annotation.getGeneSymbol();
+            }
+
+            double score;
+            for (CellType cell: cellTypes) {
+                score = compute(cellMap.get(cell.toString()));
+                printter.print(String.format("%s\t%s\t%f\t%f\t%f\t%f", query.origStr, cell, score, combined_p, reg_p, a*(score * combined_p)/prior_p));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        this.count++;
 		return null;
 	}
 
@@ -148,7 +112,7 @@ public class RegParser implements ResultParser {
                         + -0.4843821400 * H3K9me3.hit + 1.5150317212 * H3K27me3.hit + 0.0008691201 * H3K4me2.score +
                         0.0003089830 * H3K4me3.score + 0.0043517819 * H3K36me3.score + -0.0001497833 * H3K79me2.centrality))
         );
-        if ( prior < 0.3696304 ) {
+        if (prior < 0.3696304) {
             prior = 0.3696304;
         }
         return prior;

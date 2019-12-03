@@ -39,10 +39,6 @@ public final class VCFFileReader extends AbstractFileReader {
         this.vcfParser = vcfParser;
     }
 
-    @Override
-    public void checkFormat() {
-
-    }
 
     public VCFParser getVcfParser() {
         if(vcfParser == null) {

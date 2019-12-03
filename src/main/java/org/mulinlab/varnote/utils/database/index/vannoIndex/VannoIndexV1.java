@@ -47,7 +47,7 @@ public final class VannoIndexV1 extends VannoIndex{
 		int alt = GlobalParameter.readInt(is);
 		int info = GlobalParameter.readInt(is);
         this.format = new Format(mPreset, mSc, mBc, mEc, mSkip, commentIndicator, ref, alt, GlobalParameter.readBoolean(is));
-		this.format.setHeaderPart(headerParts, false);
+		this.format.setHeaderPart(headerParts);
 //        GlobalParameter.readInt(is); //type
 //        GlobalParameter.readInt(is);
         mSeq = new String[GlobalParameter.readInt(is)]; // # sequences

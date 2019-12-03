@@ -1,11 +1,11 @@
 package org.mulinlab.varnote.config.anno.databse.anno;
 
 import java.util.*;
-
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFInfoHeaderLine;
 import org.mulinlab.varnote.config.anno.InfoField;
+import org.mulinlab.varnote.config.anno.NormalField;
 import org.mulinlab.varnote.config.anno.databse.VCFParser;
 import org.mulinlab.varnote.utils.enumset.AnnoOutFormat;
 import org.mulinlab.varnote.utils.node.LocFeature;
@@ -34,7 +34,7 @@ public final class DatabaseAnnoVCFParser extends AbstractDatababseAnnoParser {
 			infoFieldMap.put(key, new InfoField(key, vcfParser.getInfoHeaderLine(key)));
 		}
 
-		config.getDb().setVCFLocCodec(true, vcfParser.getCodec());
+//		config.getDb().setVCFLocCodec(true, vcfParser.getCodec());
 	}
 
 	@Override
@@ -53,7 +53,9 @@ public final class DatabaseAnnoVCFParser extends AbstractDatababseAnnoParser {
 
 		VariantContext ctx = feature.variantContext;
 		for (String key: infoFieldsToExtract) {
-			infoFieldMap.get(key).addDB(ctx.getAttributeAsString(key, null));
+			if(ctx.hasAttribute(key)) {
+				infoFieldMap.get(key).addDB(ctx.getAttributeAsString(key, NormalField.NO_VAL));
+			}
 		}
 	}
 
@@ -114,7 +116,7 @@ public final class DatabaseAnnoVCFParser extends AbstractDatababseAnnoParser {
 			outName = config.getInfoOutputName(field);
 			info = vcfParser.getInfoHeaderLine(field);
 
-			if(outName != null)  info = new VCFInfoHeaderLine(outName, info.getCountType(), info.getType(), info.getDescription());
+			if(outName != null)  info = new VCFInfoHeaderLine(outName, info.getCount(), info.getType(), info.getDescription());
 			header.addMetaDataLine(info);
 		}
 		return header;

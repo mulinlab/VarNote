@@ -18,6 +18,7 @@ import org.mulinlab.varnote.config.parser.ResultParser;
 import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.utils.VannoUtils;
 import org.mulinlab.varnote.utils.database.Database;
+import org.mulinlab.varnote.utils.enumset.FormatType;
 import org.mulinlab.varnote.utils.node.LocFeature;
 
 public final class AnnoRunConfig extends OverlapRunConfig{
@@ -98,6 +99,12 @@ public final class AnnoRunConfig extends OverlapRunConfig{
 		Map<String, ExtractConfig> extractConfigMap = new HashMap<>();
 		DBAnnoParam annoParam = null;
 		for (Database db: databses) {
+			if(db.getFormat().type == FormatType.VCF) {
+				db.setVCFLocCodec(true, db.getVcfParser().getCodec());
+			} else {
+				db.setDefaultLocCodec(true);
+			}
+
 			if(map == null) {
 				annoParam = DBAnnoParam.defaultParam(db.getOutName());
 			} else {

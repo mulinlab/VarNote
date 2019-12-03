@@ -28,7 +28,9 @@ public abstract class AbstractFileReader {
 
     public AbstractFileReader(final QueryReaderItf itf, final Format format) {
         this.reader = itf;
-        this.format = format;
+
+        format.checkLoc();
+        this.format = HeaderFormatReader.readHeader(format, getFilePath(), getFileType());
 
         this.lineFilters = new ArrayList<>();
         this.initLineFilters();
@@ -44,7 +46,6 @@ public abstract class AbstractFileReader {
         this.fileType = fileType;
     }
 
-    public abstract void checkFormat();
     protected abstract void initLineFilters();
     public abstract LineFilterIterator getFilterIterator();
     public void addLineFilters(final LineFilter lineFilter) {
@@ -69,11 +70,6 @@ public abstract class AbstractFileReader {
     public FileType getFileType() {
         if(fileType == null) fileType = VannoUtils.checkFileType(getFilePath());
         return fileType;
-    }
-
-    public void readFormatFromHeader() {
-        format = HeaderFormatReader.readFormatFromHeader(format, getFilePath(), getFileType());
-        format.checkLoc();
     }
 
     public static QueryReaderItf getReader(final String path, final FileType fileType) {

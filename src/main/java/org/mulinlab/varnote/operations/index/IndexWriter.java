@@ -92,7 +92,6 @@ public final class IndexWriter {
 
 	public void writeIndexForBGZ(final AbstractFileReader reader) throws IOException {
 		reader.addLineFilters(new SkipLineFilter(formatSpec.numHeaderLinesToSkip));
-		reader.readFormatFromHeader();
 
 		logger.info(String.format("Input format: %s", param.getFormat().logFormat()));
 		final LineFilterIterator iterator = reader.getFilterIterator();
@@ -104,12 +103,12 @@ public final class IndexWriter {
 
 		int c = 0;
 		while(iterator.hasNext()) {
-			c++;
 			feature = iterator.next();
 //			System.out.println(feature + ", " + iterator.getPosition());
 			if(feature == null) {
 				blockBean.setFilePointer(iterator.getPosition());
 			} else {
+				c++;
 				if(!feature.chr.equals(seqName)) {
 					if(!seqName.equals("")) {
 						addBin(bin);

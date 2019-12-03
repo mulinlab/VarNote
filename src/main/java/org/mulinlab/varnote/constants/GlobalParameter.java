@@ -18,6 +18,15 @@ public final class GlobalParameter {
 	public final static String PRO_CMD = "java -jar /path/to/VarNote.jar" ;
 	public final static boolean DEFAULT_LOG = true;
 
+	//gt
+	public static final String GT_COMPRESS_FILE = ".bit";
+	public static final String GT_COMPRESS_FILE_IDX = ".bit.idx";
+	public static final int GT_BIN_INTERVAL = 1000;
+	public static final int REF_IDX = 0;
+	public static final int NO_CALL_IDX = -1;
+	public static final int GT_FILE_END = -9;
+
+
 	//sign
 	public static final String UNDERLINE = "_";
 	public static final String NULLVALUE = ".";
@@ -27,6 +36,14 @@ public final class GlobalParameter {
 	public static final String OVERLAP_NOTE = "@";
 	public static final String OVERLAP_EQUAL = "=";
 	public final static String OPTION_SEPERATE = ":";
+
+	public final static String ROAD_MAP_LABEL = "roadmap";
+	public final static String REGBASE_MAP_LABEL = "regbase";
+	public final static String GENOMAD_LABEL = "gnomad";
+	public final static String DBNSFP_LABEL = "dbNSFP";
+
+	public final static String COSMIC_LABEL = "cosmic";
+	public final static String ICGC_LABEL = "icgc";
 
 
 	//format

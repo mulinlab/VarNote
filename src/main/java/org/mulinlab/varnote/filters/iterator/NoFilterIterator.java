@@ -39,7 +39,7 @@ public final class NoFilterIterator implements LineIterator {
         try {
             pos = reader.getPosition();
             next = reader.readLine();
-            if(next != null && next.charAt(next.length() - 1) == '\r') {
+            if(next != null && next.length() > 1 && next.charAt(next.length() - 1) == '\r') {
                 next = next.substring(0, next.length() - 1);
             }
         } catch (Exception e) {

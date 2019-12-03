@@ -62,7 +62,7 @@ public abstract class IndexProgram extends RunProgram {
         if(format == null) format = Format.defaultFormat(fileToIndex.getArgValue(), false);
         format = fileToIndex.setFormat(format);
 
-        if(hasHeader) format.setHasHeader(true);
+        if(hasHeader) format.setHasHeaderInFile(true);
         if(extHeaderFile != null) format.setHeaderPath(extHeaderFile.getAbsolutePath());
 
         IOUtil.assertInputIsValid(fileToIndex.getArgValue());

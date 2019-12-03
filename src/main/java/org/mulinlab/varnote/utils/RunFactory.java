@@ -144,17 +144,16 @@ public final class RunFactory {
 		mr.getResult();
 	}
 
-	public static void runPAT(final PATRunConfig config) {
-
-		logger.info(VannoUtils.printLogHeader("RUN PAT"));
+	public static void runADTools(final AdvanceToolRunConfig config, final String tool) {
+		logger.info(VannoUtils.printLogHeader("RUN " + tool));
 
 		config.init();
 		int thread = config.getThread();
 
-		MapReduce<File, Long> mr = new SimpleMapReduce<File, Long>(thread, ReducerFactory.gePATReducer(config));
-		PATMapper mapper = null;
+		MapReduce<File, Long> mr = new SimpleMapReduce<File, Long>(thread, ReducerFactory.geADToolsReducer(config));
+        ADToolMapper mapper = null;
 		for(int i=0; i<thread; i++) {
-			mapper = new PATMapper(config, i);
+			mapper = new ADToolMapper(config, i);
 			mr.addMapper(mapper);
 		}
 

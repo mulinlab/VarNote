@@ -129,17 +129,6 @@ public final class VannoUtils {
 	    }
 	}
 	
-	public static OutMode checkOutMode(final int outMode) {
-		for (OutMode m : OutMode.values()) {
-			if(outMode == m.getNum()) {
-				return m;
-			}
-		}	
-		throw new InvalidArgumentException("Valid output recording mode are " + OutMode.QUERY.getNum() + "," + OutMode.DB.getNum() + " and " +
-				OutMode.BOTH.getNum() +  ". " + OutMode.QUERY.getNum() + " for \"only output query records\"; " + 
-				OutMode.DB.getNum() + " for \"only output matched database records\"; " + OutMode.BOTH.getNum() + " for \"output both query records and matched database records\". ");
-	}
-	
 	public static VCFHeaderLineType checkType(String type) {
 		type = trimAndLC(type);
 		if(type.equals("integer")) {
@@ -186,18 +175,12 @@ public final class VannoUtils {
 				"mode=" + Mode.MIX.getNum() + " means mix search, mode=" + Mode.SWEEP.getNum() + " means sweep search.");
 	}
 	
-	public static Format determineFileType(String fileName, final boolean isQuery) {
+	public static Format determineFileType(String fileName) {
 		fileName = trimAndLC(fileName);
 
-		if(isQuery) {
-			if(hasExtension(FileExt.VCF, fileName)) return Format.VCF;
-			else if(hasExtension(FileExt.BED, fileName)) return Format.BED;
-			else return null;
-		} else {
-			if(hasExtension(FileExt.GZVCF, fileName)) return Format.VCF;
-			else if(hasExtension(FileExt.GZBED, fileName)) return Format.BED;
-			else return null;
-		}
+		if(hasExtension(FileExt.VCF, fileName)) return Format.VCF;
+		else if(hasExtension(FileExt.BED, fileName)) return Format.BED;
+		else return null;
 	}
 
 	public static boolean formatIsMatch(String fileName, final Format format) {

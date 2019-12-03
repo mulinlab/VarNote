@@ -30,6 +30,22 @@ public final class IntersectTest {
         TestUtils.initClass(Intersect.class, args);
     }
 
+    @Test
+    public void testRoadmap() {
+
+        String[] args = new String[]{
+                "-D:bed,tag=roadmap", "http://202.113.53.226/VarNoteDB_dandan/hg19/v1.0/FP/VarNoteDB_FP_Roadmap_127Epi/VarNoteDB_FP_Roadmap_127Epi.bed.gz",
+                "-Q:tab,c=1,b=2,e=2,ref=4,alt=5", "/Users/hdd/Desktop/vanno/cepip/immuno_pleiotropic_variants.txt",
+                "-T", "1",
+                "-O", "src/test/resources/out/q3.out",
+                "-Z", "false",
+                "-OM", "2",
+                "-RC", "false",
+                "--log", "true"
+        };
+        TestUtils.initClass(Intersect.class, args);
+    }
+
 
     @Test
     public void testBED() {
