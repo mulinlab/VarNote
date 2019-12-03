@@ -60,7 +60,9 @@ public final class Index1000G {
 			feature = iterator.next();
 			if(feature != null) {
 				count ++;
-				if(feature.chr.equals("X")) break;
+				if(feature.chr.equals("X")) {
+					break;
+				}
 				if (!feature.chr.equals(seqName)) {
 					System.out.println(feature.chr);
 					sequenceNames.add(feature.chr);
@@ -72,13 +74,16 @@ public final class Index1000G {
 					binList = new BinList();
 				}
 
-				ctx = feature.variantContext;
-				for (int i = 1; i < ctx.getAlleles().size(); i++) {
-					variant = new Variant(ctx.getStart(), ctx.getReference(), ctx.getAlternateAllele(i-1));
-					variant.setCalls((byte)i, ctx.getGenotypes(), ctx.getNSamples());
+				if(count % 10000 == 0) {
 
-					binList.addVariant(variant, gtOS);
-					writeVariant(variant);
+					ctx = feature.variantContext;
+					for (int i = 1; i < ctx.getAlleles().size(); i++) {
+						variant = new Variant(ctx.getStart(), ctx.getReference(), ctx.getAlternateAllele(i-1));
+						variant.setCalls((byte)i, ctx.getGenotypes(), ctx.getNSamples());
+
+						binList.addVariant(variant, gtOS);
+						writeVariant(variant);
+					}
 				}
 			}
 		}
@@ -95,10 +100,6 @@ public final class Index1000G {
 	}
 
 	public void writeIdx() throws IOException {
-		int len = 0;
-		for (int i = 0; i < sequenceNames.size(); i++) {
-			len += sequenceNames.get(i).length();
-		}
 		gtIndexOS.writeInt(sequenceNames.size());
 
 		for (int i = 0; i < sequenceNames.size(); i++) {
