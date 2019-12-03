@@ -116,7 +116,8 @@ public final class DatabaseAnnoVCFParser extends AbstractDatababseAnnoParser {
 			outName = config.getInfoOutputName(field);
 			info = vcfParser.getInfoHeaderLine(field);
 
-			if(outName != null)  info = new VCFInfoHeaderLine(outName, info.getCount(), info.getType(), info.getDescription());
+
+			if(outName != null)  info = new VCFInfoHeaderLine(outName, info.getCountType(), info.getType(), info.getDescription());
 			header.addMetaDataLine(info);
 		}
 		return header;
