@@ -15,9 +15,19 @@ targetCompatibility = 1.8
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
-
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            afterEvaluate {
+                artifactId = jar.baseName
+            }
+        }
+    }
+}
 
 dependencies {
     compile('com.intel.gkl:gkl:0.8.6') {
