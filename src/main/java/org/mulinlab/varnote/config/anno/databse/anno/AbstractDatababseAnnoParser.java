@@ -98,6 +98,16 @@ public abstract class AbstractDatababseAnnoParser {
 		return joiner;
 	}
 
+	public List<String> getHeaderList() {
+		List<String> header = new ArrayList<>();
+		for (int col : colsToExtract) {
+			if(isInfoFiled(col)) continue;
+
+			header.add(getFieldName(col));
+		}
+		return header;
+	}
+
 	public StringJoiner joinFields(StringJoiner joiner) {
 		String fieldVal;
 
@@ -116,22 +126,35 @@ public abstract class AbstractDatababseAnnoParser {
 		return joiner;
 	}
 
+	public Map<String, String> getMapValue() {
+		Map<String, String> map = new HashMap<>();
+
+		for (int col: colsToExtract) {
+			if(isInfoFiled(col)) continue;
+
+			if(fileds.get(col) != null) {
+				map.put(getFieldName(col), fileds.get(col).getVal());
+			}
+		}
+		return map;
+	}
+
 	public void extractFieldsValue(final LocFeature query, final LocFeature[] dbFeatures) {
 		if(dbFeatures != null && dbFeatures.length > 0) {
-
 			initFields(dbFeatures.length);
 			for (LocFeature dbFeature : dbFeatures) {
-				if(checkQueryAndDBNodeMatch(query, dbFeature)) {
-					processDBFeature(dbFeature);
+				int matchFlag = checkQueryAndDBNodeMatch(query, dbFeature);
+				if(matchFlag != NormalField.NOT_MATCH) {
+					processDBFeature(dbFeature, matchFlag);
 				}
 			}
 		}
 	}
 
-	protected void processDBFeature(final LocFeature feature) {
+	protected void processDBFeature(final LocFeature feature, final int matchFlag) {
 		for (int col: colsToExtract) {
 			if(fileds.get(col) != null) {
-				fileds.get(col).addDB(feature.parts[col - 1]);
+				fileds.get(col).addDBVal(feature.parts[col - 1]);
 			}
 		}
 	}
@@ -143,22 +166,21 @@ public abstract class AbstractDatababseAnnoParser {
 		}
 	}
 
-	private boolean checkQueryAndDBNodeMatch(final LocFeature query, final LocFeature db) {
-		if(isForceOverlap) return true;
+	private int checkQueryAndDBNodeMatch(final LocFeature query, final LocFeature db) {
+		if(isForceOverlap) return NormalField.FORCE_OVERLAP;
 		else {
 			if(!query.ref.equals(db.ref)) {
-				return false;
+				return NormalField.NOT_MATCH;
 			} else {
 				for (String qAlt : query.getAlts()) {
-					for (String dbAlt: db.getAlts()) {
-						if(dbAlt.equals(qAlt)) {
-//							System.out.println(qAlt + ", " + dbAlt);
-							return true;
+					for (int i = 0; i < db.getAlts().length; i++) {
+						if(db.getAlts()[i].equals(qAlt)) {
+							return i;
 						}
 					}
 				}
 			}
-			return false;
+			return NormalField.NOT_MATCH;
 		}
 	}
 
@@ -190,6 +212,7 @@ public abstract class AbstractDatababseAnnoParser {
 	public StringJoiner joinNullVals(StringJoiner joiner) {
 		if(annoOutFormat == AnnoOutFormat.BED) {
 			for (int i = 0; i < colsToExtract.length; i++) {
+				if(isInfoFiled(colsToExtract[i])) continue;
 				joiner.add(NULLVALUE);
 			}
 		}
@@ -201,4 +224,6 @@ public abstract class AbstractDatababseAnnoParser {
 			logger.info(s);
 		}
 	}
+
+
 }

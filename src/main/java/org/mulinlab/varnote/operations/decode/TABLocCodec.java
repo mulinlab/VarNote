@@ -16,7 +16,9 @@ public final class TABLocCodec extends LocCodec {
 
     @Override
     public void processEnd() {
-        intv.end = Integer.parseInt(parts[format.endPositionColumn - 1]);
+        if(!format.isPos()) {
+            intv.end = Integer.parseInt(parts[format.endPositionColumn - 1]);
+        }
     }
 
     @Override

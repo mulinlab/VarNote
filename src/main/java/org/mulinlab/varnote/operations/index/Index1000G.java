@@ -48,8 +48,7 @@ public final class Index1000G {
 		final LineFilterIterator iterator = reader.getFilterIterator();
 
 		String seqName = "";
-		int count = 0;
-
+		int count = 0, tid = 0;
 
 		LocFeature feature;
 		VariantContext ctx;
@@ -60,25 +59,23 @@ public final class Index1000G {
 			feature = iterator.next();
 			if(feature != null) {
 				count ++;
-				if(feature.chr.equals("X")) {
-					break;
-				}
 				if (!feature.chr.equals(seqName)) {
 					System.out.println(feature.chr);
-					sequenceNames.add(feature.chr);
-					seqName = feature.chr;
-
 					if(binList != null) {
-						chrMap.put(sequenceNames.size() - 1, binList);
+						chrMap.put(tid, binList);
 					}
 					binList = new BinList();
+
+					sequenceNames.add(feature.chr);
+					tid = sequenceNames.size() - 1;
+
+					seqName = feature.chr;
 				}
 
-				if(count % 10000 == 0) {
-
-					ctx = feature.variantContext;
+				ctx = feature.variantContext;
+				if(ctx.getAlleles() != null && ctx.getAlleles().size() > 0) {
 					for (int i = 1; i < ctx.getAlleles().size(); i++) {
-						variant = new Variant(ctx.getStart(), ctx.getReference(), ctx.getAlternateAllele(i-1));
+						variant = new Variant((feature.beg + 1), ctx.getReference(), ctx.getAlternateAllele(i-1));
 						variant.setCalls((byte)i, ctx.getGenotypes(), ctx.getNSamples());
 
 						binList.addVariant(variant, gtOS);
@@ -89,7 +86,7 @@ public final class Index1000G {
 		}
 
 		if(binList != null) {
-			chrMap.put(sequenceNames.size(), binList);
+			chrMap.put(tid, binList);
 		}
 
 		writeIdx();
@@ -107,7 +104,7 @@ public final class Index1000G {
 			gtIndexOS.writeBytes(sequenceNames.get(i));
 		}
 
-		for (int i = 1; i <= sequenceNames.size(); i++) {
+		for (int i = 0; i < sequenceNames.size(); i++) {
 			writeBins(chrMap.get(i));
 		}
 	}

@@ -47,14 +47,22 @@ public final class DatabaseAnnoVCFParser extends AbstractDatababseAnnoParser {
 		return joiner;
 	}
 
+	public List<String> getHeaderList() {
+		List<String> header = super.getHeaderList();
+		for (String infoID : infoFieldsToExtract) {
+			header.add(getInfoName(infoID));
+		}
+		return header;
+	}
+
 	@Override
-	protected void processDBFeature(final LocFeature feature) {
-		super.processDBFeature(feature);
+	protected void processDBFeature(final LocFeature feature, final int matchFlag) {
+		super.processDBFeature(feature, matchFlag);
 
 		VariantContext ctx = feature.variantContext;
 		for (String key: infoFieldsToExtract) {
 			if(ctx.hasAttribute(key)) {
-				infoFieldMap.get(key).addDB(ctx.getAttributeAsString(key, NormalField.NO_VAL));
+				infoFieldMap.get(key).addDBValByAlt(ctx.getAttributeAsString(key, NormalField.NO_VAL), matchFlag, feature.getAlts());
 			}
 		}
 	}
@@ -95,6 +103,17 @@ public final class DatabaseAnnoVCFParser extends AbstractDatababseAnnoParser {
 		}
 
 		return joiner;
+	}
+
+	public Map<String, String> getMapValue() {
+		Map<String, String> map = super.getMapValue();
+
+		for (String key: infoFieldsToExtract) {
+			if(infoFieldMap.get(key) != null) {
+				map.put(getInfoName(key), infoFieldMap.get(key).getVal());
+			}
+		}
+		return map;
 	}
 
 	private String getInfoName(final String infoID) {

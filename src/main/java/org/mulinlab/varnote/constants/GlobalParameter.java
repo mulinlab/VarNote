@@ -20,6 +20,7 @@ public final class GlobalParameter {
 
 	//gt
 	public static final String GT_COMPRESS_FILE = ".bit";
+	public static final String GT_IDX = ".idx";
 	public static final String GT_COMPRESS_FILE_IDX = ".bit.idx";
 	public static final int GT_BIN_INTERVAL = 1000;
 	public static final int REF_IDX = 0;

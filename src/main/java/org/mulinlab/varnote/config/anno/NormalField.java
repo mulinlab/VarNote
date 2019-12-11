@@ -7,12 +7,15 @@ import java.util.StringJoiner;
 
 public class NormalField {
 
-	public static final String NO_VAL = "No-val";
-	private final String COMMA = GlobalParameter.COMMA;
+	public static final int FORCE_OVERLAP = -2;
+	public static final int NOT_MATCH = -1;
 
-	private final String fileName;
-	private String[] dbValues;
-	private int index;
+	public static final String NO_VAL = "No-val";
+	public final String COMMA = GlobalParameter.COMMA;
+
+	protected final String fileName;
+	protected String[] dbValues;
+	protected int index;
 
 	public NormalField(final String fileName) {
 		this.fileName = fileName;
@@ -23,7 +26,7 @@ public class NormalField {
 		index = 0;
 	}
 
-	public void addDB(final String val)  {
+	public void addDBVal(final String val)  {
 		try {
 			if(val != null && !val.equals(NO_VAL)) {
 				dbValues[index++] = val;

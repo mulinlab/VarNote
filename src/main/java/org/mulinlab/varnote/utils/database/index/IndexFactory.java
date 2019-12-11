@@ -46,7 +46,6 @@ public final class IndexFactory {
 				e.printStackTrace();
 			}
 			return index;
-			
 		} else {
 			throw new InvalidArgumentException("Index file should be end with " + IndexType.TBI.getExtIndex() + " or " + IndexType.VARNOTE.getExtIndex());
 		}

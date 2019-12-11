@@ -99,7 +99,7 @@ public class RunConfigTest {
 
     @Test
     public void testRunAnno1() {
-        String[] args = new String[]{ "-I", "/Users/hdd/Downloads/up/tell_workspace/vportal/vportal_201912031701225530/input.txt.run"};
+        String[] args = new String[]{ "-I", "/Users/hdd/Downloads/up/tell_workspace/vportal/vportal_201912082113463463/input.txt.run"};
         TestUtils.initClass(RunAnnotationConfig.class, args);
     }
 }

@@ -56,7 +56,8 @@ public final class QueryBEDParser extends AbstractQueryParser{
         StringJoiner tj = new StringJoiner(TAB);
         tj = getBEDHeaderStart(tj);
 
-        for (int i = 3; i < format.getHeaderPartSize(); i++) {
+        for (int i = 1; i <= format.getHeaderPartSize(); i++) {
+            if((i != format.sequenceColumn) && (i != format.startPositionColumn) && (i != format.endPositionColumn))
             tj.add(format.getColumnName(i));
         }
         tj.merge(joiner);

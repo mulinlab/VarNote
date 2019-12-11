@@ -7,10 +7,8 @@ import htsjdk.variant.vcf.VCFInfoHeaderLine;
 
 public final class InfoField extends NormalField {
 
-	private String[] queryAlts;
 	private final VCFInfoHeaderLine info;
 	private boolean isFlag;
-	
 	
 	public InfoField(final String fileName, final VCFInfoHeaderLine info) {
 		super(fileName);
@@ -19,28 +17,29 @@ public final class InfoField extends NormalField {
 			isFlag = true;
 		}
 	}
+
 	
-	public void init(final String[] query_alts) {
-		queryAlts = query_alts;
-	}
-	
-//	public void addDBValForceoverlap(final String val) {
-//
-//		if(val == null || val.trim().equals("")) return;
-//		final String[] vals = val.split(COMMA); //C|downstream_gene_variant|MODIFIER|WASH7P, T|non_coding_transcript_exon_variant|MODIFIER|DDX11L1|ENSG00000223972
-//		
-//		for (String str : vals) {
-//			if(format != null) {
-//				ValWithAllele va = format.getFieldValWithFormat(str);
-//				if(va.allele != null) valList.add(va.getStrWithAllele());
-//				else valList.add(va.getStr());
-//			} else {
-//				valList.add(str);
-//			}
-//		}
-//	}
-	
-	public void addDBVal(final String[] db_alts, final String val) {
+	public void addDBValByAlt(final String val, final int matchFlag, final String[] dbalts) {
+		VCFHeaderLineCount count = info.getCountType();
+		if(val != null && !val.equals(NO_VAL)) {
+			if(matchFlag == FORCE_OVERLAP) dbValues[index++] = val;
+			else {
+				final String[] vals = val.split(COMMA);
+				if(vals.length > 1) {
+					vals[0] = vals[0].substring(1);
+					int len = vals[vals.length - 1].length();
+					vals[vals.length - 1] = vals[vals.length - 1].substring(0, len - 1);
+				}
+				if ((count == VCFHeaderLineCount.R) && vals.length == (dbalts.length + 1)) {
+					dbValues[index++] = vals[matchFlag + 1];
+				} else if ((count == VCFHeaderLineCount.A) && vals.length == dbalts.length) {
+					dbValues[index++] = vals[matchFlag];
+				} else {
+					dbValues[index++] = val;
+				}
+			}
+		}
+
 //		if(val == null || val.trim().equals("")) return;
 //		final String[] vals = val.split(COMMA); //C|downstream_gene_variant|MODIFIER|WASH7P, T|non_coding_transcript_exon_variant|MODIFIER|DDX11L1|ENSG00000223972
 //
@@ -53,7 +52,7 @@ public final class InfoField extends NormalField {
 //			}
 //		}
 		
-		if(db_alts != null) {
+//		if(db_alts != null) {
 //			int num = -1;
 //			System.out.println("num=" + num + ", db_alts=" + db_alts.length + ", val=" + val);
 //			if(num > 0) if(num != db_alts.length) throw new InvalidArgumentException("The number of alt can't match Type in Info for field " + fieldName);
@@ -66,7 +65,7 @@ public final class InfoField extends NormalField {
 //					valList.get(i).setAllele(db_alts[i]);
 //				}
 //			}
-		}
+//		}
 		
 //		List<String> altVals;
 //		for (String query_alt : queryAlts) {
@@ -86,23 +85,7 @@ public final class InfoField extends NormalField {
 //			altValMap.put(query_alt, altVals);
 //		}
 	}
-	
 
-	public String nodesTostr() {
-//		if(useList) {
-//			return StringUtil.join(COMMA, valList);
-//		}
-//		else {
-//			List<String> out = new ArrayList<String>();
-//			String val;
-//			for (String string : queryAlts) {
-//				val = StringUtil.join(COMMA, altValMap.get(string));
-//				if(!val.equals("")) out.add(val);
-//			}
-//			return StringUtil.join(COMMA, out);
-//		}
-		return null;
-	}
 
 	public boolean isFlag() {
 		return isFlag;
