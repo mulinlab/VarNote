@@ -12,7 +12,8 @@ public final class FlatThreadPrintter extends ThreadPrintter {
 
     @Override
     public void print(String s) throws IOException {
-        this.writer.writeBytes(s + "\n");
+        this.writer.writeBytes(s);
+        this.writer.writeByte(newline);
     }
 
 }

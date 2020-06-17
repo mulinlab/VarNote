@@ -3,7 +3,6 @@ package org.mulinlab.varnote.operations.stack;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-
 import org.mulinlab.varnote.operations.process.ProcessResult;
 import org.mulinlab.varnote.utils.node.LocFeature;
 
@@ -61,12 +60,16 @@ public class IntervalStack extends AbstractReaderStack {
 	
 	public void findOverlap(LocFeature query) {
 
+//		if(query.beg == 668629) {
+//			System.out.println(query);
+//			System.out.println(query.origStr);
+//		}
 		if(it == null) return;
 		if(!findOverlapInST(query)) return;
 		try {
 			LocFeature curNode = null;
 			while((curNode = it.nextNode()) != null) {
-//				System.out.println(curNode);
+
 				if(curNode.end <= query.beg) {
 					continue;
 				} else {

@@ -1,5 +1,6 @@
 package org.mulinlab.varnote.config.param;
 
+import org.mulinlab.varnote.filters.RegionFilter;
 import org.mulinlab.varnote.filters.mendelian.MendelianInheritanceFilter;
 import org.mulinlab.varnote.filters.query.VariantFilter;
 import org.mulinlab.varnote.filters.query.gt.GenotypeFilter;
@@ -10,14 +11,46 @@ public final class FilterParam {
     private List<VariantFilter> variantFilters;
     private List<GenotypeFilter> genotypeFilters;
     private MendelianInheritanceFilter miFilter;
+    private RegionFilter regionFilter;
 
     public FilterParam() {
     }
 
-    public FilterParam(List<VariantFilter> variantFilters, List<GenotypeFilter> genotypeFilters, MendelianInheritanceFilter miFilter) {
+    @Override
+    public FilterParam clone() {
+        List<VariantFilter> variantFiltersClone = null;
+        if(variantFilters != null) {
+            variantFiltersClone = new ArrayList<>();
+            for (VariantFilter filter:variantFilters) {
+                variantFiltersClone.add((VariantFilter)filter.clone());
+            }
+        }
+
+        List<GenotypeFilter> genotypeFiltersClone = null;
+        if(genotypeFilters != null) {
+            genotypeFiltersClone = new ArrayList<>();
+            for (GenotypeFilter filter:genotypeFilters) {
+                genotypeFiltersClone.add((GenotypeFilter)filter.clone());
+            }
+        }
+
+        MendelianInheritanceFilter miFilterClone = null;
+        if(miFilter != null) {
+            miFilterClone = (MendelianInheritanceFilter)miFilter.clone();
+        }
+
+        RegionFilter regionFilterClone = null;
+        if(regionFilter != null) {
+            regionFilterClone = (RegionFilter)regionFilter.clone();
+        }
+        return new FilterParam(variantFiltersClone, genotypeFiltersClone, miFilterClone, regionFilterClone);
+    }
+
+    public FilterParam(List<VariantFilter> variantFilters, List<GenotypeFilter> genotypeFilters, MendelianInheritanceFilter miFilter, RegionFilter regionFilter) {
         this.variantFilters = variantFilters;
         this.genotypeFilters = genotypeFilters;
         this.miFilter = miFilter;
+        this.regionFilter = regionFilter;
     }
 
     public void addVariantFilters(final VariantFilter variantFilter) {
@@ -32,20 +65,6 @@ public final class FilterParam {
             genotypeFilters = new ArrayList<>();
         }
         genotypeFilters.add(genotypeFilter);
-    }
-
-    public void printLog() {
-        if(variantFilters != null)
-            for (VariantFilter filter:variantFilters) {
-                filter.printLog();
-            }
-
-        if(genotypeFilters != null)
-            for (GenotypeFilter filter:genotypeFilters) {
-                filter.printLog();
-            }
-
-        if(miFilter != null) miFilter.printLog();
     }
 
     public List<VariantFilter> getVariantFilters() {
@@ -74,5 +93,13 @@ public final class FilterParam {
 
     public boolean isNotNull() {
         return variantFilters != null || genotypeFilters != null ||  miFilter != null;
+    }
+
+    public RegionFilter getRegionFilter() {
+        return regionFilter;
+    }
+
+    public void setRegionFilter(RegionFilter regionFilter) {
+        this.regionFilter = regionFilter;
     }
 }

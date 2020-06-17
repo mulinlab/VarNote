@@ -3,13 +3,17 @@ package org.mulinlab.varnote.config.anno;
 
 import htsjdk.variant.vcf.VCFHeaderLineCount;
 import htsjdk.variant.vcf.VCFInfoHeaderLine;
+import org.apache.commons.lang3.StringUtils;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public final class InfoField extends NormalField {
 
 	private final VCFInfoHeaderLine info;
 	private boolean isFlag;
-	
+	private String[] qalts;
+
 	public InfoField(final String fileName, final VCFInfoHeaderLine info) {
 		super(fileName);
 		this.info = info;
@@ -18,11 +22,17 @@ public final class InfoField extends NormalField {
 		}
 	}
 
+	public void init(final int length, final String[] qalts) {
+		super.init(length);
+		this.qalts = qalts;
+	}
+
 	
 	public void addDBValByAlt(final String val, final int matchFlag, final String[] dbalts) {
+
 		VCFHeaderLineCount count = info.getCountType();
 		if(val != null && !val.equals(NO_VAL)) {
-			if(matchFlag == FORCE_OVERLAP) dbValues[index++] = val;
+			if(matchFlag == FORCE_OVERLAP || qalts == null || dbalts == null) dbValues[index++] = val;
 			else {
 				final String[] vals = val.split(COMMA);
 				if(vals.length > 1) {
@@ -30,10 +40,21 @@ public final class InfoField extends NormalField {
 					int len = vals[vals.length - 1].length();
 					vals[vals.length - 1] = vals[vals.length - 1].substring(0, len - 1);
 				}
-				if ((count == VCFHeaderLineCount.R) && vals.length == (dbalts.length + 1)) {
-					dbValues[index++] = vals[matchFlag + 1];
-				} else if ((count == VCFHeaderLineCount.A) && vals.length == dbalts.length) {
-					dbValues[index++] = vals[matchFlag];
+
+				if(((count == VCFHeaderLineCount.R) && vals.length == (dbalts.length + 1)) || ((count == VCFHeaderLineCount.A) && vals.length == dbalts.length))  {
+					final List<String> result = new ArrayList<>();
+					for (int i = 0; i < this.qalts.length; i++) {
+						for (int j = 0; j < dbalts.length; j++) {
+							if(qalts[i].equals(dbalts[j])) {
+								if ((count == VCFHeaderLineCount.R) && vals.length == (dbalts.length + 1)) {
+									result.add(vals[j + 1].trim());
+								} else if ((count == VCFHeaderLineCount.A) && vals.length == dbalts.length) {
+									result.add(vals[j].trim());
+								}
+							}
+						}
+					}
+					dbValues[index++] = StringUtils.join(result, ",");
 				} else {
 					dbValues[index++] = val;
 				}

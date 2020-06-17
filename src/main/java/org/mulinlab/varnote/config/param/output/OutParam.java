@@ -5,9 +5,9 @@ import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.utils.VannoUtils;
 import org.mulinlab.varnote.utils.enumset.OutMode;
 import java.io.File;
+import java.io.OutputStream;
 
 public class OutParam extends Param {
-
     protected String outputName;
     protected String outputPath;
     protected String outFileSuffix = GlobalParameter.OVERLAP_RESULT_SUFFIX;

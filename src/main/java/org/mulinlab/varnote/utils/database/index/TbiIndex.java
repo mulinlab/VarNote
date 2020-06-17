@@ -44,7 +44,7 @@ public final class TbiIndex extends Index{
 		super.read();
 
 		if((mPreset & 0xffff) == 2) {
-			this.format = Format.VCF;
+			this.format = Format.newVCF();
 			this.format.numHeaderLinesToSkip = mSkip;
 		} else {
 			this.format = new Format(mPreset, mSc, mBc, mEc, mSkip, Character.toString((char) mMeta), -1, -1, false);

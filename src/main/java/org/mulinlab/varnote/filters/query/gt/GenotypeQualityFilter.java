@@ -14,10 +14,15 @@ public final class GenotypeQualityFilter extends ABGenotypeFilter {
 
     @Override
     public boolean isFilterLine(final LocFeature loc, final Genotype gt) {
-        if (gt.getGQ() < minGq) {
+        if (gt.getGQ() != -1 && gt.getGQ() < minGq) {
             filterCount++;
             return true;
         }
         else return false;
+    }
+
+    @Override
+    public Object clone() {
+        return new GenotypeQualityFilter(minGq);
     }
 }

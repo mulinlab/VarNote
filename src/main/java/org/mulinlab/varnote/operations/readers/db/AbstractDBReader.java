@@ -3,6 +3,7 @@ import htsjdk.samtools.util.BlockCompressedInputStream;
 import org.apache.logging.log4j.Logger;
 import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.utils.LoggingUtils;
+import org.mulinlab.varnote.utils.VannoUtils;
 import org.mulinlab.varnote.utils.database.Database;
 import org.mulinlab.varnote.utils.database.index.Index;
 import org.mulinlab.varnote.operations.process.ProcessResult;
@@ -27,8 +28,6 @@ public abstract class AbstractDBReader {
 
 	protected AbstractDBReader(final Database db) throws IOException {
 		this.db = db;
-		this.isCount = isCount;
-
 		idx = db.getIndex();
 
 		this.currentTid = -1;
@@ -51,51 +50,37 @@ public abstract class AbstractDBReader {
 	}
 	
 	public void query(final String query) throws IOException {
-		query(regionToNode(query));
+		query(VannoUtils.regionToNode(query));
 	}
 	
 	public boolean query(final LocFeature query) throws IOException {
 		getProcess().initResult();
 		if(query.beg < 1) query.beg = 1;
-//		System.out.println(query.toString());
+//		System.out.println(db.getOutName() + " " + query.toString());
 		int tid = chr2tid(query.chr);
 		if(tid == -1) {
 			currentTid = tid;
 			return false;
 		} else if(tid != currentTid) {
 			currentTid = tid;
-			logger.info(String.format("%s reading index for chr %s.", db.getConfig().getOutName(), query.chr));
-			initForChr(tid);
-			this.preBeg = 0;
+//			logger.info(String.format("%s reading index for chr %s.", db.getConfig().getOutName(), query.chr));
+			initChr();
 		} else {
 			if(query.beg < this.preBeg) {
 				logger.info(String.format("Warning: %s:%d-%d was added out of order, sort data in order could greatly increased the query speed.", query.chr, query.beg, query.end));
-				initForChr(tid);
-				this.preBeg = 0;
+				initChr();
 			} 
 		}
 
 		this.preBeg = query.beg;
 		return true;
 	}
-	
-	public static LocFeature regionToNode(final String reg) {
-		LocFeature query = new LocFeature();
-		int colon, hyphen;
 
-        colon = reg.indexOf(':');
-
-        if(colon == -1) {
-			colon = reg.indexOf('-');
-		}
-		hyphen = reg.indexOf('-', colon + 1);
-
-        query.chr = colon >= 0 ? reg.substring(0, colon) : reg;
-        query.beg = colon >= 0 ? Integer.parseInt(reg.substring(colon + 1, hyphen >= 0 ? hyphen : reg.length())) : 0;
-        query.end = hyphen >= 0 ? Integer.parseInt(reg.substring(hyphen + 1)) : 0x7fffffff;
-        return query;
+	public void initChr() throws IOException {
+		initForChr(currentTid);
+		this.preBeg = 0;
 	}
-	
+
 	protected boolean checkChr() throws IOException{
 		return currentTid != -1;
 	}
@@ -150,6 +135,10 @@ public abstract class AbstractDBReader {
     public List<String> getResults() {
     	return stack.getResultProcessor().getResult();
     }
+
+	public int getResultSize() {
+		return stack.getResultProcessor().getResultSize();
+	}
 
 	public Database getDb() {
 		return db;

@@ -50,6 +50,6 @@ public final class Annotation extends QueryFileProgram {
         annoRunConfig.setOutParam(outParam);
         annoRunConfig.setThread(runArguments.getThreads());
         RunFactory.run(annoRunConfig);
-        return -1;
+        return 0;
     }
 }

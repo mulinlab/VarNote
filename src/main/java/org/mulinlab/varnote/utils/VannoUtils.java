@@ -1,21 +1,21 @@
 package org.mulinlab.varnote.utils;
 
+import de.charite.compbio.jannovar.pedigree.Disease;
+import de.charite.compbio.jannovar.pedigree.Pedigree;
+import de.charite.compbio.jannovar.pedigree.Person;
 import htsjdk.samtools.seekablestream.SeekableStream;
 import htsjdk.samtools.util.BlockCompressedInputStream;
+import htsjdk.variant.vcf.VCFHeader;
+import org.mulinlab.varnote.config.param.DBParam;
+import org.mulinlab.varnote.config.param.query.QueryFileParam;
 import org.mulinlab.varnote.constants.GlobalParameter;
-import org.mulinlab.varnote.operations.decode.BEDLocCodec;
-import org.mulinlab.varnote.operations.decode.LocCodec;
-import org.mulinlab.varnote.operations.decode.TABLocCodec;
-import org.mulinlab.varnote.operations.decode.VCFLocCodec;
+import org.mulinlab.varnote.operations.decode.*;
 import org.mulinlab.varnote.operations.query.AbstractQuery;
 import org.mulinlab.varnote.operations.query.SweepQuery;
 import org.mulinlab.varnote.operations.query.TabixQuery;
 import org.mulinlab.varnote.operations.query.VannoQuery;
 import org.mulinlab.varnote.operations.readers.itf.QueryReaderItf;
-import org.mulinlab.varnote.operations.readers.query.AbstractFileReader;
-import org.mulinlab.varnote.operations.readers.query.BEDFileReader;
-import org.mulinlab.varnote.operations.readers.query.TABFileReader;
-import org.mulinlab.varnote.operations.readers.query.VCFFileReader;
+import org.mulinlab.varnote.operations.readers.query.*;
 import org.mulinlab.varnote.utils.database.Database;
 import org.mulinlab.varnote.utils.enumset.*;
 import htsjdk.samtools.seekablestream.SeekableStreamFactory;
@@ -30,12 +30,14 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import joptsimple.OptionSet;
 import org.mulinlab.varnote.utils.database.index.IndexFactory;
 import org.mulinlab.varnote.utils.format.Format;
 import org.mulinlab.varnote.exceptions.InvalidArgumentException;
 import org.mulinlab.varnote.utils.gz.MyEndianOutputStream;
+import org.mulinlab.varnote.utils.node.LocFeature;
 
 public final class VannoUtils {
 	public final static String INTERSECT_ERROR = "Intersection type, valid values are " + IntersectType.INTERSECT.getVal() + "(" + IntersectType.INTERSECT.getName() + ")" +
@@ -88,6 +90,57 @@ public final class VannoUtils {
         }
         return path;
     }
+
+	public static boolean validRsid(final String rsid) {
+		if(!Pattern.matches("^rs\\d+$", rsid.toLowerCase())) {
+			return false;
+		}
+
+		return true;
+	}
+
+	public static LocFeature regionToNode(String reg) {
+		reg = reg.toUpperCase();
+		if(!Pattern.matches("^(CHR)?([0-9]{1,2}|X|Y|MT):\\d+-\\d+$", reg)) {
+			throw new InvalidArgumentException(String.format("Invalid position format of %s, please type correct position by chr1:4380800-4380801 or 1:4380800-4380801", reg));
+		}
+		LocFeature query = new LocFeature();
+		int colon, hyphen;
+
+		colon = reg.indexOf(':');
+
+		if(colon == -1) {
+			colon = reg.indexOf('-');
+		}
+		hyphen = reg.indexOf('-', colon + 1);
+
+		query.chr = colon >= 0 ? reg.substring(0, colon) : reg;
+		query.beg = colon >= 0 ? Integer.parseInt(reg.substring(colon + 1, hyphen >= 0 ? hyphen : reg.length())) : 0;
+		query.end = hyphen >= 0 ? Integer.parseInt(reg.substring(hyphen + 1)) : 0x7fffffff;
+		return query;
+	}
+
+	public static LocFeature ldRegionToNode(String reg) {
+		reg = reg.toUpperCase();
+
+		if(!Pattern.matches("^(CHR)?([0-9]{1,2}|X|Y|MT):\\d+-[ATCG]+-[ATCG]+$", reg)) {
+			throw new InvalidArgumentException(String.format("Invalid position format for %s, please type correct position by chr1:4380800-A-G or 1:4380800-A-G", reg));
+		}
+
+		LocFeature query = new LocFeature();
+		int colon, hyphen;
+
+		//chr1:54132-A-G
+		colon = reg.indexOf(':');  hyphen = reg.indexOf('-');
+		query.chr = colon >= 0? reg.substring(0, colon) : reg;
+		query.beg = colon >= 0? Integer.parseInt(reg.substring(colon + 1, hyphen)) - 1 : 0;
+		String[] refalt = reg.substring(hyphen+1).split("-");
+
+		query.ref = refalt[0];
+		query.alt = refalt[1];
+		query.end = query.beg + query.ref.length();
+		return query;
+	}
 	
 	public static IndexType checkIndexType(String indexType) {
 		if(indexType == null) return null;
@@ -103,13 +156,10 @@ public final class VannoUtils {
 	
 	public static IntersectType checkIntersectType(String intersectType) {
 		if(intersectType == null) return GlobalParameter.DEFAULT_INTERSECT;
-		int type = Integer.parseInt(trimAndLC(intersectType));
-		for (IntersectType t: IntersectType.values()) {
-			if(type == t.getVal()) {
-				return t;
-			}
-		}
-		throw new InvalidArgumentException(INTERSECT_ERROR);
+
+        IntersectType intersectType1 = IntersectType.toIntersectType(Integer.parseInt(trimAndLC(intersectType)));
+		if(intersectType == null) throw new InvalidArgumentException(INTERSECT_ERROR);
+		else return intersectType1;
 	}
 	
 	public static boolean isExist(String path) {
@@ -178,8 +228,8 @@ public final class VannoUtils {
 	public static Format determineFileType(String fileName) {
 		fileName = trimAndLC(fileName);
 
-		if(hasExtension(FileExt.VCF, fileName)) return Format.VCF;
-		else if(hasExtension(FileExt.BED, fileName)) return Format.BED;
+		if(hasExtension(FileExt.VCF, fileName)) return Format.newVCF();
+		else if(hasExtension(FileExt.BED, fileName)) return Format.newBED();
 		else return null;
 	}
 
@@ -200,14 +250,32 @@ public final class VannoUtils {
 	public static Format checkQueryFormat(String format) {
 		format = format.toUpperCase();
 		if(format.equals(FormatType.VCF.toString())) {
-			return Format.VCF;
+			return Format.newVCF();
+		} else if(format.equals(FormatType.VCFLIKE.toString())) {
+			return VannoUtils.getVCFLikeFormat();
 		} else if(format.equals(FormatType.BED.toString())) {
-			return Format.BED;
+			return Format.newBED();
+		} else if(format.equals(FormatType.BEDALLELE.toString())) {
+			return VannoUtils.getBedAlleleFormat();
+		} else if(format.equals(FormatType.COORDONLY.toString())) {
+			return VannoUtils.getCoordOnlyFormat();
+		} else if(format.equals(FormatType.COORDALLELE.toString())) {
+			return VannoUtils.getCoordAlleleFormat();
 		} else if(format.equals(FormatType.TAB.toString())) {
 			return Format.newTAB();
 		} else {
 			return null;
 		}
+	}
+
+	public static List<DBParam> removeRSParam(List<DBParam> dbParams) {
+		List<DBParam> dbParamsNew = new ArrayList<>();
+		for (DBParam dbParam:dbParams) {
+			if(!dbParam.getOutName().equals(GlobalParameter.MERGE_LABEL) && !dbParam.getOutName().equals(GlobalParameter.RSID_POS_LABEL)) {
+				dbParamsNew.add(dbParam);
+			}
+		}
+		return dbParamsNew;
 	}
 
 	public static AnnoOutFormat checkOutFormat(String format) {
@@ -217,10 +285,19 @@ public final class VannoUtils {
 		} else if(format.equals("bed")) {
 			return AnnoOutFormat.BED;
 		} else {
-			throw new InvalidArgumentException("We only support vcf and bed file format currently.");
+			throw new InvalidArgumentException("We only support vcf and bed file format as output currently.");
 		}
 	}
-	
+
+	public static String getName(String str) {
+		int end = str.lastIndexOf(".");
+		if(end != -1) {
+			return str.substring(0, end);
+		} else {
+			return str;
+		}
+	}
+
 	public static boolean strToBool(String str) {
 		str = trimAndLC(str);
 		if(str.equals("true")) {
@@ -239,13 +316,13 @@ public final class VannoUtils {
 	public static Format parseIndexFileFormat(String str) {
 		str = trimAndLC(str);
         if(str.equalsIgnoreCase("bed")) {
-			return Format.BED;
+			return Format.newBED();
         } else if(str.equalsIgnoreCase("vcf")) {
-			return Format.VCF;
+			return Format.newVCF();
         } else if(str.equalsIgnoreCase("tab")) {
 			return Format.newTAB();
         } else {
-			throw new InvalidArgumentException("We support bed, vcf or tab format. but we get: " + str);
+				throw new InvalidArgumentException("We support bed, vcf and tab format. but we get: " + str);
 		}
 	}
 	
@@ -485,12 +562,14 @@ public final class VannoUtils {
 		}
 	}
 
-	public static LocCodec getDefaultLocCodec(final Format format, final boolean isFull) {
+	public static LocCodec getDefaultLocCodec(final Format format, final boolean isFull, final VCFHeader vcfHeader) {
 		LocCodec locCodec;
 		if(format.type == FormatType.VCF) {
-			locCodec = new VCFLocCodec(format, isFull);
+			locCodec = new VCFLocCodec(format, isFull, vcfHeader);
 		} else if(format.type == FormatType.BED) {
 			locCodec = new BEDLocCodec(format, isFull);
+		} else if(format.type == FormatType.RSID) {
+			locCodec = new RSIDLocCodec(format);
 		} else {
 			locCodec = new TABLocCodec(format, isFull);
 		}
@@ -529,5 +608,169 @@ public final class VannoUtils {
 		}
 
 		return chrToTypeMap.get(chr);
+	}
+
+    public static int getAffectPersonNumber(final Pedigree pedigree) {
+	    int affectNumber = 0;
+        for (Person p : pedigree.getMembers()) {
+            final Disease d = p.getDisease();
+
+            if (d == Disease.AFFECTED) {
+                affectNumber++;
+            }
+        }
+
+        return affectNumber;
+    }
+
+	public static final int NOT_INDEL = 0;
+	public static final int INSERTION = 1;
+	public static final int DELETION = 2;
+	public static final int OUT_LEN = 3;
+	public static final int MAX_LEN = 1000;
+
+	public static int isIndel(final LocFeature node) {
+		if(node.ref == null) return NOT_INDEL;
+
+		if(node.alt.indexOf(",") != -1) {
+			int type;
+			for (String alt: node.getAlts()) {
+				type = isIndel(node.ref, alt);
+				if(type == OUT_LEN || type != NOT_INDEL) return type;
+			}
+
+			return NOT_INDEL;
+		} else {
+			return isIndel(node.ref, node.alt);
+		}
+	}
+
+	public static int isIndel(final String ref, final String alt) {
+		if(ref == null) return NOT_INDEL;
+		if(Math.abs(ref.length() - alt.length()) > MAX_LEN) return OUT_LEN;
+
+		if (ref.length() == alt.length()) {
+			return NOT_INDEL;
+		} else if(ref.length() > alt.length()) {
+			return DELETION;
+		} else {
+			return INSERTION;
+		}
+	}
+
+	public static List<LocFeature> getREMMList(final LocFeature node, final int type) {
+		List<LocFeature> list = new ArrayList<>();
+		int beg = node.beg;;
+
+		if(type == VannoUtils.INSERTION) {
+			for (int i = 0; i <= 1; i++) {
+				list.add(new LocFeature(beg + i, beg + i + 1, node.chr));
+			}
+		} else {
+			for (int i = 1; i < node.ref.length(); i++) {
+				list.add(new LocFeature(beg + i, beg + i + 1, node.chr));
+			}
+		}
+
+		return list;
+	}
+
+	public static List<LocFeature> getFeaturesMatchRefAndAltList(final LocFeature query, final LocFeature[] features) {
+		List<LocFeature> locFeatures = new ArrayList<>();
+		if(features != null) {
+			for (LocFeature locFeature: features) {
+				if(locFeature.ref.equals(query.ref) && locFeature.alt.equals(query.alt)) {
+					locFeatures.add(locFeature);
+				}
+			}
+		}
+		return locFeatures;
+	}
+
+	public static LocFeature getFeatureMatchRefAndAlt(final LocFeature query, final LocFeature[] features) {
+		if(features != null) {
+			for (LocFeature feature: features) {
+				if(feature.ref.equals(query.ref) && feature.alt.equals(query.alt)) {
+					return feature;
+				}
+			}
+		}
+		return null;
+	}
+
+	public static LocFeature getFeatureInAlt(final LocFeature query, final LocFeature[] features) {
+		if(features != null) {
+			for (LocFeature feature: features) {
+				if(feature.ref.equals(query.ref)) {
+					for (String alt:query.getAlts()) {
+						if (feature.alt.equals(alt)) {
+							return feature;
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	public static Format getBedAlleleFormat() {
+		Format format = Format.newBED();
+		format.refPositionColumn = 4;
+		format.altPositionColumn = 5;
+
+		return format;
+	}
+
+	public static Format getCoordAlleleFormat() {
+		Format format = Format.newTAB();
+		format.sequenceColumn = 1;
+		format.startPositionColumn = 2;
+		format.endPositionColumn = 2;
+		format.refPositionColumn = 3;
+		format.altPositionColumn = 4;
+
+		return format;
+	}
+
+	public static Format getCoordOnlyFormat() {
+		Format format = Format.newTAB();
+
+		format.sequenceColumn = 1;
+		format.startPositionColumn = 2;
+		format.endPositionColumn = 2;
+
+		return format;
+	}
+
+	public static Format getVCFLikeFormat() {
+		Format format = Format.newTAB();
+
+		format.sequenceColumn = 1;
+		format.startPositionColumn = 2;
+		format.endPositionColumn = 2;
+
+		format.refPositionColumn = 4;
+		format.altPositionColumn = 5;
+		return format;
+	}
+
+	public static Format getRsid2POSFormat() {
+		Format format = getVCFLikeFormat();
+		format.rsidPositionColumn = Format.DEFAULT_RSID_COL;
+		return format;
+	}
+
+	public static Format getQuickFormat(QuickFileType quickFileType) {
+		if(quickFileType == QuickFileType.VCF) {
+			return Format.newVCF();
+		} else if(quickFileType == QuickFileType.VCFLike) {
+			return getVCFLikeFormat();
+		} else if(quickFileType == QuickFileType.CoordOnly) {
+			return getCoordOnlyFormat();
+		} else if(quickFileType == QuickFileType.CoordAllele) {
+			return getCoordAlleleFormat();
+		} else {
+			throw new InvalidArgumentException("We support VCF, VCFLike, CoordOnly and CoordAllele format");
+		}
 	}
 }

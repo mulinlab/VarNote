@@ -1,6 +1,7 @@
 package org.mulinlab.varnote.operations.mapper;
 
 import org.mulinlab.varnote.config.param.query.QueryFileParam;
+import org.mulinlab.varnote.config.run.AnnoRunConfig;
 import org.mulinlab.varnote.config.run.CountRunConfig;
 import org.mulinlab.varnote.operations.query.VannoQuery;
 import org.mulinlab.varnote.operations.readers.query.AbstractFileReader;
@@ -11,25 +12,25 @@ import java.io.IOException;
 
 public final class CounterMapper extends AbstractMapper {
 
-	private Long count;
-
 	public CounterMapper(final CountRunConfig config, final int index) {
 		super(config, index);
 		queryEngine = new VannoQuery(config.getDatabses(), true);
-		count = 0l;
 	}
 
 	public AbstractFileReader getQueryForThread() {
 		return ((QueryFileParam)config.getQueryParam()).getThreadReader(index);
 	}
 
-	@Override
-	public void processResult(final LocFeature node) throws IOException {
-		this.count += queryEngine.getResultCount();
-	}
 
 	@Override
-	public Long getResult() {
-		return this.count;
+	public void doQuery(final LocFeature node) throws IOException {
+		super.doQuery(node);
+		((CountRunConfig)this.config).processNode(node, queryEngine.getResultCount(), index);
+	};
+
+
+	@Override
+	public Object getResult() {
+		return null;
 	}
 }

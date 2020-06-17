@@ -8,7 +8,6 @@ import htsjdk.variant.vcf.VCFHeader;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 import org.mulinlab.varnote.utils.LoggingUtils;
-
 import java.io.File;
 
 public final class VCFReaderSpeedTest {
@@ -28,7 +27,7 @@ public final class VCFReaderSpeedTest {
             final VariantContext context = iterator.next();
              i++;
         }
-        System.out.println("i=" + i);
+
         CloserUtil.close(iterator);
         CloserUtil.close(fileReader);
 

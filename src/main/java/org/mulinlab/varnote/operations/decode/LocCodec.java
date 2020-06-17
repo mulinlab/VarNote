@@ -3,14 +3,14 @@ package org.mulinlab.varnote.operations.decode;
 import htsjdk.tribble.AsciiFeatureCodec;
 import htsjdk.tribble.readers.LineIterator;
 import htsjdk.tribble.util.ParsingUtils;
-import org.mulinlab.varnote.constants.GlobalParameter;
+import org.apache.logging.log4j.Logger;
+import org.mulinlab.varnote.utils.LoggingUtils;
 import org.mulinlab.varnote.utils.node.LocFeature;
 import org.mulinlab.varnote.utils.format.Format;
 
 
 public abstract class LocCodec extends AsciiFeatureCodec<LocFeature> {
-
-    private static final char SEPERATOR_CHAR = '\t';
+    final static Logger logger = LoggingUtils.logger;
 
     protected LocFeature intv;
     protected final Format format;
@@ -30,11 +30,10 @@ public abstract class LocCodec extends AsciiFeatureCodec<LocFeature> {
     @Override
     public LocFeature decode(final String s) {
         if(parts == null) {
-            parts = new String[s.split(GlobalParameter.TAB).length];
+            parts = new String[s.split(format.getDelimStr()).length];
         }
         intv.clear();
-
-        ParsingUtils.split(s, parts, SEPERATOR_CHAR, true);
+        ParsingUtils.split(s, parts, format.getDelimChar(), true);
         processToken();
 
         intv.origStr = s;
@@ -62,6 +61,15 @@ public abstract class LocCodec extends AsciiFeatureCodec<LocFeature> {
         }
     }
 
+    public boolean exceedMaxLength() {
+        if(intv != null) {
+            if(intv.end - intv.beg > format.getMaxVariantLength()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public abstract void processBeg();
     public abstract void processEnd();
     public abstract void processOther();
@@ -80,4 +88,6 @@ public abstract class LocCodec extends AsciiFeatureCodec<LocFeature> {
     public void setFull(final boolean full) {
         isFull = full;
     }
+
+
 }

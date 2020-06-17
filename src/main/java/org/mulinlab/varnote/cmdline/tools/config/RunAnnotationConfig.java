@@ -28,6 +28,6 @@ public final class RunAnnotationConfig extends ConfigProgram {
         AnnoRunConfig runConfig = new AnnoRunReader<AnnoRunConfig>().read(configFile.getAbsolutePath());
 
         RunFactory.run(runConfig);
-        return -1;
+        return 0;
     }
 }

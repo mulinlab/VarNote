@@ -3,9 +3,11 @@ package org.mulinlab.varnote.filters.iterator;
 import htsjdk.tribble.readers.LineIterator;
 import org.mulinlab.varnote.operations.readers.itf.QueryReaderItf;
 import org.mulinlab.varnote.operations.readers.query.AbstractFileReader;
+import org.mulinlab.varnote.utils.VannoUtils;
 import org.mulinlab.varnote.utils.enumset.FileType;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 public final class NoFilterIterator implements LineIterator {
@@ -20,13 +22,15 @@ public final class NoFilterIterator implements LineIterator {
     public NoFilterIterator(final String path, final FileType fileType) {
         this.reader = AbstractFileReader.getReader(path, fileType);
     }
+    public NoFilterIterator(final String path) {
+        this.reader = AbstractFileReader.getReader(path, VannoUtils.checkFileType(path));
+    }
 
     @Override
     public boolean hasNext() {
         try {
             if (!iterating) {
                 getString();
-
                 iterating = true;
             }
         } catch (Exception e) {

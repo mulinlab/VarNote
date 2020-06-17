@@ -6,7 +6,6 @@ import org.mulinlab.varnote.config.run.OverlapRunConfig;
 import org.mulinlab.varnote.operations.readers.query.AbstractFileReader;
 import org.mulinlab.varnote.utils.VannoUtils;
 import org.mulinlab.varnote.utils.node.LocFeature;
-
 import java.io.IOException;
 
 public final class AnnoMapper extends AbstractMapper{
@@ -22,9 +21,11 @@ public final class AnnoMapper extends AbstractMapper{
 	}
 
 	@Override
-	public void processResult(final LocFeature node) throws IOException {
+	public void doQuery(final LocFeature node) throws IOException {
+		super.doQuery(node);
 		((AnnoRunConfig)this.config).annoRecord(node, queryEngine.getResultFeatures(), index);
-	}
+	};
+
 
 	@Override
 	public Integer getResult() {

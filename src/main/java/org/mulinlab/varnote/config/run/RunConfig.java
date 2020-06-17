@@ -2,9 +2,9 @@ package org.mulinlab.varnote.config.run;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.logging.log4j.Logger;
 import org.mulinlab.varnote.config.io.temp.FlatPrintter;
 import org.mulinlab.varnote.config.io.temp.Printter;
@@ -23,7 +23,6 @@ import org.mulinlab.varnote.exceptions.InvalidArgumentException;
 
 
 public abstract class RunConfig {
-
 	protected final Logger logger = LoggingUtils.logger;
 	protected final static String TAB = GlobalParameter.TAB;
 
@@ -62,7 +61,6 @@ public abstract class RunConfig {
 		if(runParam != null) logger.info(String.format("Thread number: %d", runParam.getThread()));
 
 		initOther();
-
 	}
 	
 	protected abstract void initQuery();
@@ -80,7 +78,15 @@ public abstract class RunConfig {
 		runParam.checkThreadNum(queryParam.getThreadSize());
 	}
 
-	protected void initPrintter(OutParam outParam, final int thread) {
+	public void mergeResult() {
+		try {
+			printter.mergeFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	protected void initPrintter(OutParam outParam, final int thread) throws IOException {
 		try {
 			if(outParam.isGzip()) {
 				printter = new ZipPrintter(outParam);
@@ -92,6 +98,7 @@ public abstract class RunConfig {
 		}
 		printter.init();
 		printter.setPrintter(thread);
+		printter.printHeader(getHeader());
 	}
 	
 	public List<Database> getDatabses() {

@@ -10,7 +10,7 @@ import org.mulinlab.varnote.utils.enumset.ChromosomeType;
 import org.mulinlab.varnote.utils.enumset.ModeOfInheritance;
 import org.mulinlab.varnote.utils.node.LocFeature;
 
-public abstract class MendelianInheritanceFilter implements VariantFilter<LocFeature> {
+public abstract class MendelianInheritanceFilter {
 
     final static Logger logger = LoggingUtils.logger;
 
@@ -29,15 +29,13 @@ public abstract class MendelianInheritanceFilter implements VariantFilter<LocFea
         this.nMembers = pedigree.getNMembers();
     }
 
-    @Override
-    public boolean isFilterLine(final LocFeature loc) {
-        if(isChromTypeMatch(VannoUtils.toChromosomeType(loc.chr))) {
-            if (this.nMembers == 1 && isCompatibleSingleton(loc.variantContext.getGenotypes())) {
+    public boolean isFilterLine(final String chr, final GenotypesContext gtx) {
+        if(isChromTypeMatch(VannoUtils.toChromosomeType(chr))) {
+            if (this.nMembers == 1 && isCompatibleSingleton(gtx)) {
                 return false;
-            } else if(isCompatibleFamily(loc.variantContext.getGenotypes())) {
+            } else if(isCompatibleFamily(gtx)) {
                 return false;
             }
-
 //            System.out.println("not com " + loc.origStr);
             return addCompatibleCount();
         } else {
@@ -59,10 +57,31 @@ public abstract class MendelianInheritanceFilter implements VariantFilter<LocFea
     protected abstract boolean isCompatibleSingleton(final GenotypesContext genotypes);
     protected abstract boolean isCompatibleFamily(final GenotypesContext genotypes);
 
-    @Override
-    public void printLog() {
-        logger.info(String.format("Filter out variants don't fit chromosome: %d", filterChrCount));
-        logger.info(String.format("Filter out variants don't fit mendelian inheritance mode: %d", filterCompatibleCount));
+    public String[] getLogs() {
+        return new String[]{
+                String.format("Filter out variants don't fit chromosome: %d", filterChrCount),
+                String.format("Filter out variants don't fit mendelian inheritance mode: %d", filterCompatibleCount)
+        };
     }
 
+    @Override
+    public Object clone() {
+        return null;
+    }
+
+    public int getFilterChrCount() {
+        return filterChrCount;
+    }
+
+    public int getFilterCompatibleCount() {
+        return filterCompatibleCount;
+    }
+
+    public ModeOfInheritance getMode() {
+        return mode;
+    }
+
+    public Pedigree getPedigree() {
+        return pedigree;
+    }
 }

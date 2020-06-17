@@ -54,6 +54,6 @@ public final class Intersect extends QueryFileProgram {
         runConfig.setThread(runArguments.getThreads());
 
         RunFactory.run(runConfig);
-        return -1;
+        return 0;
     }
 }

@@ -112,4 +112,9 @@ public class MendelianInheritanceXRFilter extends MendelianInheritanceFilter {
         }
         return parentNames.build();
     }
+
+    @Override
+    public Object clone() {
+        return new MendelianInheritanceXRFilter(pedigree);
+    }
 }

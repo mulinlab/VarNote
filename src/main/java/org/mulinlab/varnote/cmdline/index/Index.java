@@ -24,11 +24,7 @@ public final class Index extends IndexProgram {
             ", like the index on a database. \nNote that the input file must be sorted in coordinate order.\n\n" +
             "Usage example:" +
             "\n" +
-            "java -jar " + GlobalParameter.PRO_NAME + ".jar Index -I input.vcf.gz\n" +
-            "java -jar " + GlobalParameter.PRO_NAME + ".jar Index -I input.tab.gz -" + Arguments.FORMAT_CHROM_SHORT + " 1 -" +
-            Arguments.FORMAT_BEGIN_SHORT + " 2 -" +
-            Arguments.FORMAT_END_SHORT + " 2 --" + Arguments.FORMAT_REF_LONG + " 4 --" + Arguments.FORMAT_ALT_LONG + " 5" +
-            "\n\n" ;
+            "java -jar " + GlobalParameter.PRO_NAME + ".jar Index -I input.vcf.gz\n\n" ;
 
     @Argument(
             fullName = Arguments.INDEX_OUTPUT_LONG, shortName = Arguments.INDEX_OUTPUT_SHORT,
@@ -50,7 +46,7 @@ public final class Index extends IndexProgram {
         IndexWriteConfig config = new IndexWriteConfig(indexParam);
         RunFactory.writeIndex(config);
 
-        return -1;
+        return 0;
     }
 
     public static void main(final String[] argv) throws IllegalAccessException, InstantiationException {

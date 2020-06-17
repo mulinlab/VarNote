@@ -31,6 +31,10 @@ public final class TabixResultProcess implements ProcessResult{
 
 	@Override
 	public int getResultSize() {
-		return result.size();
+		if(result == null) {
+			return 0;
+		} else {
+			return result.size();
+		}
 	}
 }

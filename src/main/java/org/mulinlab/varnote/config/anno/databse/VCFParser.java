@@ -17,16 +17,27 @@ public final class VCFParser {
     private final VCFCodec codec;
     private List<String> infoKeys;
 
+    private String path;
+    private FileType fileType;
+
     public VCFParser(final String path) {
         this(path, VannoUtils.checkFileType(path));
     }
 
     public VCFParser(final String path, final FileType fileType) {
+        this.path = path;
+        this.fileType = fileType;
+
         codec = new VCFCodec();
 
         NoFilterIterator iterator = new NoFilterIterator(path, fileType);
         vcfHeader = (VCFHeader)codec.readActualHeader(iterator);
         iterator.close();
+    }
+
+    @Override
+    public VCFParser clone() {
+        return new VCFParser(this.path, this.fileType);
     }
 
     public List<String> getInfoKeys() {
@@ -46,7 +57,6 @@ public final class VCFParser {
             fileType = VannoUtils.checkFileType(headerPath);
         }
 
-        System.out.println("new vcf parser");
         return new VCFParser(headerPath, fileType);
     }
 

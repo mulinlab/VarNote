@@ -12,14 +12,17 @@ public abstract class LineFilterIterator implements Iterator<LocFeature> {
     protected final NoFilterIterator iterator;
     protected final List<LineFilter> filters;
     protected boolean isFiltered;
-
+    protected long count;
+    protected long fcount;
+    protected String line;
 
     protected LocFeature feature;
-    private boolean iterating = false;
 
     public LineFilterIterator(final NoFilterIterator iterator, final List<LineFilter> filters) {
         this.iterator = iterator;
         this.filters = filters;
+        this.count = 0;
+        this.fcount = 0;
     }
 
     public void close() {
@@ -36,19 +39,45 @@ public abstract class LineFilterIterator implements Iterator<LocFeature> {
         return processLine(iterator.next());
     }
 
+    public String nextString() {
+        return iterator.next();
+    }
 
     public LocFeature processLine(final String line) {
-        isFiltered = false;
-        for (LineFilter lineFilter: filters) {
-            if(lineFilter.isFilterLine(line)) {
-                isFiltered = true;
-                break;
+        this.line = line;
+        if(line.trim().equals("")) {
+            isFiltered = true;
+            fcount++;
+            return null;
+        } else {
+            isFiltered = false;
+            for (LineFilter lineFilter: filters) {
+                if(lineFilter.isFilterLine(line)) {
+                    isFiltered = true;
+                    break;
+                }
             }
+            if(!isFiltered) count++;
+            else {
+                fcount++;
+            }
+            return null;
         }
-        return null;
+    }
+
+    public String getLine() {
+        return line;
     }
 
     public long getPosition() {
         return iterator.getPosition();
+    }
+
+    public long getCount() {
+        return count;
+    }
+
+    public long getFcount() {
+        return fcount;
     }
 }

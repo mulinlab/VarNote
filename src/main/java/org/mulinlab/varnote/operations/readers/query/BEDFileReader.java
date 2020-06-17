@@ -16,7 +16,7 @@ public final class BEDFileReader extends AbstractFileReader {
     }
 
     public BEDFileReader(final String path) {
-        super(path, Format.BED);
+        super(path, Format.newBED());
     }
 
     public BEDFileReader(final String path, final Format format) {
@@ -37,6 +37,7 @@ public final class BEDFileReader extends AbstractFileReader {
     public LineFilterIterator getFilterIterator() {
         if(iterator == null) {
             iterator = new LocFilterIterator(new NoFilterIterator(reader), lineFilters, new BEDLocCodec(format, decodeFull));
+            setLocFilter();
         }
         return iterator;
     }

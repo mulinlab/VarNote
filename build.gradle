@@ -65,13 +65,13 @@ jar {
                 'Main-Class': 'org.mulinlab.varnote.cmdline.VarNoteCommandLine')
     }
 
-//    from {
-//        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-//    }
-//    exclude 'log4j.properties'
-//    exclude '**/*.SF'
-//    exclude '**/*.RSA'
-      exclude 'log4j2.xml'
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    exclude 'log4j.properties'
+    exclude '**/*.SF'
+    exclude '**/*.RSA'
+//    exclude 'log4j2.xml'
 }
 
 
@@ -90,28 +90,12 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 javadoc {
-    // This is a hack to disable the java 8 default javadoc lint until we fix the html formatting
-    // We only want to do this for the javadoc task, not gatkDoc
     options.addStringOption('Xdoclint:none', '-quiet')
     source = sourceSets.main.allJava
     include '**/*.java'
 }
 
-
-
 artifacts {
     archives jar
-  //  archives javadocJar
-//    archives sourcesJar
 }
 
-uploadArchives {
-    repositories.mavenDeployer {
-        snapshotRepository(url: "http://39.106.221.241:8081/repository/maven-snapshots") {//快照
-            authentication(userName: 'admin', password: 'admin123')
-        }
-        repository(url: "http://39.106.221.241:8081/repository/maven-releases") {//RELEASE
-            authentication(userName: 'admin', password: 'admin123')
-        }
-    }
-}

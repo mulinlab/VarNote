@@ -1,7 +1,6 @@
 package org.mulinlab.varnote.utils.database;
 
 import org.mulinlab.varnote.config.param.DBParam;
-import org.mulinlab.varnote.utils.database.index.vannoIndex.VannoIndex;
 import org.mulinlab.varnote.exceptions.InvalidArgumentException;
 import org.mulinlab.varnote.utils.VannoUtils;
 import org.mulinlab.varnote.utils.enumset.IndexType;

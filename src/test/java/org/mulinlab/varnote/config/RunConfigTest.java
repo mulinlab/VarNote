@@ -2,7 +2,6 @@ package org.mulinlab.varnote.config;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mulinlab.varnote.cmdline.tools.config.RunAnnotationConfig;
 import org.mulinlab.varnote.cmdline.tools.config.RunIntersectConfig;
 import org.mulinlab.varnote.cmdline.txtreader.run.AnnoRunReader;
 import org.mulinlab.varnote.cmdline.txtreader.run.IntersectRunReader;
@@ -15,8 +14,6 @@ import org.mulinlab.varnote.utils.enumset.FormatType;
 import org.mulinlab.varnote.utils.enumset.IndexType;
 import org.mulinlab.varnote.utils.enumset.IntersectType;
 import utils.TestUtils;
-
-
 import java.util.List;
 
 public class RunConfigTest {
@@ -83,7 +80,6 @@ public class RunConfigTest {
 
         Assert.assertEquals(runConfig.isForceOverlap(), true);
     }
-    ///Users/hdd/Downloads/up/tell_workspace/workspace_201911172159137590
 
     @Test
     public void testRunIntersect() {
@@ -91,15 +87,4 @@ public class RunConfigTest {
         TestUtils.initClass(RunIntersectConfig.class, args);
     }
 
-    @Test
-    public void testRunAnno() {
-        String[] args = new String[]{ "-I", "src/test/resources/config/q3.sorted.anno.run.config.full"};
-        TestUtils.initClass(RunAnnotationConfig.class, args);
-    }
-
-    @Test
-    public void testRunAnno1() {
-        String[] args = new String[]{ "-I", "/Users/hdd/Downloads/up/tell_workspace/vportal/vportal_201912082113463463/input.txt.run"};
-        TestUtils.initClass(RunAnnotationConfig.class, args);
-    }
 }

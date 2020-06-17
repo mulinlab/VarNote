@@ -41,7 +41,7 @@ public final class RunFactory {
 
 		try {
 			final NoFilterIterator reader = new NoFilterIterator(config.getOverlapFile(), VannoUtils.checkFileType(config.getOverlapFile()));
-			final LocCodec queryCodec = VannoUtils.getDefaultLocCodec(queryParam.getQueryFormat(), true);
+			final LocCodec queryCodec = VannoUtils.getDefaultLocCodec(queryParam.getQueryFormat(), true, null);
 
 			String line, dbOutName, s;
 			LocFeature queryNode = null;
@@ -99,7 +99,7 @@ public final class RunFactory {
         write.makeIndex();
 		logger.info(String.format("write vanno file for: %s end", config.getIndexParam().getInput()));
 	}
-	
+
 	public static void runQuery(final QueryRegionConfig queryRegionConfig) {
 		queryRegionConfig.init();
 		try {
@@ -117,7 +117,7 @@ public final class RunFactory {
 
 		int thread = config.getThread();
 
-		MapReduce<File, Long> mr = new SimpleMapReduce<File, Long>(thread, ReducerFactory.getCountReducer());
+		MapReduce<File, Long> mr = new SimpleMapReduce<File, Long>(thread, ReducerFactory.getMergeReducer(config));
 		CounterMapper mapper = null;
 		for(int i=0; i<thread; i++) {
 			mapper = new CounterMapper(config, i);
@@ -127,38 +127,6 @@ public final class RunFactory {
 		mr.getResult();
 	}
 
-	public static void runCEPIP(final CEPIPRunConfig config) {
-
-		logger.info(VannoUtils.printLogHeader("RUN CEPIP"));
-
-		config.init();
-		int thread = config.getThread();
-
-		MapReduce<File, Long> mr = new SimpleMapReduce<File, Long>(thread, ReducerFactory.getMergeReducer(config));
-		CEPIPMapper mapper = null;
-		for(int i=0; i<thread; i++) {
-			mapper = new CEPIPMapper(config, i);
-			mr.addMapper(mapper);
-		}
-
-		mr.getResult();
-	}
-
-	public static void runADTools(final AdvanceToolRunConfig config, final String tool) {
-		logger.info(VannoUtils.printLogHeader("RUN " + tool));
-
-		config.init();
-		int thread = config.getThread();
-
-		MapReduce<File, Long> mr = new SimpleMapReduce<File, Long>(thread, ReducerFactory.geADToolsReducer(config));
-        ADToolMapper mapper = null;
-		for(int i=0; i<thread; i++) {
-			mapper = new ADToolMapper(config, i);
-			mr.addMapper(mapper);
-		}
-
-		mr.getResult();
-	}
 
 	public static void run(final OverlapRunConfig config) {
 

@@ -13,35 +13,27 @@ public final class SpiderSpeedTest {
         final Logger logger = LoggingUtils.logger;
         long t1 = System.currentTimeMillis();
 
-        final String file = "src/test/resources/database4.sorted.vcf";
+        final String file = "src/test/resources/q2.sorted.tab.gz";
 
-        int thread = 8;
+        int thread = 4;
 
         BZIP2InputStream bz2_text = new BZIP2InputStream(file, thread);
         bz2_text.adjustPos();
         bz2_text.creatSpider();
 
-//        BufferedWriter write = IOUtil.openFileForBufferedUtf8Writing(new File("/Users/hdd/Downloads/test_data/database4.vcf"));
         int i = 0;
         String s;
 
-
+        thread = bz2_text.spider.length;
         for (int j = 0; j < thread ; j++) {
             SpiderReader reader = new SpiderReader(bz2_text.spider[j]);
             while((s = reader.readLine()) != null) {
                 if(!s.startsWith("#")) {
-//                    write.write(s);
-//                    write.newLine();
                     i++;
                 }
             }
             reader.closeReader();
         }
-
-
-        System.out.println("i=" + i);
-
-//        write.close();
 
         long t2 = System.currentTimeMillis();
         logger.info(String.format("\n\nDone! Time: %d\n", t2 - t1));

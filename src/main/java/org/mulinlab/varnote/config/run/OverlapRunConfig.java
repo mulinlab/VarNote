@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import htsjdk.samtools.util.StringUtil;
 import org.mulinlab.varnote.cmdline.txtreader.abs.QueryReader;
 import org.mulinlab.varnote.config.io.temp.ThreadPrintter;
 import org.mulinlab.varnote.config.param.DBParam;
@@ -12,10 +11,8 @@ import org.mulinlab.varnote.config.param.output.IntersetOutParam;
 import org.mulinlab.varnote.config.param.query.QueryFileParam;
 import org.mulinlab.varnote.cmdline.txtreader.abs.AbstractQueryReader;
 import org.mulinlab.varnote.constants.GlobalParameter;
-import org.mulinlab.varnote.utils.enumset.IndexType;
-import org.mulinlab.varnote.utils.enumset.Mode;
-import org.mulinlab.varnote.utils.enumset.OutMode;
-import org.mulinlab.varnote.utils.headerparser.BEDHeaderParser;
+import org.mulinlab.varnote.utils.VannoUtils;
+import org.mulinlab.varnote.utils.enumset.*;
 import org.mulinlab.varnote.utils.node.LocFeature;
 
 public class OverlapRunConfig extends RunConfig {
@@ -24,6 +21,7 @@ public class OverlapRunConfig extends RunConfig {
 	protected final static String OVERLAP_NOTE = GlobalParameter.OVERLAP_NOTE;
 	private final static String QUERY_START = GlobalParameter.QUERY_START;
 
+	private boolean isTab = true;
 	public OverlapRunConfig() {
 		super();
 	}
@@ -54,7 +52,12 @@ public class OverlapRunConfig extends RunConfig {
 
 	@Override
 	protected void initQuery() {
+		QueryFileParam queryParam = (QueryFileParam)this.queryParam;
 		initQueryFileForThread();
+
+		if(queryParam.getQueryFormat().getDelimiter() != Delimiter.TAB) {
+			isTab = false;
+		}
 	}
 
 	@Override
@@ -79,7 +82,11 @@ public class OverlapRunConfig extends RunConfig {
 	}
 
 	protected void initPrintter() {
-		initPrintter(outParam, runParam.getThread());
+		try {
+			initPrintter(outParam, runParam.getThread());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -112,14 +119,6 @@ public class OverlapRunConfig extends RunConfig {
 		return String.format("%s%s%s%s",  OVERLAP_NOTE, key, OVERLAP_EQUAL, val);
 	}
 
-	public void mergeResult() {
-		try {
-			printter.mergeFile(getHeader());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
 	protected void printRecord(final LocFeature node, String result, final int index) throws IOException {
 		printter.getPrintter(index).print(result);
 	}
@@ -128,10 +127,16 @@ public class OverlapRunConfig extends RunConfig {
 		IntersetOutParam outParam = (IntersetOutParam)this.outParam;
 		ThreadPrintter threadPrintter = printter.getPrintter(index);
 
+		int count = 0;
+		for (String r:results.keySet()) {
+			if(results.get(r) != null) {
+				count += results.get(r).length;
+			}
+		}
 		if(outParam.isLoj()) {
-			threadPrintter.print(String.format("%s%s%s", QUERY_START, TAB, node.origStr));
-		} else if(results.size() > 0 && outParam.getOutputMode() != OutMode.DB) {
-			threadPrintter.print(String.format("%s%s%s", QUERY_START, TAB, node.origStr));
+			threadPrintter.print(String.format("%s%s%s", QUERY_START, TAB, getOrigStr(node)));
+		} else if(count > 0 && outParam.getOutputMode() != OutMode.DB) {
+			threadPrintter.print(String.format("%s%s%s", QUERY_START, TAB, getOrigStr(node)));
 		}
 
 		if(outParam.getOutputMode() != OutMode.QUERY) {
@@ -141,6 +146,14 @@ public class OverlapRunConfig extends RunConfig {
 						threadPrintter.print(String.format("%s%s%s", databaseConfig.getOutName(), TAB, str));
 					}
 			}
+		}
+	}
+
+	public String getOrigStr(final LocFeature node) {
+		if(!isTab) {
+			return node.origStr.replaceAll(GlobalParameter.COMMA, GlobalParameter.TAB);
+		} else {
+			return node.origStr;
 		}
 	}
 }

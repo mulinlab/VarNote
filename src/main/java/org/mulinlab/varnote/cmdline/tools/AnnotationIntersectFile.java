@@ -43,10 +43,10 @@ public final class AnnotationIntersectFile extends RunProgram {
     protected int doWork() {
 
         AnnoRunConfig annoRunConfig = new AnnoRunConfig(intersectFile.getAbsolutePath());
-//        annoRunConfig = configArguments.setConfig(annoRunConfig);
+        annoRunConfig = configArguments.setConfig(annoRunConfig);
         annoRunConfig.setOutParam(outputArguments.getOutParam(new AnnoOutParam()));
 
         RunFactory.runAnnoFromOverlapFile(annoRunConfig);
-        return -1;
+        return 0;
     }
 }

@@ -46,6 +46,8 @@ public abstract class QueryReader<T> extends AbstractQueryReader<T> {
     public static final String USE_JDK_INFLATER = "use_jdk_inflater";
     public static final String MODE = "mode";
     public static final String THREAD = "thread";
+    public static final String ALLOW_LARGE_VARIANTS = "allowLargeVariants";
+    public static final String MAX_VARIANT_LENGTH = "maxVariantLength";
 
 
     protected List<DBParam> dbParams;
@@ -127,7 +129,7 @@ public abstract class QueryReader<T> extends AbstractQueryReader<T> {
     protected Format setformatHeader(Format format) {
         if(valueHash.get(HEADER_PATH) != null) format.setHeaderPath(valueHash.get(HEADER_PATH));
         if(valueHash.get(HAS_HEADER) != null) format.setHasHeaderInFile(VannoUtils.strToBool(valueHash.get(HAS_HEADER)));
-        if(valueHash.get(HEADER) != null) format.setHeaderPart(VannoUtils.parserHeader(valueHash.get(HEADER), GlobalParameter.TAB));
+        if(valueHash.get(HEADER) != null) format.setHeaderPart(VannoUtils.parserHeader(valueHash.get(HEADER), format.getDelimStr()));
         return format;
     }
 
@@ -142,6 +144,8 @@ public abstract class QueryReader<T> extends AbstractQueryReader<T> {
         if(valueHash.get(QUERY_REF) != null) format.refPositionColumn = Integer.parseInt(valueHash.get(QUERY_REF));
         if(valueHash.get(QUERY_ALT) != null) format.altPositionColumn = Integer.parseInt(valueHash.get(QUERY_ALT));
 
+        if(valueHash.get(ALLOW_LARGE_VARIANTS) != null) format.setAllowLargeVariants(VannoUtils.strToBool(valueHash.get(ALLOW_LARGE_VARIANTS)));
+        if(valueHash.get(MAX_VARIANT_LENGTH) != null) format.setMaxVariantLength(Integer.parseInt(valueHash.get(MAX_VARIANT_LENGTH)));
         return format;
     }
 

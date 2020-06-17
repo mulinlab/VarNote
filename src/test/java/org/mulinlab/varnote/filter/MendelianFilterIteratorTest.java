@@ -3,6 +3,7 @@ package org.mulinlab.varnote.filter;
 import htsjdk.variant.vcf.VCFCodec;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
+import org.mulinlab.varnote.config.anno.databse.VCFParser;
 import org.mulinlab.varnote.config.param.FilterParam;
 import org.mulinlab.varnote.filters.iterator.NoFilterIterator;
 import org.mulinlab.varnote.filters.iterator.VCFFilterIterator;
@@ -35,23 +36,23 @@ public class MendelianFilterIteratorTest {
     public void test() throws Exception {
         long t1 = System.currentTimeMillis();
 
-        String path = "/Users/hdd/Desktop/vanno/wkegg/FSGS.jointcall.new.vcf";
-        Pedigree pedigree = PedFiles.readPedigree(new File("/Users/hdd/Desktop/vanno/wkegg/FSGS_0.ped").toPath());
+        String path = "FSGS.jointcall.new.vcf";
+        Pedigree pedigree = PedFiles.readPedigree(new File("FSGS_0.ped").toPath());
 
         List<LineFilter> lineFilters = new ArrayList<>();
         lineFilters.add(new VCFHeaderLineFilter());
 
 
         FilterParam filterParam = new FilterParam();
-        filterParam.setMiFilter(new MendelianInheritanceADFilter(PedigreeConverter.convertToJannovarPedigree(pedigree)));
+        MendelianInheritanceADFilter mendelianInheritanceADFilter = new MendelianInheritanceADFilter(PedigreeConverter.convertToJannovarPedigree(pedigree));
+        filterParam.setMiFilter(mendelianInheritanceADFilter);
         filterParam.addGenotypeFilters(new DepthFilter(4));
         filterParam.addGenotypeFilters(new GenotypeQualityFilter(10));
 
 
-        VCFCodec codec = new VCFCodec();
-        codec.readActualHeader(new NoFilterIterator(new LongLineReader(path)));
+        VCFParser vcfParser = new VCFParser(path);
 
-        VCFFilterIterator iterator = new VCFFilterIterator(new NoFilterIterator(new LongLineReader(path)), lineFilters, filterParam, new VCFLocCodec(Format.VCF, true, codec));
+        VCFFilterIterator iterator = new VCFFilterIterator(new NoFilterIterator(new LongLineReader(path)), lineFilters, filterParam, new VCFLocCodec(Format.newVCF(), true, vcfParser));
 
         int i = 0;
         while(iterator.hasNext()) {
@@ -62,9 +63,6 @@ public class MendelianFilterIteratorTest {
         }
 
         iterator.close();
-
-
-        filterParam.printLog();
 
         long t2 = System.currentTimeMillis();
         logger.info(String.format("\n\nDone! Time: %d total: %d\n", (t2 - t1), i));

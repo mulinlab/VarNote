@@ -3,8 +3,11 @@ package org.mulinlab.varnote.config.io.temp;
 import htsjdk.tribble.util.LittleEndianOutputStream;
 
 import java.io.*;
+import java.util.List;
 
 public abstract class ThreadPrintter {
+    protected final static char newline = '\n';
+
     protected File file;
     protected final int index;
     LittleEndianOutputStream writer;

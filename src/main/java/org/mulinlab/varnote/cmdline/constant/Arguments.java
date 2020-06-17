@@ -1,5 +1,7 @@
 package org.mulinlab.varnote.cmdline.constant;
 
+import org.mulinlab.varnote.utils.enumset.FormatType;
+
 public final class Arguments {
 
     public static final String LOG_LONG = "log";
@@ -111,4 +113,44 @@ public final class Arguments {
 
     public static final String ANNO_OF_SHORT = "OF";
     public static final String ANNO_OF_LONG = "out-format";
+
+
+    public static final String DB_DOC =
+            "\nPossible attributes: {index, mode, tag}.\n" +
+            "index - The index type that should be used to retrieve data. Default value is \"VarNote\". Possible values: {VarNote, TBI}, optional \n" +
+            "mode - Mode of Intersection. default value is \"0\". Possible values: {0, 1, 2}, optional.\n" +
+            "\t   0: Intersect mode, perform common interaction operation\n\t      according to query and database formats;\n"  +
+            "\t   1: Exact match mode, force the program only to consider\n\t      the chromosome position of database records that exactly match\n\t      the corresponding chromosome position of query;\n"  +
+            "\t   2: Full close mode, force the program to report database\n\t      records that overlap both endpoints of query interval regardless\n\t      of original query and database formats.\n"  +
+            "tag - A label to rename the database in the output file, optional. By default, the program will use original file name as tag for the database.\n\n";
+
+
+    public static final String QUERY_DOC = "Path of query file (support plain text or gzip compressed files).\n\n" +
+            "Possible Tags: {vcf, vcfLike, bed, bedAllele, coordOnly, coordAllele, tab} \n\n" +
+
+            "Possible attributes for all tags: {sep, ci}\n" +
+            "Possible attributes for \"tab\" tag: {c, b, e, ref, alt, 0, sep}\n" +
+            "c: column of sequence name (1-based)\n" +
+            "b: column of start chromosomal position (1-based)\n" +
+            "e: column of end chromosomal position (1-based)\n" +
+            "ref: column of reference allele\n" +
+            "alt: column of alternative allele\n" +
+            "0: specify the position in the data file is 0-based rather than 1-based\n" +
+            "sep: specifies the character that separates fields in file, possible values are: {TAB, COMMA}\n" +
+            "ci: comment indicator\n";
+
+
+    public static final String INDEX_DOC = "The path of the TAB-delimited genome position file compressed by bgzip program. The file must be position-sorted (first by sequence name and then by leftmost coordinate). \n\n" +
+            "Possible Tags: {vcf, vcfLike, bed, bedAllele, coordOnly, coordAllele, tab} \n\n" +
+            "Possible attributes for all tags: {ci}\n" +
+            "Possible attributes for \"tab\" tag: {c, b, e, ref, alt, 0}\n" +
+            "c: column of sequence name (1-based)\n" +
+            "b: column of start chromosomal position (1-based)\n" +
+            "e: column of end chromosomal position (1-based)\n" +
+            "ref: column of reference allele\n" +
+            "alt: column of alternative allele\n" +
+            "0: specify the position in the data file is 0-based rather than 1-based\n" +
+            "ci: comment indicator\n";
+
+    public static final String FILE_TYPE_DOC = "VCF format is a vcf file with header, VCFLike format   ";
 }

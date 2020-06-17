@@ -10,8 +10,6 @@ import org.mulinlab.varnote.utils.node.LocFeature;
 
 public abstract class ABGenotypeFilter implements GenotypeFilter {
 
-    final static Logger logger = LoggingUtils.logger;
-
     protected final GenotypeQC name;
     protected int filterCount;
 
@@ -21,7 +19,21 @@ public abstract class ABGenotypeFilter implements GenotypeFilter {
     }
 
     @Override
-    public void printLog() {
-        logger.info(String.format("Filter out %d data of genotype with %s ", filterCount, name));
+    public String getLog() {
+        return String.format("Filter out %d data of genotype with %s ", filterCount, name);
     }
+
+    @Override
+    public Object clone() {
+        return null;
+    }
+
+    public int getFilterCount() {
+        return filterCount;
+    }
+
+    public String getName() {
+        return name.getName();
+    }
+    public int getCount() {return filterCount; }
 }

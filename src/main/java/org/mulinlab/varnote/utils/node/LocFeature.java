@@ -2,6 +2,7 @@ package org.mulinlab.varnote.utils.node;
 
 import htsjdk.tribble.Feature;
 import htsjdk.variant.variantcontext.VariantContext;
+import org.mulinlab.varnote.utils.enumset.VariantType;
 
 public class LocFeature implements Feature {
     public int beg;
@@ -18,6 +19,8 @@ public class LocFeature implements Feature {
     public String[] parts;
     public VariantContext variantContext;
 
+    public VariantType vt;
+
     public LocFeature() {
         clear();
         beg = 0;
@@ -31,9 +34,25 @@ public class LocFeature implements Feature {
         this.chr = chr;
     }
 
+    public LocFeature(int beg, int end, String chr, String ref, String alt) {
+        clear();
+        this.beg = beg;
+        this.end = end;
+        this.chr = chr;
+        this.ref = ref;
+        this.alt = alt;
+    }
+
     @Override
     public String toString() {
         return chr + "\t" + beg + "\t" + end;
+    }
+
+    public String posTabStr() {
+        return chr.toLowerCase().replace("chr", "") + "_" + (beg+1) + "_" + ref + "_" + alt;
+    }
+    public String posStr() {
+        return chr + ":" + (beg+1) + " " + ref + "|" + alt;
     }
 
     public void clear() {
@@ -47,6 +66,7 @@ public class LocFeature implements Feature {
         parts = null;
         alts = null;
         variantContext = null;
+        vt = VariantType.NM;
     }
 
     public String[] getAlts() {
@@ -66,6 +86,7 @@ public class LocFeature implements Feature {
         cloned.alt = this.alt;
         cloned.bgzStr = this.bgzStr;
         cloned.origStr = this.origStr;
+        cloned.vt = this.vt;
 
         if(this.parts != null && this.parts.length > 0) {
             cloned.parts = new String[this.parts.length];

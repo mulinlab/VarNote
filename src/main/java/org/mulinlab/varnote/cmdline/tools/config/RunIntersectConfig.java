@@ -25,6 +25,6 @@ public final class RunIntersectConfig extends ConfigProgram {
     protected int doWork() {
         OverlapRunConfig runConfig = new IntersectRunReader<OverlapRunConfig>().read(configFile.getAbsolutePath());
         RunFactory.run(runConfig);
-        return -1;
+        return 0;
     }
 }

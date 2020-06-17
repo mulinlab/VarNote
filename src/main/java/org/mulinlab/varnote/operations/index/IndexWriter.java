@@ -101,7 +101,8 @@ public final class IndexWriter {
 		int tid = 0, preBeg = -1;
 		LocFeature feature = new LocFeature();
 
-		int c = 0;
+		long c = 0;
+		String s = "";
 		while(iterator.hasNext()) {
 			feature = iterator.next();
 //			System.out.println(feature + ", " + iterator.getPosition());
@@ -109,6 +110,8 @@ public final class IndexWriter {
 				blockBean.setFilePointer(iterator.getPosition());
 			} else {
 				c++;
+				s = feature.origStr;
+
 				if(!feature.chr.equals(seqName)) {
 					if(!seqName.equals("")) {
 						addBin(bin);
@@ -120,24 +123,25 @@ public final class IndexWriter {
 
 					isBlockStart = true;
 					preBeg = 0;
-					
+
 					addSeqsName(feature.chr);
-					seqName = feature.chr; tid = sequenceNames.size() - 1;
+					seqName = feature.chr;
+					tid = sequenceNames.size() - 1;
 
 					addressOfChr.put(tid, vannoIndexOS.getOut().getFilePointer());
 					logger.info(String.format("Writing vanno file for chr %s", seqName));
 				}
-				
+
 				if(feature.beg < preBeg) throw new InvalidArgumentException(String.format("Features added out of order: next start %d < previous start %d, please sorted features by chr column, start column. Unsorted line: %s", feature.beg, preBeg, feature.origStr));
 				if(feature.beg > feature.end) throw new InvalidArgumentException(String.format("Feature start position %d > feature end position %d", feature.beg, feature.end));
-				
+
 				if(isBlockStart) {
 					addBin(bin);
 					bin.initSROB(feature.beg, feature.end, vannoOS.getOut().getFilePointer(), blockBean.getFilePointer());
 				} else {
 					bin.updateMax(feature, blockBean.getBlockOffset() - preBlockBean.getBlockOffset());
 				}
-				
+
 				preBlockBean.setFilePointer(blockBean.getFilePointer());
 				preBeg = feature.beg;
 				blockBean.setFilePointer(iterator.getPosition());
@@ -154,7 +158,7 @@ public final class IndexWriter {
 			vannoIndexOS.writeInt(GlobalParameter.CHR_START);
 		}
 		iterator.close();
-		System.out.println("total: " + c);
+		logger.info(String.format("Processed %d records", c));
 	}
 	
 	public void addBin(final SROB bin) throws IOException {

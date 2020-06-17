@@ -47,4 +47,9 @@ public class MendelianInheritanceADFilter extends MendelianInheritanceFilter {
 
         return (numAffectedWithHet > 0);
     }
+
+    @Override
+    public Object clone() {
+        return new MendelianInheritanceADFilter(pedigree);
+    }
 }

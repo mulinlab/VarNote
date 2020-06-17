@@ -34,6 +34,7 @@ public final class TABFileReader extends AbstractFileReader {
     public LineFilterIterator getFilterIterator() {
         if(iterator == null) {
             iterator = new LocFilterIterator(new NoFilterIterator(reader), lineFilters, new TABLocCodec(format, decodeFull));
+            setLocFilter();
         }
         return iterator;
     }

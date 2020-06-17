@@ -49,6 +49,6 @@ public final class IndexQuery extends RunProgram {
         if(indexArguments.listSeq) config.listChromsome();
         if(indexArguments.replaceHeader != null) config.replaceHeader(indexArguments.replaceHeader);
 
-        return -1;
+        return 0;
     }
 }

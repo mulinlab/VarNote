@@ -1,5 +1,6 @@
 package org.mulinlab.varnote.utils.enumset;
 
+
 public enum IntersectType {
     INTERSECT("Intersect", 0),
     EXACT("Exact Match", 1),
@@ -12,10 +13,20 @@ public enum IntersectType {
         this.name = name;
         this.val = val;
     }
+
     public String getName() {
         return name;
     }
     public int getVal() {
         return val;
+    }
+
+    public static IntersectType toIntersectType(int type) {
+        for (IntersectType t: IntersectType.values()) {
+            if(type == t.getVal()) {
+                return t;
+            }
+        }
+        return null;
     }
 }

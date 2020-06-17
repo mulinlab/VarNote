@@ -32,7 +32,13 @@ public abstract class AbstractQuery implements Query{
 	
 	protected void init() throws IOException {
 	}
-	
+
+	public void initReadersChr() throws IOException {
+		for(int i=0; i<readers.size(); i++) {
+			readers.get(i).initChr();
+		}
+	}
+
 	public void doQuery(final LocFeature node) throws IOException {
 		if(readers != null)
 			for(int i=0; i<readers.size(); i++) {
@@ -77,7 +83,7 @@ public abstract class AbstractQuery implements Query{
 
 		for(int i=0; i< readers.size(); i++) {
 			hits = readers.get(i).getResults();
-			if(hits.size() > 0) {
+			if(hits != null && hits.size() > 0) {
 				locFeatures = new LocFeature[hits.size()];
 				for (int j = 0; j < hits.size(); j++) {
 					locFeatures[j] = readers.get(i).getDb().decode(hits.get(j)).clone();
@@ -92,10 +98,10 @@ public abstract class AbstractQuery implements Query{
 
 
 	@Override
-	public long getResultCount() {
-		long count = 0;
-		for(int i=0; i<readers.size(); i++) {
-			count = count + ((CountResultProcess)readers.get(i).getProcess()).getResults();
+	public Integer[] getResultCount() {
+		Integer[] count = new Integer[readers.size()];
+		for(int i = 0; i < readers.size(); i++) {
+			count[i] = ((CountResultProcess)readers.get(i).getProcess()).getResultSize();
 		}
 		return count;
 	}

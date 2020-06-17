@@ -3,6 +3,7 @@ package org.mulinlab.varnote.config.anno.databse.anno;
 import java.util.*;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFHeader;
+import htsjdk.variant.vcf.VCFHeaderLineCount;
 import htsjdk.variant.vcf.VCFInfoHeaderLine;
 import org.mulinlab.varnote.config.anno.InfoField;
 import org.mulinlab.varnote.config.anno.NormalField;
@@ -62,17 +63,44 @@ public final class DatabaseAnnoVCFParser extends AbstractDatababseAnnoParser {
 		VariantContext ctx = feature.variantContext;
 		for (String key: infoFieldsToExtract) {
 			if(ctx.hasAttribute(key)) {
-				infoFieldMap.get(key).addDBValByAlt(ctx.getAttributeAsString(key, NormalField.NO_VAL), matchFlag, feature.getAlts());
+				if (isForceOverlap) {
+					infoFieldMap.get(key).addDBValByAlt(ctx.getAttributeAsString(key, NormalField.NO_VAL), matchFlag, null);
+				} else {
+					infoFieldMap.get(key).addDBValByAlt(ctx.getAttributeAsString(key, NormalField.NO_VAL), matchFlag, feature.getAlts());
+				}
 			}
 		}
 	}
 
 	@Override
-	protected void initFields(final int size) {
-		super.initFields(size);
+	protected Map<String, String> extractDBFeature(Map<String, String> obj, final LocFeature feature, final int matchFlag) {
+		obj = super.extractDBFeature(obj, feature, matchFlag);
 
-		for (InfoField field: infoFieldMap.values()) {
-			field.init(size);
+		String infoVal;
+		for (String key: infoFieldsToExtract) {
+			if(infoFieldMap.get(key) != null) {
+				infoVal = infoFieldMap.get(key).getVal();
+
+				if(infoVal != null) {
+					obj.put(getInfoName(key), infoVal);
+				}
+			}
+		}
+		return obj;
+	}
+
+	@Override
+	protected void initFields(final LocFeature feature, final int size) {
+		super.initFields(feature, size);
+
+		if (isForceOverlap) {
+			for (InfoField field: infoFieldMap.values()) {
+				field.init(size, null);
+			}
+		} else {
+			for (InfoField field: infoFieldMap.values()) {
+				field.init(size, feature.getAlts());
+			}
 		}
 	}
 
@@ -136,7 +164,17 @@ public final class DatabaseAnnoVCFParser extends AbstractDatababseAnnoParser {
 			info = vcfParser.getInfoHeaderLine(field);
 
 
-			if(outName != null)  info = new VCFInfoHeaderLine(outName, info.getCountType(), info.getType(), info.getDescription());
+			if(outName != null) {
+				try{
+					if(info.getCountType() == VCFHeaderLineCount.INTEGER) {
+						info = new VCFInfoHeaderLine(outName, info.getCount(), info.getType(), info.getDescription());
+					} else {
+						info = new VCFInfoHeaderLine(outName, info.getCountType(), info.getType(), info.getDescription());
+					}
+				} catch (Exception e) {
+					logger.error("Add info for " + outName + " with error." );
+				}
+			}
 			header.addMetaDataLine(info);
 		}
 		return header;

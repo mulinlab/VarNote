@@ -2,7 +2,7 @@ package org.mulinlab.varnote.utils.database;
 
 import java.io.File;
 import htsjdk.variant.vcf.VCFCodec;
-import org.mulinlab.varnote.config.anno.databse.HeaderFormatReader;
+import org.mulinlab.varnote.utils.headerparser.HeaderFormatReader;
 import org.mulinlab.varnote.config.anno.databse.VCFParser;
 import org.mulinlab.varnote.config.param.DBParam;
 import org.mulinlab.varnote.operations.decode.LocCodec;
@@ -88,11 +88,15 @@ public abstract class Database {
 	}
 
 	public void setDefaultLocCodec(final boolean isFull) {
-		locCodec = VannoUtils.getDefaultLocCodec(getFormat(), isFull);
+		if(format.type == FormatType.VCF) {
+			locCodec = VannoUtils.getDefaultLocCodec(getFormat(), isFull, getVcfParser().getVcfHeader());
+		} else {
+			locCodec = VannoUtils.getDefaultLocCodec(getFormat(), isFull, null);
+		}
 	}
 
-	public void setVCFLocCodec(final boolean isFull, final VCFCodec vcfCodec) {
-		locCodec = new VCFLocCodec(getFormat(), isFull, vcfCodec);
+	public void setVCFLocCodec(final boolean isFull) {
+		locCodec = new VCFLocCodec(getFormat(), isFull, getVcfParser());
 	}
 
 	public LocFeature decode(final String s) {
@@ -117,7 +121,7 @@ public abstract class Database {
 	public LocCodec getLocCodec() {
 		if(locCodec == null) {
 			if(format.type == FormatType.VCF) {
-				setVCFLocCodec(true, getVcfParser().getCodec());
+				setVCFLocCodec(true);
 			} else {
 				setDefaultLocCodec(true);
 			}

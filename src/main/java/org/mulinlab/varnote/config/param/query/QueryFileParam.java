@@ -1,7 +1,9 @@
 package org.mulinlab.varnote.config.param.query;
 
 import htsjdk.samtools.util.IOUtil;
-import org.mulinlab.varnote.config.anno.databse.HeaderFormatReader;
+import org.mulinlab.varnote.config.anno.databse.VCFParser;
+import org.mulinlab.varnote.filters.query.VariantFilter;
+import org.mulinlab.varnote.utils.headerparser.HeaderFormatReader;
 import org.mulinlab.varnote.config.param.FilterParam;
 import org.mulinlab.varnote.exceptions.InvalidArgumentException;
 import org.mulinlab.varnote.operations.readers.itf.QueryReaderItf;
@@ -30,6 +32,7 @@ public final class QueryFileParam extends QueryParam {
 
     private final boolean isFull;
     private FilterParam filterParam;
+    private List<VariantFilter> locFilters;
 
     protected List<AbstractFileReader> threadReaders;
 
@@ -54,10 +57,12 @@ public final class QueryFileParam extends QueryParam {
         this.filterParam = filterParam;
 
         if(queryFormat == null) queryFormat = Format.defaultFormat(path, true);
-        if(queryFormat.getHeaderPart() == null) {
+        if(queryFormat.type == FormatType.VCF) {
+            new VCFParser(path);
+        }
+        if(queryFormat.type != FormatType.RSID && queryFormat.getHeaderPart() == null) {
             queryFormat = HeaderFormatReader.readHeader(queryFormat, path, fileType);
         }
-
         this.queryFormat = queryFormat;
     }
 
@@ -101,11 +106,16 @@ public final class QueryFileParam extends QueryParam {
     public AbstractFileReader getReader(final QueryReaderItf itf) throws FileNotFoundException {
         AbstractFileReader r = VannoUtils.getReader(itf, this.queryFormat);
 
+        if(locFilters != null) {
+            r.setLocFilters(locFilters);
+        }
+
         if(queryFormat.type == FormatType.VCF) {
             if(filterParam != null) {
-                ((VCFFileReader)r).setVariantFilters(filterParam);
+                ((VCFFileReader)r).setVariantFilters(filterParam.clone());
             }
         }
+
         r.setDecodeFull(isFull);
         return r;
     }
@@ -126,7 +136,7 @@ public final class QueryFileParam extends QueryParam {
         logger.info(String.format("Query Format: %s", queryFormat.logFormat()));
 
         if(!queryFormat.getCommentIndicator().equals("##")) logger.info(String.format("Comment indicator of query is: %s", queryFormat.getCommentIndicator()));
-        if(queryFormat.isHasHeader()) logger.info(String.format("QueryRegion header is: %s", queryFormat.getHeaderPartStr()));
+        if(queryFormat.isHasHeader()) logger.info(String.format("Query header is: %s", queryFormat.getHeaderPartStr()));
     }
 
 
@@ -134,10 +144,27 @@ public final class QueryFileParam extends QueryParam {
         return fileType;
     }
 
-    public FilterParam getFilterParam() {
-        return filterParam;
+    public boolean isFull() {
+        return isFull;
     }
+
+    public List<FilterParam> getVCFFilterParamList() {
+        List<FilterParam> list = new ArrayList<>(threadReaders.size());
+        for (AbstractFileReader r:threadReaders) {
+            list.add(((VCFFileReader)r).getFilterParam());
+        }
+        return list;
+    }
+
     public void setFilterParam(FilterParam filterParam) {
         this.filterParam = filterParam;
+    }
+
+    public void setLocFilters(List<VariantFilter> locFilters) {
+        this.locFilters = locFilters;
+    }
+
+    public List<VariantFilter> getLocFilters() {
+        return locFilters;
     }
 }

@@ -1,35 +1,61 @@
 package org.mulinlab.varnote.operations.decode;
 
-import htsjdk.variant.vcf.VCFCodec;
+import htsjdk.variant.vcf.*;
+import org.mulinlab.varnote.config.anno.databse.VCFParser;
 import org.mulinlab.varnote.constants.GlobalParameter;
+import org.mulinlab.varnote.utils.enumset.VariantType;
 import org.mulinlab.varnote.utils.format.Format;
 import org.mulinlab.varnote.utils.node.LocFeature;
+import java.util.HashMap;
+import java.util.Map;
 
 public final class VCFLocCodec extends LocCodec {
 
     private VCFCodec codec;
+    private VCFParser vcfParser;
+    private VCFHeader vcfHeader;
+    private Map<String, Boolean> altIDs;
 
-    public VCFLocCodec(final boolean isFull) {
-        this(Format.VCF, isFull);
+    public VCFLocCodec(final Format format, final boolean isFull, VCFHeader vcfHeader) {
+        super(format, isFull ? (format.getHeaderPart() == null ? -1 : format.getHeaderPartSize()) : 8, isFull);
+        this.vcfHeader = vcfHeader;
+
+        if(!format.isAllowLargeVariants() && vcfHeader != null) {
+            altIDs = new HashMap<>();
+            for (VCFIDHeaderLine line:vcfHeader.getIDHeaderLines()) {
+                if(line instanceof VCFAltHeaderLine) {
+                    altIDs.put(line.getID(), true);
+                    altIDs.put("<" + line.getID() + ">", true);
+                }
+            }
+        }
     }
 
-    public VCFLocCodec(final Format format, final boolean isFull) {
-        super(format, isFull ? (format.getHeaderPart() == null ? -1 : format.getHeaderPartSize()) : 6, isFull);
-    }
-
-    public VCFLocCodec(final Format format, final boolean isFull, final VCFCodec codec) {
-        this(format, isFull);
-        this.codec = codec;
+    public VCFLocCodec(final Format format, final boolean isFull, final VCFParser vcfParser) {
+        this(format, isFull, vcfParser.getVcfHeader());
+        this.vcfParser = vcfParser;
+        this.codec = vcfParser.getCodec();
     }
 
     @Override
     public VCFLocCodec clone() {
-        return new VCFLocCodec(this.format, this.isFull, this.codec);
+        if(vcfParser == null) {
+            return new VCFLocCodec(this.format, this.isFull, vcfHeader);
+        } else {
+            return new VCFLocCodec(this.format, this.isFull, this.vcfParser.clone());
+        }
     }
 
     @Override
     public LocFeature decode(final String s) {
         super.decode(s);
+
+        if (altIDs != null && altIDs.get(intv.alt) != null) {
+            intv.vt = VariantType.LV;
+        } else if(exceedMaxLength()) {
+            intv.vt = VariantType.OML;
+        }
+
         if(codec != null) {
             intv.variantContext = codec.decode(s);
         }
@@ -49,7 +75,9 @@ public final class VCFLocCodec extends LocCodec {
     @Override
     public void processOther() {
         intv.end = intv.beg + intv.ref.length();
-//        ajustSVTYPE(parts[INFO_FIELD - 1]);
+        if(parts != null && parts.length > 7) {
+            ajustSVTYPE(parts[7]);
+        }
     }
 
     public void ajustSVTYPE(final String info) {
@@ -82,9 +110,5 @@ public final class VCFLocCodec extends LocCodec {
             i = info.indexOf(';', e_off);
             intv.end = Integer.parseInt(i > e_off ? info.substring(e_off, i) : info.substring(e_off));
         }
-    }
-
-    public void setCodec(VCFCodec codec) {
-        this.codec = codec;
     }
 }

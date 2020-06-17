@@ -2,6 +2,8 @@ package org.mulinlab.varnote.cmdline;
 
 import org.junit.Test;
 import org.mulinlab.varnote.cmdline.tools.Annotation;
+import org.mulinlab.varnote.cmdline.tools.Intersect;
+import org.mulinlab.varnote.utils.LoggingUtils;
 import utils.TestUtils;
 
 
@@ -39,15 +41,4 @@ public final class AnnotationTest {
         TestUtils.initClass(Annotation.class, args);
     }
 
-    @Test
-    public void testTAB() {
-        String[] args = new String[]{
-                "-D", "src/test/resources/database1.sorted.bed.gz",
-                "-Q:tab,c=2,b=3,e=4,ref=5,alt=6", "src/test/resources/q4.sorted.tab.gz",
-                "-Z", "false",
-                "-loj", "true",
-                "-OF", "VCF",
-                "-T", "4", "--log", "true"};
-        TestUtils.initClass(Annotation.class, args);
-    }
 }

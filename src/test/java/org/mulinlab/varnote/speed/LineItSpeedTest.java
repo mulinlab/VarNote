@@ -13,7 +13,7 @@ public class LineItSpeedTest {
     @Test
     public void testTXT() throws Exception {
         long t1 = System.currentTimeMillis();
-        String path = "src/test/resources/database4.sorted.vcf";
+        String path = "src/test/resources/q1.sorted.bed";
 
         LongLineReader reader = new LongLineReader(path);
         String s;
@@ -33,7 +33,7 @@ public class LineItSpeedTest {
     @Test
     public void testBGZ() throws Exception {
         long t1 = System.currentTimeMillis();
-        String path = "/Users/hdd/Downloads/test_data/database4.sorted.vcf.gz";
+        String path = "src/test/resources/database2.sorted.tab.gz";
 
         BGZReader reader = new BGZReader(path);
         String s;
@@ -53,7 +53,7 @@ public class LineItSpeedTest {
     @Test
     public void testGZ() throws Exception {
         long t1 = System.currentTimeMillis();
-        String path = "/Users/hdd/Downloads/test_data/q3.sorted.vcf.gz";
+        String path = "src/test/resources/q2.sorted.tab.gz";
 
         GZIPReader reader = new GZIPReader(path);
         String s;

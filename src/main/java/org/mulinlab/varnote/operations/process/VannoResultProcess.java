@@ -38,6 +38,7 @@ public final class VannoResultProcess implements ProcessResult{
 				result.add(d.bgzStr); 
 			} else {
 				NodeWithFilePointer dt = (NodeWithFilePointer)d;
+//				System.out.println(d.toString() + " "  + BlockCompressedFilePointerUtil.makeFilePointer(dt.blockAddress, dt.blockOffset));
 				mFp.seek(BlockCompressedFilePointerUtil.makeFilePointer(dt.blockAddress, dt.blockOffset));   //25238  54636  //12541 44392
 //				System.out.println(dt.blockAddress + "," + dt.blockOffset );
 				dt.bgzStr = mFp.readLine();
@@ -60,9 +61,13 @@ public final class VannoResultProcess implements ProcessResult{
 		result = null;
 		result = new ArrayList<String>(3);
 	}
-	
+
 	@Override
 	public int getResultSize() {
-		return result.size();
+		if(result == null) {
+			return 0;
+		} else {
+			return result.size();
+		}
 	}
 }

@@ -64,6 +64,19 @@ public final class ExtractConfig {
 		setOutName();
 	}
 
+	private String[] getUniqFields(String[] fields) {
+		List<String> keys = new ArrayList<>();
+		Map<String, Boolean> keyMap = new HashMap<>();
+
+		for (String field:fields) {
+			if(keyMap.get(field) == null) {
+				keys.add(field);
+				keyMap.put(field, true);
+			}
+		}
+		return keys.toArray(new String[keys.size()]);
+	}
+
 	private void setColToExtract() {
 		final String[] fields = getARR(param.getFields());
 		final String[] cols = getARR(param.getCols());
@@ -73,10 +86,10 @@ public final class ExtractConfig {
 			if(fields.length == 1 && fields[0].toUpperCase().equals("ALL")) {
 				colToExtract = getAllCols();
 			} else {
-				colToExtract = getColsForField(fields, param.getFields().charAt(0) == EXCLUDE);
+				colToExtract = getColsForField(getUniqFields(fields), param.getFields().charAt(0) == EXCLUDE);
 			}
 		} else {
-			colToExtract = getCols(cols, param.getCols().charAt(0) == EXCLUDE);
+			colToExtract = getCols(getUniqFields(cols), param.getCols().charAt(0) == EXCLUDE);
 		}
 	}
 
@@ -232,8 +245,7 @@ public final class ExtractConfig {
 							}
 						}
 
-						if(!isInfo) throw new InvalidArgumentException(String.format("Unknown out_names: %s, field should in header %s or starts with col such as col1, col2, etc.",
-								key, format.getHeaderPartStr()));
+						if(!isInfo) throw new InvalidArgumentException(String.format("Unknown field name %s of database %s defined in out_names",  key, getLabel()));
 					} else {
 						outputNameMap.put(col, out);
 					}

@@ -1,11 +1,23 @@
 package org.mulinlab.varnote.operations.decode;
 
+import org.mulinlab.varnote.utils.enumset.VariantType;
 import org.mulinlab.varnote.utils.format.Format;
+import org.mulinlab.varnote.utils.node.LocFeature;
 
 public final class TABLocCodec extends LocCodec {
 
     public TABLocCodec(final Format format, final boolean isFull) {
         super(format, format.getHeaderPart() == null ? -1 : format.getHeaderPartSize(), isFull);
+    }
+
+    @Override
+    public LocFeature decode(final String s) {
+        super.decode(s);
+        if(exceedMaxLength()) {
+            intv.vt = VariantType.OML;
+        }
+
+        return intv;
     }
 
     @Override

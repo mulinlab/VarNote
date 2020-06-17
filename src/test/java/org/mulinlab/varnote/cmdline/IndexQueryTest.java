@@ -6,13 +6,6 @@ import utils.TestUtils;
 
 public final class IndexQueryTest {
 
-//    @Test
-//    public void testIndexHelp() {
-//        final Set<Class<?>> classes = new HashSet<>();
-//        classes.add(QueryIndexMeta.class);
-//
-//        VarNoteCommandLine.printUsage(System.out, classes, GlobalParameter.PRO_CMD);
-//    }
 
     @Test
     public void testIndex() {

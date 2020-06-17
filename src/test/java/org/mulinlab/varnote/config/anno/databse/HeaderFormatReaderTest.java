@@ -2,8 +2,7 @@ package org.mulinlab.varnote.config.anno.databse;
 
 import org.junit.Test;
 import org.mulinlab.varnote.utils.format.Format;
-
-import static org.junit.Assert.*;
+import org.mulinlab.varnote.utils.headerparser.HeaderFormatReader;
 
 public class HeaderFormatReaderTest {
 

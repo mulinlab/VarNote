@@ -26,7 +26,7 @@ public final class VCFFileReader extends AbstractFileReader {
     }
 
     public VCFFileReader(final String path) {
-        super(path, Format.VCF);
+        super(path, Format.newVCF());
     }
     public VCFFileReader(final String path, final Format format) {
         super(path, format);
@@ -63,16 +63,20 @@ public final class VCFFileReader extends AbstractFileReader {
         }
     }
 
+    public FilterParam getFilterParam() {
+        return filterParam;
+    }
+
     public void setDecodeLoc(boolean decodeLoc) {
         isDecodeLoc = decodeLoc;
     }
 
     public VCFLocCodec getVCFcodec() {
-        return new VCFLocCodec(format, decodeFull, getVcfParser().getCodec());
+        return new VCFLocCodec(format, decodeFull, getVcfParser());
     }
 
     public VCFLocCodec getLoccodec() {
-        return new VCFLocCodec(format, decodeFull);
+        return new VCFLocCodec(format, decodeFull, getVcfParser().getVcfHeader());
     }
 
     @Override
@@ -80,6 +84,7 @@ public final class VCFFileReader extends AbstractFileReader {
         if(iterator == null) {
             if(isDecodeLoc) {
                 iterator = new LocFilterIterator(new NoFilterIterator(reader), lineFilters, getLoccodec());
+                setLocFilter();
             } else {
                 iterator = new VCFFilterIterator(new NoFilterIterator(reader), lineFilters, filterParam, getVCFcodec());
             }

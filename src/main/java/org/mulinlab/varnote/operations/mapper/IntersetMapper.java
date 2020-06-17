@@ -1,5 +1,6 @@
 package org.mulinlab.varnote.operations.mapper;
 import org.mulinlab.varnote.config.param.query.QueryFileParam;
+import org.mulinlab.varnote.config.run.CountRunConfig;
 import org.mulinlab.varnote.config.run.OverlapRunConfig;
 import org.mulinlab.varnote.operations.readers.query.AbstractFileReader;
 import org.mulinlab.varnote.utils.VannoUtils;
@@ -19,10 +20,10 @@ public final class IntersetMapper extends AbstractMapper{
 	}
 
 	@Override
-	public void processResult(final LocFeature node) throws IOException {
-//		System.out.println(node.toString() + "," + queryEngine.getResults().size());
+	public void doQuery(final LocFeature node) throws IOException {
+		super.doQuery(node);
 		((OverlapRunConfig)this.config).printRecord(node, queryEngine.getResults(), index);
-	}
+	};
 
 	@Override
 	public Integer getResult() {

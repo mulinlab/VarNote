@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-
-import htsjdk.tribble.Feature;
 import org.mulinlab.varnote.utils.enumset.IntersectType;
 import org.mulinlab.varnote.utils.enumset.Mode;
 import org.mulinlab.varnote.utils.enumset.OutMode;
@@ -26,9 +24,9 @@ public final class GlobalParameter {
 	public static final int REF_IDX = 0;
 	public static final int NO_CALL_IDX = -1;
 	public static final int GT_FILE_END = -9;
+	public static final int GT_CHR_END = -8;
 
 
-	//sign
 	public static final String UNDERLINE = "_";
 	public static final String NULLVALUE = ".";
 	public static final String TAB = "\t";
@@ -36,16 +34,10 @@ public final class GlobalParameter {
 	public static final String COMMENT_LINE = "#";
 	public static final String OVERLAP_NOTE = "@";
 	public static final String OVERLAP_EQUAL = "=";
-	public final static String OPTION_SEPERATE = ":";
 
-	public final static String ROAD_MAP_LABEL = "roadmap";
-	public final static String REGBASE_MAP_LABEL = "regbase";
-	public final static String GENOMAD_LABEL = "gnomad";
-	public final static String DBNSFP_LABEL = "dbNSFP";
-
-	public final static String COSMIC_LABEL = "cosmic";
-	public final static String ICGC_LABEL = "icgc";
-
+	public final static String MERGE_LABEL = "merge";
+	public final static String POS_RSID_LABEL = "pos2snp";
+	public final static String RSID_POS_LABEL = "snp2pos";
 
 	//format
 	public final static String DEFAULT_COMMENT_INDICATOR = "##";
@@ -80,7 +72,10 @@ public final class GlobalParameter {
 	public final static IntersectType DEFAULT_INTERSECT = IntersectType.INTERSECT;
 	public final static int DEFAULT_THREAD = 1;
 	public static String OVERLAP_RESULT_SUFFIX = ".overlap";
+	public static String COUNT_RESULT_SUFFIX = ".count";
 
+	public final static boolean DEFAULT_ALLOW_MAX_VIRANTS = false;
+	public final static int DEFAULT_MAX_LENGTH = 50;
 
 	//anno
 	public final static boolean DEFAULT_FORCE_OVERLAP = false;
@@ -105,12 +100,9 @@ public final class GlobalParameter {
 
 
 	public static String KNRM = "\u001B[0m"; // reset
-	//public final static String KBLD = "\u001B[1m"; // Bold
 	public static String KRED = "\u001B[31m";
 	public static String KGRN = "\u001B[32m";
-	//public final static String KYEL = "\u001B[33m";
 	public static String KBLU = "\u001B[34m";
-	//public final static String KMAG = "\u001B[35m";
 	public static String KCYN = "\u001B[36m";
 	public static String KWHT = "\u001B[37m";
 	public static String KBLDRED = "\u001B[1m\u001B[31m";
@@ -120,8 +112,6 @@ public final class GlobalParameter {
 	public static final int BIN_GENOMIC_SPAN = 512 * 1024 * 1024;
 	public static final int[] LEVEL_STARTS = { 0, 1, 9, 73, 585, 4681 };
 	public static final int MAX_BINS = 37450; // =(8^6-1)/7+1
-//	public static final int MAX_LINEAR_INDEX_SIZE = MAX_BINS + 1  - LEVEL_STARTS[LEVEL_STARTS.length - 1];
-//	public static final int[] bins = new int[MAX_BINS];
 	public static final int UNSET_GENOMIC_LOCATION = 0;
     
 	public static final int version = 1;
@@ -199,20 +189,4 @@ public final class GlobalParameter {
 			return LEVEL_STARTS[1] + (beg >> 26);
 		return 0;
 	}
-
-	public static int convertBeg(Feature feature) {
-		return (feature.getStart() <= 0) ? 0 : (feature.getStart() - 1);
-	}
-
-	public static int convertEnd(Feature feature) {
-		int end = feature.getEnd();
-		if (end <= 0) {
-			// If feature end cannot be determined (e.g. because a read is not
-			// really aligned),
-			// then treat this as a one base feature for indexing purposes.
-			end = feature.getStart() + 1;
-		}
-		return end;
-	}
-	
 }

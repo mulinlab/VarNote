@@ -78,4 +78,10 @@ public class MendelianInheritanceARFilter extends MendelianInheritanceFilter {
 
         return builder.build();
     }
+
+    @Override
+    public Object clone() {
+        return new MendelianInheritanceARFilter(pedigree);
+    }
+
 }

@@ -2,15 +2,12 @@ package org.mulinlab.varnote.config.param;
 
 import htsjdk.samtools.seekablestream.SeekableStreamFactory;
 import htsjdk.samtools.util.IOUtil;
-import htsjdk.samtools.util.StringUtil;
 import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.utils.VannoUtils;
 import org.mulinlab.varnote.utils.enumset.IndexType;
 import org.mulinlab.varnote.utils.enumset.IntersectType;
-import org.mulinlab.varnote.utils.headerparser.BEDHeaderParser;
-
 import java.io.File;
-import java.util.List;
+
 
 public final class DBParam extends Param {
 

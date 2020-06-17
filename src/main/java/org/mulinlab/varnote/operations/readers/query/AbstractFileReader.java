@@ -1,9 +1,10 @@
 package org.mulinlab.varnote.operations.readers.query;
 
 import htsjdk.samtools.util.IOUtil;
-import org.mulinlab.varnote.config.anno.databse.HeaderFormatReader;
-import org.mulinlab.varnote.constants.GlobalParameter;
-import org.mulinlab.varnote.filters.iterator.NoFilterIterator;
+import org.mulinlab.varnote.filters.RegionFilter;
+import org.mulinlab.varnote.filters.iterator.LocFilterIterator;
+import org.mulinlab.varnote.filters.query.VariantFilter;
+import org.mulinlab.varnote.utils.headerparser.HeaderFormatReader;
 import org.mulinlab.varnote.filters.query.line.LineFilter;
 import org.mulinlab.varnote.operations.readers.itf.*;
 import org.mulinlab.varnote.filters.iterator.LineFilterIterator;
@@ -25,6 +26,10 @@ public abstract class AbstractFileReader {
 
     protected LineFilterIterator iterator;
     protected boolean decodeFull = false;
+    protected List<VariantFilter> locFilters;
+
+    public AbstractFileReader() {
+    }
 
     public AbstractFileReader(final QueryReaderItf itf, final Format format) {
         this.reader = itf;
@@ -92,4 +97,13 @@ public abstract class AbstractFileReader {
         return decodeFull;
     }
 
+    public void setLocFilters(List<VariantFilter> locFilters) {
+        this.locFilters = locFilters;
+    }
+
+    public void setLocFilter() {
+        if(iterator != null && locFilters != null) {
+            ((LocFilterIterator)iterator).setLocFilters(locFilters);
+        }
+    }
 }

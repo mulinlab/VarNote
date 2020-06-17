@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.zip.GZIPOutputStream;
 
 import htsjdk.samtools.util.BlockCompressedOutputStream;
 import htsjdk.tribble.util.LittleEndianOutputStream;
@@ -14,9 +15,9 @@ public class PrintGZ {
 	private final LittleEndianOutputStream gzOut;
 	private final BufferedWriter nonGZWriter;
 	
-	public PrintGZ(final String path, final boolean isGzip) throws FileNotFoundException {
+	public PrintGZ(final String path, final boolean isGzip) throws IOException {
 		 if(isGzip) {
-			 gzOut = new LittleEndianOutputStream(new BlockCompressedOutputStream(new File(path)));
+			 gzOut = new LittleEndianOutputStream(new GZIPOutputStream(new FileOutputStream(path)));
 			 nonGZWriter = null;
 		 } else {
 			 gzOut = null;

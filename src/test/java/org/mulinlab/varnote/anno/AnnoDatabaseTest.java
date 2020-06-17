@@ -1,6 +1,7 @@
 package org.mulinlab.varnote.anno;
 
 
+import htsjdk.variant.vcf.VCFHeader;
 import org.junit.Test;
 import org.mulinlab.varnote.cmdline.txtreader.anno.AnnoConfigReader;
 import org.mulinlab.varnote.config.anno.databse.anno.DatabaseAnnoBEDParser;
@@ -14,6 +15,7 @@ import org.mulinlab.varnote.utils.block.SROB;
 import org.mulinlab.varnote.utils.database.Database;
 import org.mulinlab.varnote.utils.database.DatabaseFactory;
 import org.mulinlab.varnote.utils.enumset.AnnoOutFormat;
+import org.mulinlab.varnote.utils.format.Format;
 import org.mulinlab.varnote.utils.node.LocFeature;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,23 +31,28 @@ public class AnnoDatabaseTest {
 
         Database db = DatabaseFactory.readDatabase(new DBParam("src/test/resources/database4.sorted.vcf.gz"));
 
-        DatabaseAnnoVCFParser parser = new DatabaseAnnoVCFParser(new ExtractConfig(map.get("database4.sorted.vcf.gz"), db), true, AnnoOutFormat.VCF);
+        DatabaseAnnoVCFParser parser = new DatabaseAnnoVCFParser(new ExtractConfig(map.get("database4.sorted.vcf.gz"), db), false, AnnoOutFormat.VCF);
 
-        VCFLocCodec decode = new VCFLocCodec(false);
-        LocFeature feature = decode.decode("1\t12854895\tesv3585241\tG\tA\t100\tPASS\tAC=49;AF=0.0325479;END=12919194;");
+        VCFLocCodec decode = new VCFLocCodec(Format.newVCF(), false, (VCFHeader) null);
+        LocFeature feature = decode.decode("1\t12854895\tesv3585241\tG\tA,T\t100\tPASS\tAC=49;AF=0.0325479;END=12919194;");
 
         List<LocFeature> dblines = new ArrayList<>();
-        dblines.add(db.decode("1\t12855318\trs111963106\tG\tA,C\t69.44\t.\tAC=2;AF=0.500;AN=4;\tGT:AD:DP:GQ:PL"));
-        dblines.add(db.decode("1\t12855338\t.\tG\tGAA\t56.40\t.\tAC=2;AF=0.500;AN=4;\tGT:AD:DP:GQ:PL"));
-        dblines.add(db.decode("1\t12855835\trs1063795\tC\tG\t5055.20\t.\tAC=4;AF=1.00;AN=4;DB;DP=113;\tGT:AD:DP:GQ:PL"));
-        dblines.add(db.decode("1\t12855845\trs1063797\tG\tC\t5055.20\t.\tAC=4;AF=1.00;AN=4;DB;DP=85;\tGT:AD:DP:GQ:PL"));
-        dblines.add(db.decode("1\t12856010\trs61775053\tC\tG\t3428.44\t.\tAC=2;AF=0.500;AN=4;\tGT:AD:DP:GQ:PL"));
+        dblines.add(db.decode("1\t12855318\trs111963106\tG\tA,C,T\t69.44\t.\tAC=2,3,4;AF=0.500,0.600,0.700;AN=4,5,6;\tGT:AD:DP:GQ:PL").clone());
+        dblines.add(db.decode("1\t12855338\t.\tG\tGAA\t56.40\t.\tAC=2;AF=0.500;AN=4;\tGT:AD:DP:GQ:PL").clone());
+        dblines.add(db.decode("1\t12855835\trs1063795\tC\tG\t5055.20\t.\tAC=4;AF=1.00;AN=4;DB;DP=113;\tGT:AD:DP:GQ:PL").clone());
+        dblines.add(db.decode("1\t12855845\trs1063797\tG\tC,A\t5055.20\t.\tAC=4,5;AF=1.00,2.00;AN=4,5;DB;DP=85,95;\tGT:AD:DP:GQ:PL").clone());
+        dblines.add(db.decode("1\t12856010\trs61775053\tC\tG\t3428.44\t.\tAC=2;AF=0.500;AN=4;\tGT:AD:DP:GQ:PL").clone());
 
         parser.extractFieldsValue(feature, dblines.toArray(new LocFeature[dblines.size()]));
         StringJoiner join = parser.joinFields(new StringJoiner(GlobalParameter.TAB));
 
         System.out.println(parser.getHeader(new StringJoiner(GlobalParameter.TAB)).toString());
         System.out.println(join.toString());
+
+        List<Map<String, String>> rmap = parser.extractValues(feature, dblines.toArray(new LocFeature[dblines.size()]));
+        for (Map<String, String> key:rmap) {
+            System.out.println(key);
+        }
     }
 
     @Test
@@ -57,7 +64,7 @@ public class AnnoDatabaseTest {
 
         DatabaseAnnoBEDParser parser = new DatabaseAnnoBEDParser(new ExtractConfig(map.get("database3.sorted.tab.gz"), db), false, AnnoOutFormat.VCF);
 
-        VCFLocCodec decode = new VCFLocCodec(false);
+        VCFLocCodec decode = new VCFLocCodec(Format.newVCF(), false, (VCFHeader) null);
         LocFeature feature = decode.decode("1\t12854895\tesv3585241\tG\t<CN0>\t100\tPASS\tAC=49;AF=0.0325479;END=12919194;");
 
         List<LocFeature> dblines = new ArrayList<>();

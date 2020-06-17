@@ -141,7 +141,7 @@ public abstract class AbstractDatababseAnnoParser {
 
 	public void extractFieldsValue(final LocFeature query, final LocFeature[] dbFeatures) {
 		if(dbFeatures != null && dbFeatures.length > 0) {
-			initFields(dbFeatures.length);
+			initFields(query, dbFeatures.length);
 			for (LocFeature dbFeature : dbFeatures) {
 				int matchFlag = checkQueryAndDBNodeMatch(query, dbFeature);
 				if(matchFlag != NormalField.NOT_MATCH) {
@@ -149,6 +149,38 @@ public abstract class AbstractDatababseAnnoParser {
 				}
 			}
 		}
+	}
+
+	public List<Map<String, String>> extractValues(final LocFeature query, final LocFeature[] dbFeatures) {
+		List<Map<String, String>> list = new ArrayList<>();
+		Map<String, String> obj;
+		if(dbFeatures != null && dbFeatures.length > 0) {
+			for (LocFeature dbFeature : dbFeatures) {
+				initFields(query, 1);
+
+				int matchFlag = checkQueryAndDBNodeMatch(query, dbFeature);
+				if(matchFlag != NormalField.NOT_MATCH) {
+
+					processDBFeature(dbFeature, matchFlag);
+					obj = new HashMap<>();
+					obj = extractDBFeature(obj, query, matchFlag);
+					list.add(obj);
+				}
+			}
+		}
+		return list;
+	}
+
+	protected Map<String, String> extractDBFeature(Map<String, String> obj, final LocFeature feature, final int matchFlag) {
+		for (int col: colsToExtract) {
+			if(fileds.get(col) != null) {
+
+				if(fileds.get(col).getVal() != null) {
+					obj.put(getFieldName(col), fileds.get(col).getVal());
+				}
+			}
+		}
+		return obj;
 	}
 
 	protected void processDBFeature(final LocFeature feature, final int matchFlag) {
@@ -160,7 +192,7 @@ public abstract class AbstractDatababseAnnoParser {
 	}
 
 
-	protected void initFields(final int size) {
+	protected void initFields(final LocFeature feature, final int size) {
 		for (NormalField field: fileds.values()) {
 			field.init(size);
 		}

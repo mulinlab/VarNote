@@ -6,7 +6,7 @@ import org.mulinlab.varnote.utils.node.LocFeature;
 
 public final class CountResultProcess implements ProcessResult{
 
-	private long count;
+	private int count;
 	
 	public CountResultProcess() {
 		super();
@@ -19,10 +19,6 @@ public final class CountResultProcess implements ProcessResult{
 		count++;
 	}
 
-	public long getResults() {
-		return count;
-	}
-
 
 	@Override
 	public List<String> getResult() {
@@ -32,7 +28,7 @@ public final class CountResultProcess implements ProcessResult{
 
 	@Override
 	public int getResultSize() {
-		return 0;
+		return count;
 	}
 
 

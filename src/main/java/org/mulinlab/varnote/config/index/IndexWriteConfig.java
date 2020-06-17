@@ -5,7 +5,6 @@ import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.utils.database.index.IndexFactory;
 import org.mulinlab.varnote.utils.database.index.vannoIndex.VannoIndex;
 import org.mulinlab.varnote.utils.enumset.IndexType;
-import org.mulinlab.varnote.utils.headerparser.BEDHeaderParser;
 import org.mulinlab.varnote.exceptions.InvalidArgumentException;
 import org.mulinlab.varnote.utils.VannoUtils;
 import org.mulinlab.varnote.utils.headerparser.MetaReader;

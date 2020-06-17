@@ -33,20 +33,8 @@ public final class ReducerFactory {
 		};
 	}
 
-	public static Reducer geADToolsReducer(final AdvanceToolRunConfig config) {
-		return new Reducer<File, Mapper<Long>, Long>() {
-			public File doReducer(List<Mapper<Long>> mappers) {
 
-				printMergeLog();
-				config.mergeResult();
-				if(config.getOutParam() != null) config.getOutParam().printLog();
-				return null;
-			}
-		};
-	}
-
-
-	public static Reducer getMergeReducer(final OverlapRunConfig config) {
+	public static Reducer getMergeReducer(final RunConfig config) {
 		return new Reducer<File, Mapper<Long>, Long>() {
 			public File doReducer(List<Mapper<Long>> mappers) {
 				printMergeLog();

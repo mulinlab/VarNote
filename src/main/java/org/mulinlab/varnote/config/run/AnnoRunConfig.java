@@ -15,13 +15,14 @@ import org.mulinlab.varnote.config.param.output.AnnoOutParam;
 import org.mulinlab.varnote.config.param.query.QueryFileParam;
 import org.mulinlab.varnote.cmdline.txtreader.anno.OverlapHeaderReader;
 import org.mulinlab.varnote.config.parser.ResultParser;
+import org.mulinlab.varnote.config.parser.output.AnnoOut;
 import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.utils.VannoUtils;
 import org.mulinlab.varnote.utils.database.Database;
 import org.mulinlab.varnote.utils.enumset.FormatType;
 import org.mulinlab.varnote.utils.node.LocFeature;
 
-public final class AnnoRunConfig extends OverlapRunConfig{
+public class AnnoRunConfig extends OverlapRunConfig{
 
 	private String overlapFile;
 	private boolean forceOverlap = GlobalParameter.DEFAULT_FORCE_OVERLAP;
@@ -82,8 +83,6 @@ public final class AnnoRunConfig extends OverlapRunConfig{
 	}
 
 	public void initOther() {
-		super.initOther();
-
 		logger.info(VannoUtils.printLogHeader("ANNOTATION  SETTING"));
 
 		QueryFileParam queryParam = (QueryFileParam)this.queryParam;
@@ -100,7 +99,7 @@ public final class AnnoRunConfig extends OverlapRunConfig{
 		DBAnnoParam annoParam = null;
 		for (Database db: databses) {
 			if(db.getFormat().type == FormatType.VCF) {
-				db.setVCFLocCodec(true, db.getVcfParser().getCodec());
+				db.setVCFLocCodec(true);
 			} else {
 				db.setDefaultLocCodec(true);
 			}
@@ -123,7 +122,9 @@ public final class AnnoRunConfig extends OverlapRunConfig{
 		for (int i = 0; i < threadSize; i++) {
 			annoParsers[i] = new AnnoParser(this, extractConfigMap, i);
 		}
-		annoParsers[0].printLog();
+		((AnnoParser)annoParsers[0]).printLog();
+
+		initPrintter();
 	}
 
 
@@ -141,7 +142,8 @@ public final class AnnoRunConfig extends OverlapRunConfig{
 	}
 
 	private String doAnno(final LocFeature node, final Map<String, LocFeature[]> results, final int index) {
-		return annoParsers[index].processNode(node, results);
+		AnnoOut annoOut = (AnnoOut)annoParsers[index].processNode(node, results);
+		return annoOut.getResult();
 	}
 
 	public void setAnnoConfig(final String annoConfig) {

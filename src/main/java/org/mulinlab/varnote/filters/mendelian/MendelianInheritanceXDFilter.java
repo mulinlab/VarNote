@@ -55,4 +55,9 @@ public class MendelianInheritanceXDFilter extends MendelianInheritanceFilter {
         }
         return (numAffectedWithVar > 0);
     }
+
+    @Override
+    public Object clone() {
+        return new MendelianInheritanceXDFilter(pedigree);
+    }
 }

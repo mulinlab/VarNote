@@ -1,8 +1,7 @@
 package org.mulinlab.varnote.operations.readers.db;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
+import java.io.IOException;
 import org.mulinlab.varnote.config.param.DBParam;
 import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.operations.decode.LocCodec;

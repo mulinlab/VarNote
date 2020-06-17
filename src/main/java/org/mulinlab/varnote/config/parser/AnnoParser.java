@@ -1,7 +1,6 @@
 package org.mulinlab.varnote.config.parser;
 
 import java.util.*;
-
 import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFHeaderLine;
 import org.mulinlab.varnote.config.anno.databse.anno.AbstractDatababseAnnoParser;
@@ -13,6 +12,7 @@ import org.mulinlab.varnote.config.anno.query.QueryBEDParser;
 import org.mulinlab.varnote.config.anno.query.QueryVCFParser;
 import org.mulinlab.varnote.config.param.output.AnnoOutParam;
 import org.mulinlab.varnote.config.param.query.QueryFileParam;
+import org.mulinlab.varnote.config.parser.output.AnnoOut;
 import org.mulinlab.varnote.config.run.AnnoRunConfig;
 import org.mulinlab.varnote.operations.readers.query.VCFFileReader;
 import org.mulinlab.varnote.utils.database.Database;
@@ -70,7 +70,6 @@ public class AnnoParser implements ResultParser {
 		sign = (outFormat == AnnoOutFormat.BED) ? TAB : INFO_FIELD_SEPARATOR;
 	}
 
-	@Override
 	public void printLog() {
 		for (String key : dbParesers.keySet()) {
 			dbParesers.get(key).printLog();
@@ -143,7 +142,9 @@ public class AnnoParser implements ResultParser {
 	}
 
 	@Override
-	public String processNode(final LocFeature query, final Map<String, LocFeature[]> dbNodeMap) {
+	public AnnoOut processNode(final LocFeature query, final Map<String, LocFeature[]> dbNodeMap) {
+		AnnoOut annoOut = new AnnoOut(query);
+
 		StringJoiner joiner = new StringJoiner(sign);
 
 		if (dbNodeMap != null) {
@@ -165,13 +166,15 @@ public class AnnoParser implements ResultParser {
 		}
 
 		if (loj) {
-			return printRecode(query, joiner);
+			annoOut.setResult(printRecode(query, joiner));
 		} else {
 			if (joiner.length() > 0 && isNotNull(joiner.toString().split(sign))) {
-				return printRecode(query, joiner);
+				annoOut.setResult(printRecode(query, joiner));
 			} else {
-				return null;
+				annoOut.setResult(null);
 			}
 		}
+
+		return annoOut;
 	}
 }

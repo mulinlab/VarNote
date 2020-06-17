@@ -19,11 +19,11 @@ public final class QueryRegion extends QueryProgram {
     static final String USAGE_DETAILS =
             "\n\nUsage example:" +
             "\n" +
-            "java -jar " + GlobalParameter.PRO_NAME + ".jar QueryRegion -Q chr1-1-100000 -D /path/db.vcf.gz \n" ;
+            "java -jar " + GlobalParameter.PRO_NAME + ".jar QueryRegion -Q chr1:1-100000 -D /path/db.vcf.gz \n" ;
 
 
     @Argument( fullName = Arguments.QUERY_INPUT_LONG, shortName = Arguments.QUERY_INPUT_SHORT,
-            doc = "Region specified as the format \"chr-beginPos-endPos\"", optional = false
+            doc = "Region specified as the format \"chr:beginPos-endPos\"", optional = false
     )
     public String queryRegion = null;
 
@@ -37,6 +37,6 @@ public final class QueryRegion extends QueryProgram {
         QueryRegionConfig queryRegionConfig = new QueryRegionConfig(queryRegion, dbArguments.getDBList(), isDisplayLabel);
         RunFactory.runQuery(queryRegionConfig);
 
-        return -1;
+        return 0;
     }
 }
