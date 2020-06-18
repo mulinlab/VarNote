@@ -17,7 +17,7 @@ import org.mulinlab.varnote.utils.RunFactory;
         programGroup = ConfigProgramGroup.class)
 
 public final class RunAnnotationConfig extends ConfigProgram {
-    static final String USAGE_SUMMARY = "Run Annotation program from a config file. ";
+    static final String USAGE_SUMMARY = "Run Annotation program with a config file. ";
     static final String USAGE_DETAILS =
             "\n\nUsage example:" +
             "\n" +

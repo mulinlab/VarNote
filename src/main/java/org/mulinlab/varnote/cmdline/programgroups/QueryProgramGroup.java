@@ -8,8 +8,8 @@ import org.broadinstitute.barclay.argparser.CommandLineProgramGroup;
 public class QueryProgramGroup implements CommandLineProgramGroup {
 
     @Override
-    public String getName() { return "Query"; }
+    public String getName() { return "VarNote Query"; }
 
     @Override
-    public String getDescription() { return "Tools that quickly retrieve data lines from the database(or annotation) file(s)."; }
+    public String getDescription() { return "Tools that quickly retrieve data lines from database."; }
 }

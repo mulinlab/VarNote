@@ -15,7 +15,7 @@ import org.mulinlab.varnote.utils.RunFactory;
         programGroup = ConfigProgramGroup.class)
 
 public final class RunIntersectConfig extends ConfigProgram {
-    static final String USAGE_SUMMARY = "Run Intersect program from a config file. ";
+    static final String USAGE_SUMMARY = "Run Intersect program with a config file. ";
     static final String USAGE_DETAILS =
             "\n\nUsage example:" +
             "\n" +

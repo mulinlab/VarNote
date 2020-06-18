@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.mulinlab.varnote.cmdline.tools.RandomAccess;
 import utils.TestUtils;
 
-public final class QueryRegionTest {
+public final class RandomAccessTest {
 
     @Test
     public void testIndex() {
