@@ -3,9 +3,9 @@
  
    - [Install, Qucik Start and Usage](http://mulinlab.org/varnote/documentaiton.html "Install and Usage")
    - [VarNote Applications](http://mulinlab.org/varnote/application.html "VarNote Pipelines"): The advanced features of VarNote enable it can be extended to efficiently annotate and prioritize whole-genome non-coding variants in different genetic studies, such as GWAS downstream analysis and whole-genome sequencing of patients with inherited diseases. We leveraged VarNote programming APIs and large-scale variant annotations to provide three commonly-used applications, including:
-     1. VarNote-REG: prioritization of likely causal regulatory variants from GWAS results;
-     2. VarNote-PAT: prioritization of rare pathogenic regulatory variants from WES/WGS of patients with inherited diseases;
-     3. VarNote-CAN: prioritization of cancer driver regulatory mutations from tumor sequencing results.
+     - VarNote-REG: prioritization of likely causal regulatory variants from GWAS results;
+     - VarNote-PAT: prioritization of rare pathogenic regulatory variants from WES/WGS of patients with inherited diseases;
+     - VarNote-CAN: prioritization of cancer driver regulatory mutations from tumor sequencing results.
    - We welcome any discussion, suggestion and potential contribution of new functional prediction scores through github or contact Dr. Mulin Jun Li (mulinli{at}connect.hku.hk). 
 
 
