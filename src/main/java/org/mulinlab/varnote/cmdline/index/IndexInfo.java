@@ -1,7 +1,6 @@
 package org.mulinlab.varnote.cmdline.index;
 
 
-import org.mulinlab.varnote.cmdline.abstractclass.CMDProgram;
 import org.mulinlab.varnote.cmdline.abstractclass.RunProgram;
 import org.mulinlab.varnote.cmdline.collection.IndexArgumentCollection;
 import org.mulinlab.varnote.cmdline.programgroups.IndexProgramGroup;
@@ -16,11 +15,11 @@ import org.broadinstitute.barclay.argparser.CommandLineProgramProperties;
 import java.io.File;
 
 @CommandLineProgramProperties(
-        summary = IndexQuery.USAGE_SUMMARY + IndexQuery.USAGE_DETAILS,
-        oneLineSummary = IndexQuery.USAGE_SUMMARY,
+        summary = IndexInfo.USAGE_SUMMARY + IndexInfo.USAGE_DETAILS,
+        oneLineSummary = IndexInfo.USAGE_SUMMARY,
         programGroup = IndexProgramGroup.class)
 
-public final class IndexQuery extends RunProgram {
+public final class IndexInfo extends RunProgram {
     static final String USAGE_SUMMARY = "Query header, meta or sequence names stored in the VarNote index files (\".vanno.vi\").";
     static final String USAGE_DETAILS =
             "\nUsage example:" +

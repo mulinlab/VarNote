@@ -10,16 +10,16 @@ import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.utils.RunFactory;
 
 @CommandLineProgramProperties(
-        summary = QueryRegion.USAGE_SUMMARY + QueryRegion.USAGE_DETAILS,
-        oneLineSummary = QueryRegion.USAGE_SUMMARY,
+        summary = RandomAccess.USAGE_SUMMARY + RandomAccess.USAGE_DETAILS,
+        oneLineSummary = RandomAccess.USAGE_SUMMARY,
         programGroup = QueryProgramGroup.class)
 
-public final class QueryRegion extends QueryProgram {
+public final class RandomAccess extends QueryProgram {
     static final String USAGE_SUMMARY = "To quickly retrieve data lines from indexed database(or annotation) file(s) that “overlap” with the specified genomic region like \"chr:beginPos-endPos\"";
     static final String USAGE_DETAILS =
             "\n\nUsage example:" +
             "\n" +
-            "java -jar " + GlobalParameter.PRO_NAME + ".jar QueryRegion -Q chr1:1-100000 -D /path/db.vcf.gz \n" ;
+            "java -jar " + GlobalParameter.PRO_NAME + ".jar RandomAccess -Q chr1:1-100000 -D /path/db.vcf.gz \n" ;
 
 
     @Argument( fullName = Arguments.QUERY_INPUT_LONG, shortName = Arguments.QUERY_INPUT_SHORT,
