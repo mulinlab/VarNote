@@ -40,6 +40,11 @@ public final class IndexWriteConfig {
 		final VannoIndex idx = getIndex();
 		MetaReader.readHeader(idx.getFormat(), indexParam.getInput(), "meta data");
 	}
+
+	public void printFormat() {
+		final VannoIndex idx = getIndex();
+		System.out.println("Format: " + idx.getFormat().logFormat());
+	}
 	
 	public void printHeader() {
 		final VannoIndex idx = getIndex();

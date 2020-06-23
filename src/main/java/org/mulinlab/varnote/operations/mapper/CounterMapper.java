@@ -1,12 +1,10 @@
 package org.mulinlab.varnote.operations.mapper;
 
 import org.mulinlab.varnote.config.param.query.QueryFileParam;
-import org.mulinlab.varnote.config.run.AnnoRunConfig;
 import org.mulinlab.varnote.config.run.CountRunConfig;
 import org.mulinlab.varnote.operations.query.VannoQuery;
 import org.mulinlab.varnote.operations.readers.query.AbstractFileReader;
 import org.mulinlab.varnote.utils.node.LocFeature;
-
 import java.io.IOException;
 
 
@@ -28,6 +26,10 @@ public final class CounterMapper extends AbstractMapper {
 		((CountRunConfig)this.config).processNode(node, queryEngine.getResultCount(), index);
 	};
 
+
+	protected boolean isLargeVariants(final LocFeature node) {
+		return false;
+	}
 
 	@Override
 	public Object getResult() {

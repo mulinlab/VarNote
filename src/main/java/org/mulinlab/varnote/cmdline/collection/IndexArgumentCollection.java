@@ -14,6 +14,10 @@ public final class IndexArgumentCollection {
             doc = "Print meta lines, such as all VCF headers.", optional = true)
     public Boolean printMeta = false;
 
+    @Argument(shortName = Arguments.INDEX_PRINT_FORMAT_SHORT, fullName = Arguments.INDEX_PRINT_FORMAT_LONG,
+            doc = "Print database format.", optional = true)
+    public Boolean printFormat = false;
+
     @Argument(shortName = Arguments.INDEX_LITS_CHROM_SHORT, fullName = Arguments.INDEX_LIST_CHROM_LONG,
             doc = "List the sequence names stored in the index file.", optional = true)
     public Boolean listSeq = false;
@@ -23,6 +27,6 @@ public final class IndexArgumentCollection {
     public String replaceHeader;
 
     public boolean isPrintInfo() {
-        return printHeader || printMeta || listSeq || (replaceHeader != null);
+        return printFormat || printHeader || printMeta || listSeq || (replaceHeader != null);
     }
 }

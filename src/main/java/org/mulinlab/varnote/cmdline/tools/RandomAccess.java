@@ -1,5 +1,6 @@
 package org.mulinlab.varnote.cmdline.tools;
 
+import htsjdk.samtools.util.Log;
 import org.broadinstitute.barclay.argparser.Argument;
 import org.broadinstitute.barclay.argparser.CommandLineProgramProperties;
 import org.mulinlab.varnote.cmdline.abstractclass.QueryProgram;
@@ -7,6 +8,7 @@ import org.mulinlab.varnote.cmdline.constant.Arguments;
 import org.mulinlab.varnote.cmdline.programgroups.QueryProgramGroup;
 import org.mulinlab.varnote.config.run.QueryRegionConfig;
 import org.mulinlab.varnote.constants.GlobalParameter;
+import org.mulinlab.varnote.utils.LoggingUtils;
 import org.mulinlab.varnote.utils.RunFactory;
 
 @CommandLineProgramProperties(
@@ -21,7 +23,6 @@ public final class RandomAccess extends QueryProgram {
             "\n" +
             "java -jar " + GlobalParameter.PRO_NAME + ".jar RandomAccess -Q chr1:1-100000 -D /path/db.vcf.gz \n" ;
 
-
     @Argument( fullName = Arguments.QUERY_INPUT_LONG, shortName = Arguments.QUERY_INPUT_SHORT,
             doc = "Region specified as the format \"chr:beginPos-endPos\"", optional = false
     )
@@ -31,6 +32,13 @@ public final class RandomAccess extends QueryProgram {
             doc = "A flag to determine whether or not to print database name as the first column of the result.", optional = true
     )
     public boolean isDisplayLabel = GlobalParameter.DEFAULT_DISPLAY_LABEL;
+
+    @Override
+    protected void setDefaultLog() {
+        if(islog == null) {
+            islog = false;
+        }
+    }
 
     @Override
     protected int doWork() {

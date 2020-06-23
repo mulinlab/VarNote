@@ -46,6 +46,7 @@ public final class IndexInfo extends RunProgram {
         if(indexArguments.printHeader) config.printHeader();
         if(indexArguments.printMeta) config.printMetaData();
         if(indexArguments.listSeq) config.listChromsome();
+        if(indexArguments.printFormat) config.printFormat();
         if(indexArguments.replaceHeader != null) config.replaceHeader(indexArguments.replaceHeader);
 
         return 0;

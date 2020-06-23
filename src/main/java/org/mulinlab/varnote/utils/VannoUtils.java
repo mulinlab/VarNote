@@ -114,7 +114,7 @@ public final class VannoUtils {
 		}
 		hyphen = reg.indexOf('-', colon + 1);
 
-		query.chr = colon >= 0 ? reg.substring(0, colon) : reg;
+		query.chr = colon >= 0 ? reg.substring(0, colon).replace("CHR", "") : reg;
 		query.beg = colon >= 0 ? Integer.parseInt(reg.substring(colon + 1, hyphen >= 0 ? hyphen : reg.length())) : 0;
 		query.end = hyphen >= 0 ? Integer.parseInt(reg.substring(hyphen + 1)) : 0x7fffffff;
 		return query;
@@ -132,7 +132,7 @@ public final class VannoUtils {
 
 		//chr1:54132-A-G
 		colon = reg.indexOf(':');  hyphen = reg.indexOf('-');
-		query.chr = colon >= 0? reg.substring(0, colon) : reg;
+		query.chr = colon >= 0? reg.substring(0, colon).replace("CHR", "") : reg;
 		query.beg = colon >= 0? Integer.parseInt(reg.substring(colon + 1, hyphen)) - 1 : 0;
 		String[] refalt = reg.substring(hyphen+1).split("-");
 
@@ -717,7 +717,7 @@ public final class VannoUtils {
 		Format format = Format.newBED();
 		format.refPositionColumn = 4;
 		format.altPositionColumn = 5;
-
+		format.type = FormatType.BEDALLELE;
 		return format;
 	}
 
@@ -728,7 +728,7 @@ public final class VannoUtils {
 		format.endPositionColumn = 2;
 		format.refPositionColumn = 3;
 		format.altPositionColumn = 4;
-
+		format.type = FormatType.COORDALLELE;
 		return format;
 	}
 
@@ -738,7 +738,7 @@ public final class VannoUtils {
 		format.sequenceColumn = 1;
 		format.startPositionColumn = 2;
 		format.endPositionColumn = 2;
-
+		format.type = FormatType.COORDONLY;
 		return format;
 	}
 
@@ -751,6 +751,7 @@ public final class VannoUtils {
 
 		format.refPositionColumn = 4;
 		format.altPositionColumn = 5;
+		format.type = FormatType.VCFLIKE;
 		return format;
 	}
 

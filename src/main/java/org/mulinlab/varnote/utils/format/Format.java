@@ -68,6 +68,8 @@ public class Format extends TabixFormat {
 			type = FormatType.VCF;
 		} else if(flags == UCSC_FLAGS && sequenceColumn == 1 && startPositionColumn == 2 && endPositionColumn == 3) {
 			type = FormatType.BED;
+		} else if(flags == UCSC_FLAGS && sequenceColumn == 1 && startPositionColumn == 2 && endPositionColumn == 3 && refPositionColumn == 4 && altPositionColumn == 5) {
+			type = FormatType.BEDALLELE;
 		} else {
 			type = FormatType.TAB;
 		}
@@ -108,7 +110,9 @@ public class Format extends TabixFormat {
 		if(this.type == FormatType.VCF) {
 			return "VCF";
 		} else if(this.type == FormatType.BED) {
-			return "BED";
+			return "BED-Like";
+		} else if(this.type == FormatType.BEDALLELE) {
+			return "BED-Like Allele";
 		} else if(this.type == FormatType.RSID) {
 			return "RSID";
 		} else {
