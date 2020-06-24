@@ -20,17 +20,17 @@ import java.io.File;
         programGroup = IndexProgramGroup.class)
 
 public final class IndexInfo extends RunProgram {
-    static final String USAGE_SUMMARY = "Query header, meta or sequence names stored in the VarNote index files (\".vanno.vi\").";
+    static final String USAGE_SUMMARY = "To query related information (such as header, format, meta information or sequence name) stored in the VarNote index file of each annotation database.";
     static final String USAGE_DETAILS =
             "\nUsage example:" +
             "\n" +
             "java -jar " + GlobalParameter.PRO_NAME + ".jar IndexInfo -" +  Arguments.INPUT_SHORT + " /path/test.gz -"
-                    + Arguments.INDEX_PRINT_HEADER_SHORT + " true -" + Arguments.INDEX_PRINT_META_SHORT + " true " + Arguments.INDEX_LITS_CHROM_SHORT + " true" +
+                    + Arguments.INDEX_PRINT_HEADER_SHORT + " true -" + Arguments.INDEX_PRINT_META_SHORT + " true -" + Arguments.INDEX_LITS_CHROM_SHORT + " true" +
             "\n\n" ;
 
     @Argument(
             fullName = Arguments.INPUT_LONG, shortName = Arguments.INPUT_SHORT,
-            doc = "The indexed database(or annotation) file, indexed by VarNote."
+            doc = "The indexed annotation database file, must be indexed by VarNote."
     )
     public File vannoFile = null;
 

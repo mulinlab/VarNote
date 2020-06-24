@@ -20,7 +20,7 @@ import org.mulinlab.varnote.utils.format.Format;
         programGroup = QueryProgramGroup.class)
 
 public final class Intersect extends QueryFileProgram {
-    static final String USAGE_SUMMARY = "To quickly retrieve data lines from indexed database(or annotation) file(s) that “overlap” with genomic features defined in the query file.";
+    static final String USAGE_SUMMARY = "To quickly retrieve (by random-sweep algorithm) intersected records from indexed annotation database(s) given query intervals/variants.";
     static final String USAGE_DETAILS =
             "\n\nUsage example:" +
             "\n" +
@@ -31,7 +31,7 @@ public final class Intersect extends QueryFileProgram {
     public final OutputArgumentCollection outputArguments = new OutputArgumentCollection();
 
     @Argument( shortName = Arguments.INTERSECT_RC_SHORT, fullName = Arguments.INTERSECT_RC_LONG, optional = true,
-            doc = "A flag to determine whether or not to remove the comment lines(start with \'@\') in the output file. Note that the comment lines are required for the Annotation program."
+            doc = "A flag to determine whether or not to remove the comment lines(start with \'@\') in the output file. Note that the comment lines are required for the VarNote Annotation program."
     )
     public boolean isRemoveComment = GlobalParameter.DEFAULT_REMOVE_COMMENT;
 

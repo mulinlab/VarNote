@@ -41,7 +41,7 @@ public abstract class LocCodec extends AsciiFeatureCodec<LocFeature> {
     }
 
     public void processToken() {
-        intv.chr = parts[format.sequenceColumn - 1];
+        intv.chr = parts[format.sequenceColumn - 1].toLowerCase().replace("chr", "");
         intv.beg = intv.end = Integer.parseInt(parts[format.startPositionColumn - 1]);
 
         if(format.refPositionColumn > 1) intv.ref = parts[format.refPositionColumn - 1];

@@ -13,12 +13,12 @@ public final class RunArgumentCollection {
     private Integer threads = GlobalParameter.DEFAULT_THREAD;
 
     @Argument( shortName = "ALV", fullName = "allowLargeVariants", optional = true,
-            doc = "Indicator to allow large variants or not."
+            doc = "Indicator to allow large query intervals/variants or not"
     )
     private Boolean allowLargeVariants = GlobalParameter.DEFAULT_ALLOW_MAX_VIRANTS;
 
     @Argument( shortName = "MVL", fullName = "maxVariantLength", optional = true,
-            doc = "Indicator of the max length of variant."
+            doc = "Indicator of the max length of query interval/variant."
     )
     private int maxVariantLength = GlobalParameter.DEFAULT_MAX_LENGTH;
 

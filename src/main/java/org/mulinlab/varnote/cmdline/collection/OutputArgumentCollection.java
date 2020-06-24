@@ -9,12 +9,12 @@ public class OutputArgumentCollection {
     private static final long serialVersionUID = 1L;
 
     @Argument( shortName = Arguments.INTERSECT_OUT_SHORT, fullName = Arguments.INTERSECT_OUT_LONG, optional = true,
-            doc = "Output file path. By default output file will be written into the same folder as the input file."
+            doc = "Output file path. By default, output file will be written into the same folder as the input file."
     )
     public String outPath = null;
 
     @Argument( shortName = Arguments.INTERSECT_ZIP_SHORT, fullName = Arguments.INTERSECT_ZIP_LONG, optional = true,
-            doc = "A flag to determine whether or not to compress the output results by using the block gzip tool."
+            doc = "A flag to determine whether or not to compress the output results."
     )
     public boolean isGZip = GlobalParameter.DEFAULT_GZIP;
 

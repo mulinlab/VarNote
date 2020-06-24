@@ -14,7 +14,7 @@ public final class Arguments {
     public static final String INPUT_LONG = "input";
 
     public static final String INDEX_OUTPUT_SHORT = "O";
-    public static final String INDEX_OUTPUT_LONG = "out-floder";
+    public static final String INDEX_OUTPUT_LONG = "out-folder";
 
     public static final String INDEX_PRINT_HEADER_SHORT = "PH";
     public static final String INDEX_PRINT_HEADER_LONG = "print-header";
@@ -128,7 +128,7 @@ public final class Arguments {
             "tag - A label to rename the database in the output file, optional. By default, the program will use original file name as tag for the database.\n\n";
 
 
-    public static final String QUERY_DOC = "Path of query file (support plain text or gzip compressed files).\n\n" +
+    public static final String QUERY_DOC = "Path of query file (support plain text or gzip compressed file).\n\n" +
             "Possible Tags: {vcf, vcfLike, bed, bedAllele, coordOnly, coordAllele, tab} \n\n" +
 
             "Possible attributes for all tags: {sep, ci}\n" +

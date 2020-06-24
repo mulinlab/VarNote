@@ -24,12 +24,12 @@ import java.io.File;
 
 public final class AnnotationIntersectFile extends RunProgram {
 
-    static final String USAGE_SUMMARY = "Annotating an intersect file. ";
+    static final String USAGE_SUMMARY = "To quickly extract desired annotation fields from an existing VarNote intersection file. \n\n";
     static final String USAGE_DETAILS =
             "Usage example:" + "\n" + "java -jar " + GlobalParameter.PRO_NAME + ".jar AnnotationIntersectFile -I XXX.overlap \n" ;
 
     @Argument( shortName = Arguments.INPUT_SHORT, fullName = Arguments.INPUT_LONG, optional = false,
-            doc = "Intersect file path."
+            doc = "VarNote intersection file path."
     )
     public File intersectFile = null;
 

@@ -114,9 +114,11 @@ public final class VannoUtils {
 		}
 		hyphen = reg.indexOf('-', colon + 1);
 
-		query.chr = colon >= 0 ? reg.substring(0, colon).replace("CHR", "") : reg;
+		query.chr = colon >= 0 ? reg.substring(0, colon) : reg;
 		query.beg = colon >= 0 ? Integer.parseInt(reg.substring(colon + 1, hyphen >= 0 ? hyphen : reg.length())) : 0;
 		query.end = hyphen >= 0 ? Integer.parseInt(reg.substring(hyphen + 1)) : 0x7fffffff;
+
+		query.chr = query.chr.toLowerCase().replace("chr", "");
 		return query;
 	}
 
@@ -132,13 +134,15 @@ public final class VannoUtils {
 
 		//chr1:54132-A-G
 		colon = reg.indexOf(':');  hyphen = reg.indexOf('-');
-		query.chr = colon >= 0? reg.substring(0, colon).replace("CHR", "") : reg;
+		query.chr = colon >= 0? reg.substring(0, colon) : reg;
 		query.beg = colon >= 0? Integer.parseInt(reg.substring(colon + 1, hyphen)) - 1 : 0;
 		String[] refalt = reg.substring(hyphen+1).split("-");
 
 		query.ref = refalt[0];
 		query.alt = refalt[1];
 		query.end = query.beg + query.ref.length();
+
+		query.chr = query.chr.toLowerCase().replace("chr", "");
 		return query;
 	}
 	

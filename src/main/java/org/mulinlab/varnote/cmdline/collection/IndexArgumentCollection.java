@@ -7,11 +7,11 @@ public final class IndexArgumentCollection {
     private static final long serialVersionUID = 1L;
 
     @Argument(shortName = Arguments.INDEX_PRINT_HEADER_SHORT, fullName = Arguments.INDEX_PRINT_HEADER_LONG,
-            doc = "Print the column header line.", optional = true)
+            doc = "Print header line(s).", optional = true)
     public Boolean printHeader = false;
 
     @Argument(shortName = Arguments.INDEX_PRINT_META_SHORT, fullName = Arguments.INDEX_PRINT_META_LONG,
-            doc = "Print meta lines, such as all VCF headers.", optional = true)
+            doc = "Print meta information lines.", optional = true)
     public Boolean printMeta = false;
 
     @Argument(shortName = Arguments.INDEX_PRINT_FORMAT_SHORT, fullName = Arguments.INDEX_PRINT_FORMAT_LONG,
@@ -23,7 +23,7 @@ public final class IndexArgumentCollection {
     public Boolean listSeq = false;
 
     @Argument(shortName = Arguments.INDEX_REPLACE_HEADER_SHORT, fullName = Arguments.INDEX_REPLACE_HEADER_LONG,
-            doc = "Replace the column header with a comma-separated string containing the header columns. Columns name should be separated by comma and the header string should be included with double quotation.", optional = true)
+            doc = "Replace the column names with a comma-separated string containing the column names. Columns name should be separated by comma and included with double quotation.", optional = true)
     public String replaceHeader;
 
     public boolean isPrintInfo() {

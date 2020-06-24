@@ -14,11 +14,11 @@ public final class InputFileArgumentCollection {
     protected TagArgument queryFile = null;
 
     @Argument(shortName = Arguments.FORMAT_HEADER_SHORT, fullName = Arguments.FORMAT_HEADER_LONG, optional = true,
-            doc = "Indicate whether input file contains a column header line. If --" + Arguments.FORMAT_HEADER_LONG + " is included, the first line below the comment line will be considered as a header line.")
+            doc = "Indicate whether input file contains a header line for defining column names. If --" + Arguments.FORMAT_HEADER_LONG + " is included, the first line below the comment line will be considered as a column header line.")
     public Boolean hasHeader = GlobalParameter.DEFAULT_HAS_HEADER;
 
     @Argument(shortName = Arguments.FORMAT_HEADER_PATH_SHORT, fullName = Arguments.FORMAT_HEADER_PATH_LONG, optional = true,
-            doc = "Path of external file to include the header lines.")
+            doc = "Path of external file to include the header and meta lines.")
     public File extHeaderFile;
 
     public String getQueryFilePath() {

@@ -7,7 +7,10 @@ import java.util.HashSet;
 
 
 public abstract class CMDProgram {
-//    protected final Logger logger = LoggingUtils.logger;
+    @Argument( shortName = "h", fullName = "help", optional = true,
+            doc = "Show help of program."
+    )
+    protected boolean help;
 
     private CommandLineParser commandLineParser;
     private String commandLine;
