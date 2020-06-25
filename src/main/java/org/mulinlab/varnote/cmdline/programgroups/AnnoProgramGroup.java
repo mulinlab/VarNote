@@ -11,5 +11,5 @@ public class AnnoProgramGroup implements CommandLineProgramGroup {
     public String getName() { return "VarNote Annotation"; }
 
     @Override
-    public String getDescription() { return "Tools that identifies desired annotation fields from database."; }
+    public String getDescription() { return "Tools that identifies desired annotation fields from database(s)."; }
 }

@@ -128,7 +128,7 @@ public final class Arguments {
             "tag - A label to rename the database in the output file, optional. By default, the program will use original file name as tag for the database.\n\n";
 
 
-    public static final String QUERY_DOC = "Path of query file (support plain text or gzip compressed file).\n\n" +
+    public static final String QUERY_DOC = "Path of query file, support plain text or gzip compressed file. For gzip, up to <hl1>4Gb original file size</hl1> is supported currently.\n\n" +
             "Possible Tags: {vcf, vcfLike, bed, bedAllele, coordOnly, coordAllele, tab} \n\n" +
 
             "Possible attributes for all tags: {sep, ci}\n" +

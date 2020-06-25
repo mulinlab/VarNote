@@ -11,5 +11,5 @@ public class QueryProgramGroup implements CommandLineProgramGroup {
     public String getName() { return "VarNote Query"; }
 
     @Override
-    public String getDescription() { return "Tools that quickly retrieve data lines from database."; }
+    public String getDescription() { return "Tools that quickly retrieve data lines from database(s)."; }
 }
