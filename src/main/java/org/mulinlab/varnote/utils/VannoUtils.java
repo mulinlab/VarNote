@@ -122,7 +122,26 @@ public final class VannoUtils {
 		return query;
 	}
 
-	public static LocFeature ldRegionToNode(String reg) {
+	public static LocFeature posToNode(String reg) {
+		reg = reg.toUpperCase();
+
+		if(!Pattern.matches("^(CHR)?([0-9]{1,2}|X|Y|MT):\\d+$", reg)) {
+			throw new InvalidArgumentException(String.format("Invalid position format for %s, please type correct position by chr1:4380800 or 1:4380800", reg));
+		}
+
+		LocFeature query = new LocFeature();
+		int colon;
+
+		colon = reg.indexOf(':');
+		query.chr = colon >= 0? reg.substring(0, colon) : reg;
+		query.beg = colon >= 0? Integer.parseInt(reg.substring(colon + 1)) - 1 : 0;
+		query.end = query.beg + 1;
+
+		query.chr = query.chr.toLowerCase().replace("chr", "");
+		return query;
+	}
+
+	public static LocFeature posAlleleToNode(String reg) {
 		reg = reg.toUpperCase();
 
 		if(!Pattern.matches("^(CHR)?([0-9]{1,2}|X|Y|MT):\\d+-[ATCG]+-[ATCG]+$", reg)) {
