@@ -19,7 +19,7 @@ public final class IOutils {
 
 		int index = apath.lastIndexOf(File.separator);
 		if(index == -1) {
-			throw new InvalidArgumentException("Cannot parse path:" + apath + ", please use like this : /f/example/*.bgz ");
+			throw new InvalidArgumentException("Cannot parse path:" + apath + ", please refer to this path format: /f/example/*.bgz ");
 		}
 		File dir = new File(apath.substring(0, index));  
 	    File[] files = dir.listFiles();

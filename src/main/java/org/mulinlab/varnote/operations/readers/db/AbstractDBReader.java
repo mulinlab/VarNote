@@ -67,7 +67,7 @@ public abstract class AbstractDBReader {
 			initChr();
 		} else {
 			if(query.beg < this.preBeg) {
-				logger.info(String.format("Warning: %s:%d-%d was added out of order, sort data in order could greatly increased the query speed.", query.chr, query.beg, query.end));
+				logger.info(String.format("Warning: %s:%d-%d was added out of order, use sorted data to increase the query speed.", query.chr, query.beg, query.end));
 				initChr();
 			} 
 		}

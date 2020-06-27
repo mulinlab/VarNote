@@ -81,7 +81,7 @@ public final class ExtractConfig {
 		final String[] fields = getARR(param.getFields());
 		final String[] cols = getARR(param.getCols());
 
-		if(fields == null && cols == null) throw new InvalidArgumentException(String.format("fields or cols should be defined for %s.", param.getLabel()));
+		if(fields == null && cols == null) throw new InvalidArgumentException(String.format("Fields or cols should be defined for %s.", param.getLabel()));
 		if(fields != null) {
 			if(fields.length == 1 && fields[0].toUpperCase().equals("ALL")) {
 				colToExtract = getAllCols();
@@ -119,7 +119,7 @@ public final class ExtractConfig {
 		int col;
 		for (int i = 0; i < colStrs.length; i++) {
 			col = Integer.parseInt(colStrs[i]);
-			if(col > maxSize) throw new InvalidArgumentException(String.format("Column index %d is greater than the max column index %d of %s.", col, maxSize, param.getLabel()));
+			if(col > maxSize) throw new InvalidArgumentException(String.format("Column number %d is larger than the max column number %d for %s.", col, maxSize, param.getLabel()));
 			cols[i] = col;
 		}
 		if(!isExclude) {
@@ -193,7 +193,7 @@ public final class ExtractConfig {
 		if(val.charAt(i) == EXCLUDE) {
 			i++;
 		}
-		if(val.charAt(i) != '[' || val.charAt(len - 1) != ']') throw new InvalidArgumentException("You should set field with format like XXX = [XX1, XX2, XX3] or XXX = -[XX1, XX2, XX3]");
+		if(val.charAt(i) != '[' || val.charAt(len - 1) != ']') throw new InvalidArgumentException("Unsupported field format, correct format should be XXX = [XX1, XX2, XX3] or XXX = -[XX1, XX2, XX3]");
 		String[] r = val.substring(i+1, len - 1).split(GlobalParameter.COMMA);
 
 		for (int j = 0; j < r.length; j++) {
@@ -224,7 +224,7 @@ public final class ExtractConfig {
 				for (String str : outNames) {
 
 					beg = str.indexOf(":");
-					if(beg == -1)  throw new InvalidArgumentException("out_names should have a format like [a:A, b:B, c:C] or [col1:A, col3:B, col4:C].");
+					if(beg == -1)  throw new InvalidArgumentException("Unsupported out_names format, correct format should be [a:A, b:B, c:C] or [col1:A, col3:B, col4:C].");
 					key = str.substring(0, beg).trim();
 					out = str.substring(beg + 1).trim();
 
@@ -245,7 +245,7 @@ public final class ExtractConfig {
 							}
 						}
 
-						if(!isInfo) throw new InvalidArgumentException(String.format("Unknown field name %s of database %s defined in out_names",  key, getLabel()));
+						if(!isInfo) throw new InvalidArgumentException(String.format("Unknown field name %s in database %s had been defined in out_names.",  key, getLabel()));
 					} else {
 						outputNameMap.put(col, out);
 					}

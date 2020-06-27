@@ -76,16 +76,16 @@ public final class HeaderFormatReader {
     public static boolean checkDataIsValid(final Format format, final String[] data) {
         if (format.type != FormatType.RSID) {
             if(data.length != format.getHeaderPartSize()) {
-                throw new InvalidArgumentException(String.format("The columns of data are %d, while the columns of header are %d, please check.", data.length, format.getHeaderPartSize()));
+                throw new InvalidArgumentException(String.format("The columns of data are %d, which are not consistent with the columns of header %d, please check!", data.length, format.getHeaderPartSize()));
             } else if(format.refPositionColumn > 0 && (data.length < format.refPositionColumn)) {
-                throw new InvalidArgumentException(String.format("The ref column is %d but we found only %d columns in data, please check.", format.refPositionColumn, data.length));
+                throw new InvalidArgumentException(String.format("The ref column is %d, but only %d columns are provided in data, please check!", format.refPositionColumn, data.length));
             } else if(format.altPositionColumn > 0 && (data.length < format.altPositionColumn)) {
-                throw new InvalidArgumentException(String.format("The alt column is %d but we found only %d columns in data, please check.", format.altPositionColumn, data.length));
+                throw new InvalidArgumentException(String.format("The alt column is %d, but only %d columns are provided in data, please check!", format.altPositionColumn, data.length));
             } else {
                 try {
                     Integer.parseInt(data[format.startPositionColumn - 1]);
                 } catch (NumberFormatException e) {
-                    throw new InvalidArgumentException(String.format("Begin column should be a number, but we get ", data[format.startPositionColumn - 1]));
+                    throw new InvalidArgumentException(String.format("Begin column should be an integer, but the input is %s.", data[format.startPositionColumn - 1]));
                 }
 
                 try {
@@ -93,7 +93,7 @@ public final class HeaderFormatReader {
                         Integer.parseInt(data[format.endPositionColumn - 1]);
                     }
                 } catch (NumberFormatException e) {
-                    throw new InvalidArgumentException(String.format("End column should be a number, but we get ", data[format.endPositionColumn - 1]));
+                    throw new InvalidArgumentException(String.format("End column should be an integer, but the input is %s.", data[format.endPositionColumn - 1]));
                 }
             }
         }

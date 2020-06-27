@@ -28,11 +28,11 @@ public final class FormatReader<T> extends AbstractQueryReader<T> {
 	public boolean filterLine(String line) {
 		if(line.startsWith(BEGIN)) {
 			if(currentField != null) {
-				if(format.trim().equals("") || outFormat.trim().equals("")) throw new InvalidArgumentException("Both format and out_format is required for " + currentField);
+				if(format.trim().equals("") || outFormat.trim().equals("")) throw new InvalidArgumentException("Both input format and output format are required for " + currentField);
 				formatMap.put(currentField, new FieldFormat(format, outFormat, currentField));
 			}
 			currentField = line.substring(1);
-			if(currentField.trim().equals("")) throw new InvalidArgumentException("Field name is empty, please check filed name starts with @");
+			if(currentField.trim().equals("")) throw new InvalidArgumentException("Empty field name, please define field name starts with @");
 			format = "";
 			outFormat = "";
 			
@@ -47,7 +47,7 @@ public final class FormatReader<T> extends AbstractQueryReader<T> {
 	@Override
 	public void putValue(String key, String val) {
 		super.putValue(key, val);
-		if(currentField == null) throw new InvalidArgumentException("Please define field name begin with @ first.");
+		if(currentField == null) throw new InvalidArgumentException("Please define field name starts with @");
 		switch (key) {
 			case FORMAT:
 				format = val;
