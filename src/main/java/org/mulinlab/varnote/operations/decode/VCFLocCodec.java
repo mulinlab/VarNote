@@ -84,18 +84,18 @@ public final class VCFLocCodec extends LocCodec {
         if(info == null) return;
         ajustEND(info);
         if((info.indexOf("SVTYPE") != -1) && (info.indexOf("CIPOS") != -1) && (info.indexOf("CIEND") != -1)) {
-            int posbegin = info.indexOf("CIPOS"), posend = info.indexOf(GlobalParameter.INFO_FIELD_SEPARATOR, info.indexOf("CIPOS")),
-                    endbegin = info.indexOf("CIEND"), endend = info.indexOf(GlobalParameter.INFO_FIELD_SEPARATOR, info.indexOf("CIEND"));
-            if(posend == -1) posend = info.length();
-            if(endend == -1) endend = info.length();
-
-            String[] CIPOS = info.substring(posbegin + 6, posend).split(",");
-            String[] CIEND = info.substring(endbegin + 6, endend).split(",");
-
-            if(CIPOS.length == 2 && CIEND.length == 2) {
-                intv.beg = intv.beg + Integer.parseInt(CIPOS[0]);
-                intv.end = intv.end + Integer.parseInt(CIEND[1]);
-            }
+//            int posbegin = info.indexOf("CIPOS"), posend = info.indexOf(GlobalParameter.INFO_FIELD_SEPARATOR, info.indexOf("CIPOS")),
+//                    endbegin = info.indexOf("CIEND"), endend = info.indexOf(GlobalParameter.INFO_FIELD_SEPARATOR, info.indexOf("CIEND"));
+//            if(posend == -1) posend = info.length();
+//            if(endend == -1) endend = info.length();
+//
+//            String[] CIPOS = info.substring(posbegin + 6, posend).split(",");
+//            String[] CIEND = info.substring(endbegin + 6, endend).split(",");
+//
+//            if(CIPOS.length == 2 && CIEND.length == 2) {
+//                intv.beg = intv.beg + Integer.parseInt(CIPOS[0]);
+//                intv.end = intv.end + Integer.parseInt(CIEND[1]);
+//            }
         }
     }
 

@@ -64,9 +64,9 @@ public abstract class AbstractMapper<T> implements Mapper<T>{
 	protected void printLVLog(final LocFeature node) {
 		timeMetric.addLVCount();
 		if(node.vt == VariantType.OML) {
-			logger.info(String.format("%s is not processed because of over the max length of variant, please set option --maxVariantLength to change it.", node.chr + ":" + node.beg + "-" + node.end));
+			logger.info(String.format("%s is not processed since exceeding the max length of variant, use option --maxVariantLength to reset the length.", node.chr + ":" + node.beg + "-" + node.end));
 		} else if(node.vt == VariantType.LV) {
-			logger.info(node.alt + " is not processed, please turn option --allowLargeVariants on to enable it.");
+			logger.info(node.alt + " is not processed, use option --allowLargeVariants to enable it large variant.");
 		}
 	}
 

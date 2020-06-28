@@ -8,8 +8,8 @@ import org.broadinstitute.barclay.argparser.CommandLineProgramGroup;
 public class IndexProgramGroup implements CommandLineProgramGroup {
 
     @Override
-    public String getName() { return "Index"; }
+    public String getName() { return "VarNote Index"; }
 
     @Override
-    public String getDescription() { return "Tools that generates index for the compressed annotation file."; }
+    public String getDescription() { return "Tools that generates index for the compressed database file."; }
 }

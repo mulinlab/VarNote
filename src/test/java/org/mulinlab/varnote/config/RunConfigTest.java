@@ -2,7 +2,7 @@ package org.mulinlab.varnote.config;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mulinlab.varnote.cmdline.tools.config.RunIntersectConfig;
+import org.mulinlab.varnote.cmdline.tools.config.IntersectConfig;
 import org.mulinlab.varnote.cmdline.txtreader.run.AnnoRunReader;
 import org.mulinlab.varnote.cmdline.txtreader.run.IntersectRunReader;
 import org.mulinlab.varnote.config.param.output.IntersetOutParam;
@@ -84,7 +84,7 @@ public class RunConfigTest {
     @Test
     public void testRunIntersect() {
         String[] args = new String[]{ "-I", "src/test/resources/config/q3.sorted.overlap.run.config.full"};
-        TestUtils.initClass(RunIntersectConfig.class, args);
+        TestUtils.initClass(IntersectConfig.class, args);
     }
 
 }

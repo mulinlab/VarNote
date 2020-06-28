@@ -7,7 +7,6 @@ import htsjdk.samtools.seekablestream.SeekableStream;
 import htsjdk.samtools.util.BlockCompressedInputStream;
 import htsjdk.variant.vcf.VCFHeader;
 import org.mulinlab.varnote.config.param.DBParam;
-import org.mulinlab.varnote.config.param.query.QueryFileParam;
 import org.mulinlab.varnote.constants.GlobalParameter;
 import org.mulinlab.varnote.operations.decode.*;
 import org.mulinlab.varnote.operations.query.AbstractQuery;
@@ -24,14 +23,12 @@ import htsjdk.samtools.util.IOUtil;
 import htsjdk.samtools.util.StringUtil;
 import htsjdk.variant.vcf.VCFHeaderLineCount;
 import htsjdk.variant.vcf.VCFHeaderLineType;
-
 import java.io.*;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.regex.Pattern;
-
 import joptsimple.OptionSet;
 import org.mulinlab.varnote.utils.database.index.IndexFactory;
 import org.mulinlab.varnote.utils.format.Format;
@@ -40,9 +37,9 @@ import org.mulinlab.varnote.utils.gz.MyEndianOutputStream;
 import org.mulinlab.varnote.utils.node.LocFeature;
 
 public final class VannoUtils {
-	public final static String INTERSECT_ERROR = "Intersection type, valid values are " + IntersectType.INTERSECT.getVal() + "(" + IntersectType.INTERSECT.getName() + ")" +
-			" or " + IntersectType.EXACT.getVal() + "(" + IntersectType.EXACT.getName() + ") or " + IntersectType.FULLCLOASE.getVal() + "(" + IntersectType.FULLCLOASE.getName() + ")" +
-			". default is:" +  IntersectType.INTERSECT.getName() + ".";
+	public final static String INTERSECT_ERROR = "Invalid intersection type, effective value should be " + IntersectType.INTERSECT.getVal() + "(" + IntersectType.INTERSECT.getName() + ")" +
+			", " + IntersectType.EXACT.getVal() + "(" + IntersectType.EXACT.getName() + ") and " + IntersectType.FULLCLOASE.getVal() + "(" + IntersectType.FULLCLOASE.getName() + ")" +
+			". Default value is:" +  IntersectType.INTERSECT.getName() + ".";
 
 	public final static Map<String, ChromosomeType> chrToTypeMap = new HashMap<>();
 
@@ -102,7 +99,7 @@ public final class VannoUtils {
 	public static LocFeature regionToNode(String reg) {
 		reg = reg.toUpperCase();
 		if(!Pattern.matches("^(CHR)?([0-9]{1,2}|X|Y|MT):\\d+-\\d+$", reg)) {
-			throw new InvalidArgumentException(String.format("Invalid position format of %s, please type correct position by chr1:4380800-4380801 or 1:4380800-4380801", reg));
+			throw new InvalidArgumentException(String.format("Invalid format for chromosome region %s, please type correct one as chr1:4380800-4380801 or 1:4380800-4380801", reg));
 		}
 		LocFeature query = new LocFeature();
 		int colon, hyphen;
@@ -117,14 +114,35 @@ public final class VannoUtils {
 		query.chr = colon >= 0 ? reg.substring(0, colon) : reg;
 		query.beg = colon >= 0 ? Integer.parseInt(reg.substring(colon + 1, hyphen >= 0 ? hyphen : reg.length())) : 0;
 		query.end = hyphen >= 0 ? Integer.parseInt(reg.substring(hyphen + 1)) : 0x7fffffff;
+
+		query.chr = query.chr.toLowerCase().replace("chr", "");
 		return query;
 	}
 
-	public static LocFeature ldRegionToNode(String reg) {
+	public static LocFeature posToNode(String reg) {
+		reg = reg.toUpperCase();
+
+		if(!Pattern.matches("^(CHR)?([0-9]{1,2}|X|Y|MT):\\d+$", reg)) {
+			throw new InvalidArgumentException(String.format("Invalid format for chromosome position %s, please type correct one as chr1:4380800 or 1:4380800", reg));
+		}
+
+		LocFeature query = new LocFeature();
+		int colon;
+
+		colon = reg.indexOf(':');
+		query.chr = colon >= 0? reg.substring(0, colon) : reg;
+		query.beg = colon >= 0? Integer.parseInt(reg.substring(colon + 1)) - 1 : 0;
+		query.end = query.beg + 1;
+
+		query.chr = query.chr.toLowerCase().replace("chr", "");
+		return query;
+	}
+
+	public static LocFeature posAlleleToNode(String reg) {
 		reg = reg.toUpperCase();
 
 		if(!Pattern.matches("^(CHR)?([0-9]{1,2}|X|Y|MT):\\d+-[ATCG]+-[ATCG]+$", reg)) {
-			throw new InvalidArgumentException(String.format("Invalid position format for %s, please type correct position by chr1:4380800-A-G or 1:4380800-A-G", reg));
+			throw new InvalidArgumentException(String.format("Invalid format for chromosome position with alleles %s, please type correct one as chr1:4380800-A-G or 1:4380800-A-G", reg));
 		}
 
 		LocFeature query = new LocFeature();
@@ -139,6 +157,8 @@ public final class VannoUtils {
 		query.ref = refalt[0];
 		query.alt = refalt[1];
 		query.end = query.beg + query.ref.length();
+
+		query.chr = query.chr.toLowerCase().replace("chr", "");
 		return query;
 	}
 	
@@ -150,8 +170,7 @@ public final class VannoUtils {
 				return t;
 			}
 		}	
-		throw new InvalidArgumentException("Index system to use, valid values are "+ IndexType.TBI.getName() +" or " +
-				IndexType.VARNOTE.getName() + ". By default, the program will use " + GlobalParameter.PRO_NAME + " index system(" + IndexType.VARNOTE.getName() + ").");
+		throw new InvalidArgumentException("Invalid index type, effective value should be tbi or varnote. Default value is varnote.");
 	}
 	
 	public static IntersectType checkIntersectType(String intersectType) {
@@ -192,8 +211,7 @@ public final class VannoUtils {
 		} else if(type.equals("flag")) {
 			return VCFHeaderLineType.Flag;
 		} else {
-			throw new InvalidArgumentException("We only support VCF Header Type equals 'integer', 'float', 'string', 'character' or 'flag', "
-					+ "but we get " + type);
+			throw new InvalidArgumentException("Unsupported VCF INFO Type for XX, following ones are supported: 'integer', 'float', 'string', 'character' or 'flag'");
 		}
 	}
 
@@ -210,7 +228,7 @@ public final class VannoUtils {
 		} else if(count.equals(".")) {
 			return VCFHeaderLineCount.UNBOUNDED;
 		} else {
-			throw new InvalidArgumentException("We only support VCF Header Number equals 'integer', '.', 'r', 'g' or 'a', " + "but we get " + count);
+			throw new InvalidArgumentException("Unsupported VCF INFO Number for XX, following ones are supported: 'integer', '.', 'r', 'g', 'a' or ‘+’");
 		}
 	}
 	
@@ -220,9 +238,7 @@ public final class VannoUtils {
 				return m;
 			}
 		}	
-		throw new InvalidArgumentException("Valid mode are " + Mode.TABIX.getNum() + "," + Mode.MIX.getNum() + " and " +
-				Mode.SWEEP.getNum() +  ". mode=" + Mode.TABIX.getNum() + " means random access search, " + 
-				"mode=" + Mode.MIX.getNum() + " means mix search, mode=" + Mode.SWEEP.getNum() + " means sweep search.");
+		throw new InvalidArgumentException("Invalid searching mode, effective value should be 0, 1 or 2. 0:random access mode, 1:mix mode, 2:sweep mode.");
 	}
 	
 	public static Format determineFileType(String fileName) {
@@ -237,12 +253,12 @@ public final class VannoUtils {
 		fileName = trimAndLC(fileName);
 		String ext = getExtension(FileExt.VCF, fileName);
 		if(ext != null && format.type != FormatType.VCF) {
-			throw new InvalidArgumentException(String.format("The input has an extension of %s, but we get a %s format. Please check!", ext, format.type));
+			throw new InvalidArgumentException(String.format("The input file name contains suffix of %s, but a %s format was identified. Please check!", ext, format.type));
 		}
 
 		ext = getExtension(FileExt.BED, fileName);
 		if(ext != null && format.type != FormatType.BED) {
-			throw new InvalidArgumentException(String.format("The input has an extension of %s, but we get a %s format. Please check!", ext, format.type));
+			throw new InvalidArgumentException(String.format("The input file name contains suffix of %s, but a %s format was identified. Please check!", ext, format.type));
 		}
 		return true;
 	}
@@ -285,7 +301,7 @@ public final class VannoUtils {
 		} else if(format.equals("bed")) {
 			return AnnoOutFormat.BED;
 		} else {
-			throw new InvalidArgumentException("We only support vcf and bed file format as output currently.");
+			throw new InvalidArgumentException("Only VCF and BED format are supported as output currently.");
 		}
 	}
 
@@ -305,7 +321,7 @@ public final class VannoUtils {
 		} else if(str.equals("false")) {
 			return false;
 		} else {
-			throw new InvalidArgumentException("Parameter expect true or false but get: " + str + " .");
+			throw new InvalidArgumentException("Invalid parameter for " + str + ", only true or false are supported.");
 		}
 	}
 	
@@ -322,7 +338,7 @@ public final class VannoUtils {
         } else if(str.equalsIgnoreCase("tab")) {
 			return Format.newTAB();
         } else {
-				throw new InvalidArgumentException("We support bed, vcf and tab format. but we get: " + str);
+				throw new InvalidArgumentException("Invalid format for " + str + ", only bed, vcf and tab format are supported.");
 		}
 	}
 	
@@ -415,7 +431,7 @@ public final class VannoUtils {
 	
 	public static void checkValidBGZ(final String path) {
 		if(VannoUtils.checkFileType(path) != FileType.BGZ) 
-			throw new InvalidArgumentException(String.format("Input file %s is not in valid block compressed format(.gz, .bgz). ", path));
+			throw new InvalidArgumentException(String.format("Invalid compressed input file %s, please ensure an intact compressed format (.gz, .bgz).", path));
 	}
 	
 	public static FileType checkFileType(final String path) {
@@ -518,7 +534,7 @@ public final class VannoUtils {
 		String[] parts = header.split(splitChar);
 
 		if (parts.length < 2)
-			throw new InvalidArgumentException(String.format("there are not enough columns present in the header line: %s", header));
+			throw new InvalidArgumentException(String.format("Insufficient columns in the header line: %s", header));
 
 		return parts;
 	}
@@ -529,7 +545,7 @@ public final class VannoUtils {
 			strings = header.split(GlobalParameter.COMMA);
 
 			if (strings.length < 2)
-				throw new InvalidArgumentException(String.format("there are not enough columns present in the header line: %s", header));
+				throw new InvalidArgumentException(String.format("Insufficient columns in the header line: %s", header));
 		}
 		return strings;
 	}
@@ -717,7 +733,7 @@ public final class VannoUtils {
 		Format format = Format.newBED();
 		format.refPositionColumn = 4;
 		format.altPositionColumn = 5;
-
+		format.type = FormatType.BEDALLELE;
 		return format;
 	}
 
@@ -728,7 +744,7 @@ public final class VannoUtils {
 		format.endPositionColumn = 2;
 		format.refPositionColumn = 3;
 		format.altPositionColumn = 4;
-
+		format.type = FormatType.COORDALLELE;
 		return format;
 	}
 
@@ -738,7 +754,7 @@ public final class VannoUtils {
 		format.sequenceColumn = 1;
 		format.startPositionColumn = 2;
 		format.endPositionColumn = 2;
-
+		format.type = FormatType.COORDONLY;
 		return format;
 	}
 
@@ -751,6 +767,7 @@ public final class VannoUtils {
 
 		format.refPositionColumn = 4;
 		format.altPositionColumn = 5;
+		format.type = FormatType.VCFLIKE;
 		return format;
 	}
 
@@ -770,7 +787,7 @@ public final class VannoUtils {
 		} else if(quickFileType == QuickFileType.CoordAllele) {
 			return getCoordAlleleFormat();
 		} else {
-			throw new InvalidArgumentException("We support VCF, VCFLike, CoordOnly and CoordAllele format");
+			throw new InvalidArgumentException("Only VCF, VCFLike, CoordOnly and CoordAllele format are supported.");
 		}
 	}
 }

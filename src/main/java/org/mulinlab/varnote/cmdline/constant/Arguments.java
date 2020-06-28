@@ -14,13 +14,16 @@ public final class Arguments {
     public static final String INPUT_LONG = "input";
 
     public static final String INDEX_OUTPUT_SHORT = "O";
-    public static final String INDEX_OUTPUT_LONG = "out-floder";
+    public static final String INDEX_OUTPUT_LONG = "out-folder";
 
     public static final String INDEX_PRINT_HEADER_SHORT = "PH";
     public static final String INDEX_PRINT_HEADER_LONG = "print-header";
 
     public static final String INDEX_PRINT_META_SHORT = "PM";
     public static final String INDEX_PRINT_META_LONG = "print-meta-data";
+
+    public static final String INDEX_PRINT_FORMAT_SHORT = "PF";
+    public static final String INDEX_PRINT_FORMAT_LONG = "print-format";
 
     public static final String INDEX_LITS_CHROM_SHORT = "LC";
     public static final String INDEX_LIST_CHROM_LONG = "list-chroms";
@@ -125,11 +128,11 @@ public final class Arguments {
             "tag - A label to rename the database in the output file, optional. By default, the program will use original file name as tag for the database.\n\n";
 
 
-    public static final String QUERY_DOC = "Path of query file (support plain text or gzip compressed files).\n\n" +
+    public static final String QUERY_DOC = "Path of query file, support plain text or gzip compressed file. For gzip, up to <hl1>4Gb original file size</hl1> is supported currently.\n\n" +
             "Possible Tags: {vcf, vcfLike, bed, bedAllele, coordOnly, coordAllele, tab} \n\n" +
 
             "Possible attributes for all tags: {sep, ci}\n" +
-            "Possible attributes for \"tab\" tag: {c, b, e, ref, alt, 0, sep}\n" +
+            "Possible attributes for \"tab\" tag: {c, b, e, ref, alt, 0}\n" +
             "c: column of sequence name (1-based)\n" +
             "b: column of start chromosomal position (1-based)\n" +
             "e: column of end chromosomal position (1-based)\n" +

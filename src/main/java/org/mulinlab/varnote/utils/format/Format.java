@@ -68,6 +68,8 @@ public class Format extends TabixFormat {
 			type = FormatType.VCF;
 		} else if(flags == UCSC_FLAGS && sequenceColumn == 1 && startPositionColumn == 2 && endPositionColumn == 3) {
 			type = FormatType.BED;
+		} else if(flags == UCSC_FLAGS && sequenceColumn == 1 && startPositionColumn == 2 && endPositionColumn == 3 && refPositionColumn == 4 && altPositionColumn == 5) {
+			type = FormatType.BEDALLELE;
 		} else {
 			type = FormatType.TAB;
 		}
@@ -108,7 +110,9 @@ public class Format extends TabixFormat {
 		if(this.type == FormatType.VCF) {
 			return "VCF";
 		} else if(this.type == FormatType.BED) {
-			return "BED";
+			return "BED-Like";
+		} else if(this.type == FormatType.BEDALLELE) {
+			return "BED-Like Allele";
 		} else if(this.type == FormatType.RSID) {
 			return "RSID";
 		} else {
@@ -120,7 +124,7 @@ public class Format extends TabixFormat {
 	
 	public static Format readFormatString(final String str) {
 		String[] cols = str.split(",");
-		if(cols.length != 9) throw new InvalidArgumentException("Parsing format with error, format should have 9 columns.");
+		if(cols.length != 9) throw new InvalidArgumentException("Parsing format with error, 9 columns are expected.");
 
 		return new Format(Integer.parseInt(cols[0]), Integer.parseInt(cols[1]), Integer.parseInt(cols[2]), Integer.parseInt(cols[3]), Integer.parseInt(cols[4]),
 				cols[5], Integer.parseInt(cols[6]), Integer.parseInt(cols[7]), VannoUtils.strToBool(cols[8]));
@@ -159,11 +163,11 @@ public class Format extends TabixFormat {
 	public void checkLoc() {
 		if(this.type != FormatType.RSID) {
 			if (sequenceColumn < 1)
-				throw new InvalidArgumentException("You should define column of sequence name with -c");
+				throw new InvalidArgumentException("c of sequence name is expected by -c");
 			if (startPositionColumn < 1)
-				throw new InvalidArgumentException("You should define column of start chromosomal position with -b");
+				throw new InvalidArgumentException("Valid column of start chromosomal position is expected by -b");
 			if (endPositionColumn < 0)
-				throw new InvalidArgumentException("You should define column of end chromosomal position with -e");
+				throw new InvalidArgumentException("Valid column of end chromosomal position is expected by -e");
 		}
 
 		if(endPositionColumn == 0) {

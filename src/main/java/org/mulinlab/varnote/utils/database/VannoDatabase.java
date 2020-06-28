@@ -29,7 +29,7 @@ public final class VannoDatabase extends Database{
 	@Override
 	protected void checkIndexFile() {
 		if(!VannoUtils.isExist(this.vannoFile)) {
-			throw new InvalidArgumentException("We cannot find vanno file: "+ this.vannoFile + ", you must put vanno file and vanno index file in the same folder!");
+			throw new InvalidArgumentException("Vanno file: "+ this.vannoFile + " cannot be found, vanno file and vanno index file should be in the same folder!");
 		} else if(!VannoUtils.isExist(this.dbIndexPath)) {
 			throw new InvalidArgumentException("Cannot find vanno index file: " + this.dbIndexPath + " !");
 		}

@@ -24,10 +24,8 @@ import java.io.File;
 
 public final class Annotation extends QueryFileProgram {
 
-    static final String USAGE_SUMMARY = "Annotation extraction for a list of intervals or variants";
-    static final String USAGE_DETAILS = "This tool identifies desired annotation fields from databases. " +
-            "It allows feature extraction using both interval-level overlap and variant-level exact match, " +
-            "and supports allele-specific variant annotation for SNV/Indel and region-specific annotation for large variants." +
+    static final String USAGE_SUMMARY = "To quickly extract (by random-sweep algorithm) desired annotation fields from indexed annotation database(s) given query intervals/variants.";
+    static final String USAGE_DETAILS = "It allows feature extraction using both interval-level overlap and variant-level exact matching. It also has an annotation mode supporting allele-specific variant annotation for SNV/Indel and region-specific annotation for large variations." +
             "\n\nUsage example:" +
                     "\n" +
                     "java -jar " + GlobalParameter.PRO_NAME + ".jar Annotation -Q query.vcf -D /path/db.vcf.gz\n" ;

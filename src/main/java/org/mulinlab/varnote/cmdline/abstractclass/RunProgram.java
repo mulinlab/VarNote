@@ -30,6 +30,7 @@ public abstract class RunProgram extends CMDProgram {
         else LoggingUtils.setLoggingLevel(Log.LogLevel.INFO);
     }
 
+
     protected void onShutdown() {
 
     }

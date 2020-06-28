@@ -12,7 +12,7 @@ public final class DBArgumentCollection {
     private static final long serialVersionUID = 1L;
 
     @Argument( fullName = Arguments.DB_INPUT_LONG, shortName = Arguments.DB_INPUT_SHORT, doc =
-            "Local path or http/ftp address of indexed database(or annotation) file(s). Note: Either VarNote index(.vanno.vi) or Tabix index(.tbi) should be in the same location.\n" + Arguments.DB_DOC)
+            "Local path or http/ftp address of indexed annotation database(s). Note: Either VarNote index(.vanno.vi) or Tabix index(.tbi) should be in the same location of database file(s).\n" + Arguments.DB_DOC)
     public List<TagArgument> dbFiles;
 
     public List<DBParam> getDBList() {

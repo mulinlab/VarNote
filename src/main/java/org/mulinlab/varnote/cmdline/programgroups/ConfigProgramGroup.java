@@ -8,8 +8,8 @@ import org.broadinstitute.barclay.argparser.CommandLineProgramGroup;
 public class ConfigProgramGroup implements CommandLineProgramGroup {
 
     @Override
-    public String getName() { return "Run Config"; }
+    public String getName() { return "Run with a config file"; }
 
     @Override
-    public String getDescription() { return "Run program from a config file."; }
+    public String getDescription() { return "Run program with a config file."; }
 }

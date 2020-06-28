@@ -1,10 +1,10 @@
 package org.mulinlab.varnote.cmdline;
 
 import org.junit.Test;
-import org.mulinlab.varnote.cmdline.tools.QueryRegion;
+import org.mulinlab.varnote.cmdline.tools.RandomAccess;
 import utils.TestUtils;
 
-public final class QueryRegionTest {
+public final class RandomAccessTest {
 
     @Test
     public void testIndex() {
@@ -14,6 +14,6 @@ public final class QueryRegionTest {
                 "-Q", "chr1:1-100000",
                 "--log=false", "-L=true"};
 
-        TestUtils.initClass(QueryRegion.class, args);
+        TestUtils.initClass(RandomAccess.class, args);
     }
 }

@@ -22,6 +22,6 @@ public enum OutMode {
                 return m;
             }
         }
-        throw new InvalidArgumentException(String.format("'%s' is not a valid/supported output mode. Valid modes are: %s", value, Arrays.asList(OutMode.values())));
+        throw new InvalidArgumentException(String.format("Unsupported output mode for %s, corrected modes are: %s.", value, Arrays.asList(OutMode.values())));
     }
 }

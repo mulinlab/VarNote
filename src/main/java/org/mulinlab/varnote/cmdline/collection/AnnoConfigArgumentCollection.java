@@ -14,8 +14,8 @@ public final class AnnoConfigArgumentCollection {
     private static final long serialVersionUID = 1L;
 
     @Argument( shortName = Arguments.ANNO_CONFIG_SHORT, fullName = Arguments.ANNO_CONFIG_LONG, optional = true,
-            doc = "Path of annotate configuration file. The program annotates query record with all information in databases if without this option. \n" +
-                    "If -a is not defined, the program will search file named /path/to/query/query_file + \".annoc\" under the folder of the query file."
+            doc = "Path of annotation extraction configuration file. The program annotates query variant with all information in database(s) if without this option. \n" +
+                    "If -a is not defined, the program will automatically search file named /path/to/query/query_file + \".annoc\" under the folder of the query file."
     )
     private File annoConfig = null;
 

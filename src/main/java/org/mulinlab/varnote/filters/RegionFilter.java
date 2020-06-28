@@ -14,6 +14,9 @@ public class RegionFilter implements VariantFilter<LocFeature>  {
     public RegionFilter(List<LocFeature> regions, boolean isExclude, boolean isGene) {
         count = 0;
         this.regions = regions;
+        for (LocFeature region:regions) {
+            region.chr = region.chr.toLowerCase().replace("chr", "");
+        }
         this.isExclude = isExclude;
         this.isGene = isGene;
     }

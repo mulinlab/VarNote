@@ -160,7 +160,7 @@ public final class FieldFormat {
 				sb.append(variableVals.get(variableVals.size() - 1));
 			} else if(outFV.variable.matches("\\$\\d+\\.\\.\\$n")) {
 				if(index == -1) {
-					throw new InvalidArgumentException("Invalid format for field " + fieldName + ", Please use format like $2..$n or $3..$n and so on.");
+					throw new InvalidArgumentException("Unsupported filed format for " + fieldName + ", corrected format should be  $2..$n or $3..$n and so on.");
 				}
 				
 				for (int j = index; j < variableVals.size(); j++) {

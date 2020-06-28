@@ -9,5 +9,6 @@
         <Root level="INFO">
             <AppenderRef ref="Console"/>
         </Root>
+        <logger name="com.intel.gkl" level="warn"/>
     </Loggers>
 </Configuration>

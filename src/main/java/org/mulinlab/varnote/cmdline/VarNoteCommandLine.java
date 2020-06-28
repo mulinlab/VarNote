@@ -117,7 +117,7 @@ public class VarNoteCommandLine {
     public static void printUsage(final PrintStream destinationStream, final Set<Class<?>> classes, final String commandLineName) {
         final StringBuilder builder = new StringBuilder();
         builder.append(BOLDRED + "USAGE: " + commandLineName + " " + GREEN + "<program name>" + BOLDRED + " [-h]\n\n" + KNRM)
-                .append(BOLDRED + "Available Programs:\n" + KNRM);
+                .append(BOLDRED + "Program Summary Table:\n" + KNRM);
 
         /** Group CommandLinePrograms by CommandLineProgramGroup **/
         final Map<Class<? extends CommandLineProgramGroup>, CommandLineProgramGroup> programGroupClassToProgramGroupInstance = new LinkedHashMap<>();
