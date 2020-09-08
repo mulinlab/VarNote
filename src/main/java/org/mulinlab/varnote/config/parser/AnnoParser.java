@@ -31,6 +31,7 @@ public class AnnoParser implements ResultParser {
 	private final Map<String, AbstractDatababseAnnoParser> dbParesers;
 	private final boolean loj;
 	private final AnnoOutFormat outFormat;
+	private final List<Database> dbs;
 
 	public AnnoParser(final AnnoRunConfig config, final Map<String, ExtractConfig> extractConfigMap, final int index) {
 		super();
@@ -47,7 +48,7 @@ public class AnnoParser implements ResultParser {
 		outFormat = ((AnnoOutParam)config.getOutParam()).getAnnoOutFormat();
 
 		dbParesers = new HashMap<>();
-		final List<Database> dbs = config.getDatabses();
+		this.dbs = config.getDatabses();
 		String label;
 
 		for (Database db: dbs) {
@@ -100,8 +101,8 @@ public class AnnoParser implements ResultParser {
 		if(outFormat == AnnoOutFormat.BED) {
 			StringJoiner joiner = new StringJoiner(TAB);
 
-			for (String key : dbParesers.keySet()) {
-				parser = dbParesers.get(key);
+			for (Database db: dbs) {
+				parser = dbParesers.get(db.getOutName());
 				if(parser != null)
 					parser.getHeader(joiner);
 			}
@@ -109,9 +110,8 @@ public class AnnoParser implements ResultParser {
 		} else {
 			VCFHeader vcfHeader = queryParser.getVCFHeader();
 			if(vcfHeader != null) {
-
-				for (String key : dbParesers.keySet()) {
-					parser = dbParesers.get(key);
+				for (Database db: dbs) {
+					parser = dbParesers.get(db.getOutName());
 					if(parser != null)
 						vcfHeader = parser.addVCFHeader(vcfHeader);
 				}
@@ -147,20 +147,27 @@ public class AnnoParser implements ResultParser {
 
 		StringJoiner joiner = new StringJoiner(sign);
 
+		String key;
 		if (dbNodeMap != null) {
-			for (String key : dbParesers.keySet()) {
+			for (Database db: dbs) {
+				key = db.getOutName();
 
-				if (dbNodeMap.get(key) != null && dbNodeMap.get(key).length > 0) {
-					dbParesers.get(key).extractFieldsValue(query, dbNodeMap.get(key));
-					joiner = dbParesers.get(key).joinFields(joiner);
-				} else if(loj) {
-					joiner = dbParesers.get(key).joinNullVals(joiner);
+				if(dbParesers.get(key) != null) {
+					if (dbNodeMap.get(key) != null && dbNodeMap.get(key).length > 0) {
+						dbParesers.get(key).extractFieldsValue(query, dbNodeMap.get(key));
+						joiner = dbParesers.get(key).joinFields(joiner);
+					} else if(loj) {
+						joiner = dbParesers.get(key).joinNullVals(joiner);
+					}
 				}
 			}
 		} else {
 			if(loj) {
-				for (String key : dbParesers.keySet()) {
-					joiner = dbParesers.get(key).joinNullVals(joiner);
+				for (Database db: dbs) {
+					key = db.getOutName();
+
+					if(dbParesers.get(key) != null)
+						joiner = dbParesers.get(key).joinNullVals(joiner);
 				}
 			}
 		}
