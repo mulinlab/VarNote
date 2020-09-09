@@ -34,7 +34,7 @@ public final class AnnotationTest {
             "-Q", "src/test/resources/q1.sorted.bed",
                     "-Z", "false",
     //              "-loj", "true",
-                    "-OF", "VCF",
+                    "-OF", "BED",
                     "-A", "src/test/resources/config/d1_d2.extract"
         };
 

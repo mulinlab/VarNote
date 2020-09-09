@@ -42,8 +42,8 @@ public final class IOutils {
 	}
 	
 	public static void main(String[] args) {
-		readFileWithPattern("/Users/hdd/Desktop/*.gz");
-		System.out.println(hasPattern("/Users/hdd/Desktop/00-All.tsv.gz"));
+		readFileWithPattern("~/*.gz");
+		System.out.println(hasPattern("~/00-All.tsv.gz"));
 
 	      // Create a Pattern object
 //	      Pattern r = Pattern.compile("A.\\*.gz");

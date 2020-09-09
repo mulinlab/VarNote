@@ -98,7 +98,7 @@ public final class TbiIndex extends Index{
 	}
 
 	public static void main(String[] args) {
-		TbiIndex index  = new TbiIndex("/Users/hdd/Desktop/data/ALL.chr1.phase3_shapeit2_mvncall_integrated_v3plus_nounphased.rsID.genotypes.GRCh38_dbSNP.vcf.gz.tbi");
+		TbiIndex index  = new TbiIndex("ALL.chr1.phase3_shapeit2_mvncall_integrated_v3plus_nounphased.rsID.genotypes.GRCh38_dbSNP.vcf.gz.tbi");
 		
 		System.out.println(index.mSc);
 		System.out.println(index.mBc);
