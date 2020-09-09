@@ -58,8 +58,8 @@ public final class BGZReader {
 		String javaLibPath = System.getProperty("java.library.path");
 		System.out.println(javaLibPath);
 		
-		BGZReader reader = new BGZReader("/Users/hdd/Downloads/dandan/data/AF.ANN.bgz", 0); 
-		BGZReader reader2 = new BGZReader("/Users/hdd/Downloads/dandan/data/AF.ANN.bgz", 1); 
+		BGZReader reader = new BGZReader("~/data/AF.ANN.bgz", 0);
+		BGZReader reader2 = new BGZReader("~/data/AF.ANN.bgz", 1);
 		System.out.println("1111=" + reader.readLine(0));
 		System.out.println("222=" + reader2.readLine(0));
 		System.out.println("333=" + reader.readLine(0));

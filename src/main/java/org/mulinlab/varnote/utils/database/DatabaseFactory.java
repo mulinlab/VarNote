@@ -24,7 +24,6 @@ public final class DatabaseFactory {
 			if(!SeekableStreamFactory.isFilePath(config.getDbPath()) || config.getDbPath().indexOf("*") == -1) {
 				dbs.add(DatabaseFactory.readDatabase(config));
 			} else {
-				// add database for pattern: "/Users/hdd/Desktop/*.gz" default setting: indexType: auto, exact: false, fc:false
 				final List<String> files = IOutils.readFileWithPattern(config.getDbPath());
 				for (int j = 0; j < files.size(); j++) {
 					dbs.add(DatabaseFactory.readDatabase(new DBParam(new File(files.get(j)))));

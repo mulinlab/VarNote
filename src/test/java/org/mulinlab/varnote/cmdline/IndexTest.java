@@ -9,7 +9,15 @@ public final class IndexTest {
     @Test
     public void testIndexVCF() {
         String[] args = new String[]{
-                "-I", "src/test/resources/database4.sorted.vcf.gz" };
+                "-I:bed", "~/test.bedgraph.gz" };
+
+        TestUtils.initClass(Index.class, args, false);
+    }
+
+    @Test
+    public void testIndexCood() {
+        String[] args = new String[]{
+                "-I:coordOnly", "~/test.bedgraph.gz" };
 
         TestUtils.initClass(Index.class, args, false);
     }
