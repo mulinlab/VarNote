@@ -8,14 +8,14 @@ BEDTools	v2.27.1	bedtools intersect -wa -wb -a {QUERY FILE} -b {DATABASE File} -
 GIGGLE	v0.6.3	giggle search -i {DATABASE INDEX DIRECTORY} -q {QUERY FILE} -o -v
 vcfanno	0.2.8 (built with go1.8)	vcfanno -p 1 {DATABASE CONFIGURE FILE} {QUERY FILE}
 VEP	91.1	vep --dir {VEP DATABASE DIRECTORY} --assembly GRCh37 --vcf --format vcf -i {QUERY FILE} -custom {DATABASE FILE},ANN,bed,overlap,1 --offline --fork 1
-VarNote	v1.0	java -jar VarNote.jar overlap -q {QUERY FILE} -d {DATABASE FILE} -t 1
+VarNote	v1.0	java -jar VarNote.jar Intersect -Q {QUERY FILE} -D {DATABASE FILE} -T 1
 
 2): To benchmark the VarNote and compared tools for variant-level annotation:
 
 bcftools annotate -a {DATABASE FILE} -c {BED FIELDS} -h {HEADER LINES} --threads {THREADS}  {QUERY FILE}   #for BED
 bcftools annotate -a {DATABASE FILE} -c {FIELDS} --threads {THREADS}  {QUERY FILE}   #for VCF
 
-java -jar VarNote.jar anno -q {QUERY FILE} -d {DATABASE FILE} -t {THREADS} --exact --loj -a {FIELDS}
+java -jar VarNote.jar Annotation -Q {QUERY FILE} -D:db,mode=1 {DATABASE FILE} -T {THREADS} -A {FIELDS} -loj true
 
 vcfanno -p {THREADS} {CONFIGURE FILE} {QUERY FILE}
 
