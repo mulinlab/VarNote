@@ -98,7 +98,7 @@ public final class VannoUtils {
 
 	public static LocFeature regionToNode(String reg) {
 		reg = reg.toUpperCase();
-		if(!Pattern.matches("^(CHR)?([0-9]{1,2}|X|Y|MT):\\d+-\\d+$", reg)) {
+		if(!Pattern.matches("^(CHR)?([0-9]{1,2}|X|Y|MT|\\w+):\\d+-\\d+$", reg)) {
 			throw new InvalidArgumentException(String.format("Invalid format for chromosome region %s, please type correct one as chr1:4380800-4380801 or 1:4380800-4380801", reg));
 		}
 		LocFeature query = new LocFeature();
@@ -122,7 +122,7 @@ public final class VannoUtils {
 	public static LocFeature posToNode(String reg) {
 		reg = reg.toUpperCase();
 
-		if(!Pattern.matches("^(CHR)?([0-9]{1,2}|X|Y|MT):\\d+$", reg)) {
+		if(!Pattern.matches("^(CHR)?([0-9]{1,2}|X|Y|MT|\\w+):\\d+$", reg)) {
 			throw new InvalidArgumentException(String.format("Invalid format for chromosome position %s, please type correct one as chr1:4380800 or 1:4380800", reg));
 		}
 
@@ -141,7 +141,7 @@ public final class VannoUtils {
 	public static LocFeature posAlleleToNode(String reg) {
 		reg = reg.toUpperCase();
 
-		if(!Pattern.matches("^(CHR)?([0-9]{1,2}|X|Y|MT):\\d+-[ATCG]+-[ATCG]+$", reg)) {
+		if(!Pattern.matches("^(CHR)?([0-9]{1,2}|X|Y|MT|\\w+):\\d+-[ATCG]+-[ATCG]+$", reg)) {
 			throw new InvalidArgumentException(String.format("Invalid format for chromosome position with alleles %s, please type correct one as chr1:4380800-A-G or 1:4380800-A-G", reg));
 		}
 

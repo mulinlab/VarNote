@@ -9,7 +9,17 @@ public class VannoUtilsTest {
 
     @Test
     public void posToNode() {
-        LocFeature locFeature = VannoUtils.posToNode("chr1:1234");
+        LocFeature locFeature = VannoUtils.regionToNode("X_GL456233_RANDOM:36727-41667");
+        assertEquals(locFeature.beg, 36727);
+        assertEquals(locFeature.end, 41667);
+
+        locFeature = VannoUtils.posAlleleToNode("X_GL456233_RANDOM:1234-AAAAA-G");
+        assertEquals(locFeature.beg, 1233);
+        assertEquals(locFeature.end, 1238);
+        assertEquals(locFeature.ref, "AAAAA");
+        assertEquals(locFeature.alt, "G");
+
+        locFeature = VannoUtils.posToNode("chr1:1234");
         assertEquals(locFeature.beg, 1233);
         assertEquals(locFeature.end, 1234);
 

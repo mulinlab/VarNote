@@ -29,6 +29,7 @@ public final class QueryFileParam extends QueryParam {
     private final FileType fileType;
     private final Format queryFormat;
     private final String fileName;
+    private final long len;
 
     private final boolean isFull;
     private FilterParam filterParam;
@@ -51,7 +52,10 @@ public final class QueryFileParam extends QueryParam {
         IOUtil.assertInputIsValid(path);
 
         this.path = VannoUtils.getAbsolutePath(path);
-        this.fileName = new File(this.path).getName();
+        File file = new File(this.path);
+        this.fileName = file.getName();
+        this.len = file.length();
+
         this.fileType = VannoUtils.checkFileType(path);
         this.isFull = isFull;
         this.filterParam = filterParam;
@@ -69,6 +73,9 @@ public final class QueryFileParam extends QueryParam {
     public void splitFile(int thread) {
         if(threadReaders == null) threadReaders = new ArrayList<>();
 
+        if(this.len < 6400) {
+            thread  = 1;
+        }
         try {
             if (fileType == FileType.BGZ || fileType == FileType.TXT) {
                 BZIP2InputStream bz2_text = new BZIP2InputStream(path, thread);
