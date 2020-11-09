@@ -54,7 +54,7 @@ public final class BZIP2InputStream {
     public void adjustPos() throws IOException {
 
         pos[0] = 0;
-        if(input.length() < 200) {
+        if(input.length() < 6400) {
             threadNum = 1;
             pos[1] = input.length();
             return;
