@@ -9,9 +9,9 @@
    - We welcome any discussion, suggestion and potential contribution of new functional prediction scores through github or contact Dr. Mulin Jun Li (mulinli{at}connect.hku.hk). 
 
 
-## Copyright
-Copyright (c) Mulinlab@Tianjin Medical University 2016-2020. All rights reserved.
-
 ## Citation
 Huang D, Yi X, Zhou Y, Yao H, Xu H, Wang J, Zhang S, Nong W, Wang P, Shi L, Xuan C, Li M, Wang J, Li W, Kwan HS, Sham PC, Wang K, Li MJ. Ultrafast and scalable variant annotation and prioritization with big functional genomics data. Genome Res. 2020 Dec;30(12):1789-1801.
 
+
+## Copyright
+Copyright (c) Mulinlab@Tianjin Medical University 2016-2020. All rights reserved.
